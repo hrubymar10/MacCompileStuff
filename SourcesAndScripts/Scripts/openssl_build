@@ -4,7 +4,8 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-OPENSSL_VERSION="1.1.0g"
+OPENSSL_VERSION_1="1.1.0g"
+OPENSSL_VERSION_2="1.1"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -77,24 +78,24 @@ fi
 
 # TODO: Verify checksum
 rm -rf openssl-*
-wget "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"
-tar xf "openssl-$OPENSSL_VERSION.tar.gz"
-rm "openssl-$OPENSSL_VERSION.tar.gz"
-cd "openssl-$OPENSSL_VERSION"
+wget "https://www.openssl.org/source/openssl-$OPENSSL_VERSION_1.tar.gz"
+tar xf "openssl-$OPENSSL_VERSION_1.tar.gz"
+rm "openssl-$OPENSSL_VERSION_1.tar.gz"
+cd "openssl-$OPENSSL_VERSION_1"
 KERNEL_BITS=64 ./config
 make
-mkdir "openssl-$OPENSSL_VERSION-RELEASE"
-cp libcrypto.1.1.dylib "openssl-$OPENSSL_VERSION-RELEASE/libcrypto.1.1.dylib"
-cd "openssl-$OPENSSL_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libcrypto.1.1.dylib" "libcrypto.1.1.dylib"
-edit_dylib_deps libcrypto.1.1.dylib
+mkdir "openssl-$OPENSSL_VERSION_1-RELEASE"
+cp "libcrypto.$OPENSSL_VERSION_2.dylib" "openssl-$OPENSSL_VERSION_1-RELEASE/libcrypto.$OPENSSL_VERSION_2.dylib"
+cd "openssl-$OPENSSL_VERSION_1-RELEASE"
+install_name_tool -id "@executable_path/../Frameworks/libcrypto.$OPENSSL_VERSION_2.dylib" "libcrypto.$OPENSSL_VERSION_2.dylib"
+edit_dylib_deps "libcrypto.$OPENSSL_VERSION_2.dylib"
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/openssl-*
-mv "Sources/openssl-$OPENSSL_VERSION/openssl-$OPENSSL_VERSION-RELEASE" "CompiledLibs/openssl-$OPENSSL_VERSION-RELEASE"
+mv "Sources/openssl-$OPENSSL_VERSION_1/openssl-$OPENSSL_VERSION_1-RELEASE" "CompiledLibs/openssl-$OPENSSL_VERSION_1-RELEASE"
 rm -rf ../Headers/openssl
-cp -rf "Sources/openssl-$OPENSSL_VERSION/include/openssl" ../Headers/
-rm -rf ../lib/libcrypto.1.1.dylib
-cp -rf "CompiledLibs/openssl-$OPENSSL_VERSION-RELEASE"/libcrypto.1.1.dylib ../lib/libcrypto.1.1.dylib
+cp -rf "Sources/openssl-$OPENSSL_VERSION_1/include/openssl" ../Headers/
+rm -rf ../lib/libcrypto*
+cp -rf "CompiledLibs/openssl-$OPENSSL_VERSION_1-RELEASE/libcrypto.$OPENSSL_VERSION_2.dylib" "../lib/libcrypto.$OPENSSL_VERSION_2.dylib"
 
 echo "==> DONE ..."
 echo
