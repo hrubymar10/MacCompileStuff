@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+#
+# readline_build
+# Martin Hrubý (hrubymar10), 2018
+#
+
+READLINE_VERSION="7.0"
+
+edit_dylib_deps() {
+        DYLIB=$1
+        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
+
+        for DEP in $DEPS; do
+                DEP_BASE=$(basename ${DEP})
+                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
+                        continue
+                fi
+                # Is this our redistributable file?
+                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
+                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
+                fi
+        done
+}
+
+time_interval_to_string() {
+        local START=$1
+        local END=$2
+
+        declare -i timestamp
+        declare -i days
+        declare -i hours
+        declare -i minutes
+        declare -i seconds
+        timestamp=$END-$START
+
+        days=$timestamp/60/60/24
+        hours=$((($timestamp-($days*60*60*24))/60/60))
+        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
+        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
+        if [ $days -eq 0 ]; then
+        if [ $hours -eq 0 ]; then
+                if [ $minutes -eq 0 ]; then
+                echo "==> Operation took $seconds seconds ..."
+                else
+                echo "==> Operation took $minutes minutes and $seconds seconds ..."
+                fi
+        else
+                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+        else
+        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+}
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname $0` && pwd)
+if [ -z "$MY_PATH" ] ; then
+        # error; for some reason, the path is not accessible
+        # to the script (e.g. permissions re-evaled after suid)
+        echo 'Error: Script path is for some reason not accessible' >&2
+        exit 1  # fail
+fi
+cd "$MY_PATH"/../Sources
+
+if ! [ -x "$(command -v wget)" ]; then
+        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+if xcode-select --install 2>&1 | grep installed; then
+        echo "==> Xcode Command Line Tools are installed..."
+else
+        echo "==> Xcode Command Line Tools aren't installed, installing..."
+        xcode-select --install
+fi
+
+# TODO: Verify checksum
+rm -rf readline-*
+wget "https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz"
+tar xf "readline-$READLINE_VERSION.tar.gz"
+rm "readline-$READLINE_VERSION.tar.gz"
+cd "readline-$READLINE_VERSION"
+./configure --enable-shared
+make shared
+mkdir "readline-$READLINE_VERSION-RELEASE"
+cp "shlib/libreadline.$READLINE_VERSION.dylib" "readline-$READLINE_VERSION-RELEASE/libreadline.$READLINE_VERSION.dylib"
+cd "readline-$READLINE_VERSION-RELEASE"
+install_name_tool -id "@executable_path/../Frameworks/libreadline.$READLINE_VERSION.dylib" "libreadline.$READLINE_VERSION.dylib"
+edit_dylib_deps "libreadline.$READLINE_VERSION.dylib"
+cd "$MY_PATH"/../
+rm -rf CompiledLibs/readline-*
+
+mv "Sources/readline-$READLINE_VERSION/readline-$READLINE_VERSION-RELEASE" "CompiledLibs/readline-$READLINE_VERSION-RELEASE"
+rm -rf ../Headers/readline
+mkdir ../Headers/readline
+cp -rf "Sources/readline-$READLINE_VERSION/chardefs.h" ../Headers/readline/chardefs.h
+cp -rf "Sources/readline-$READLINE_VERSION/history.h" ../Headers/readline/history.h
+cp -rf "Sources/readline-$READLINE_VERSION/keymaps.h" ../Headers/readline/keymaps.h
+cp -rf "Sources/readline-$READLINE_VERSION/readline.h" ../Headers/readline/readline.h
+cp -rf "Sources/readline-$READLINE_VERSION/rlconf.h" ../Headers/readline/rlconf.h
+cp -rf "Sources/readline-$READLINE_VERSION/rlstdc.h" ../Headers/readline/rlstdc.h
+cp -rf "Sources/readline-$READLINE_VERSION/rltypedefs.h" ../Headers/readline/rltypedefs.h
+cp -rf "Sources/readline-$READLINE_VERSION/tilde.h" ../Headers/readline/tilde.h
+rm -rf ../lib/libreadline*
+cp -rf "CompiledLibs/readline-$READLINE_VERSION-RELEASE/libreadline.$READLINE_VERSION.dylib" "../lib/libreadline.$READLINE_VERSION.dylib"
+
+echo "==> DONE ..."
+echo
+time_interval_to_string "$starttimestamp" "$(date +%s)"
+echo
