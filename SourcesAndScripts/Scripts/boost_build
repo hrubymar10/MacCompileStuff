@@ -62,15 +62,22 @@ if [ -z "$MY_PATH" ] ; then
         echo 'Error: Script path is for some reason not accessible' >&2
         exit 1  # fail
 fi
-cd "$MY_PATH"
+cd "$MY_PATH"/../Sources
 
 if ! [ -x "$(command -v wget)" ]; then
         echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
         exit 1
 fi
 
+if xcode-select --install 2>&1 | grep installed; then
+        echo "==> Xcode Command Line Tools are installed..."
+else
+        echo "==> Xcode Command Line Tools aren't installed, installing..."
+        xcode-select --install
+fi
+
 # TODO: Verify checksum
-rm -rf "boost_$BOOST_VERSION_2"
+rm -rf boost_*
 wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.zip"
 unzip "boost_$BOOST_VERSION_2.zip"
 rm "boost_$BOOST_VERSION_2.zip"
@@ -94,13 +101,13 @@ for filename in * ; do
         install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
         edit_dylib_deps $filename
 done
-cd "$MY_PATH"
-rm -rf "boost_$BOOST_VERSION_2-RELEASE"
-mv "boost_$BOOST_VERSION_2/stage/lib/boost_$BOOST_VERSION_2-RELEASE" "boost_$BOOST_VERSION_2-RELEASE"
+cd "$MY_PATH"/../
+rm -rf boost_*
+mv "Sources/boost_$BOOST_VERSION_2/stage/lib/boost_$BOOST_VERSION_2-RELEASE" "CompiledLibs/boost_$BOOST_VERSION_2-RELEASE"
 rm -rf ../Headers/boost
-cp -rf "boost_$BOOST_VERSION_2/boost" ../Headers/
+cp -rf "Sources/boost_$BOOST_VERSION_2/boost" ../Headers/
 rm -rf ../lib/libboost*
-cp -rf "boost_$BOOST_VERSION_2-RELEASE"/* ../lib/
+cp -rf "CompiledLibs/boost_$BOOST_VERSION_2-RELEASE"/* ../lib/
 
 echo "==> DONE ..."
 echo
