@@ -7,4 +7,5 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 
 ### Versions
 * Boost 1.66.0
+* OpenSSL 1.1.0g
 
