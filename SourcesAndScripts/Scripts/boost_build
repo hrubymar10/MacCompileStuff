@@ -102,7 +102,7 @@ for filename in * ; do
         edit_dylib_deps $filename
 done
 cd "$MY_PATH"/../
-rm -rf boost_*
+rm -rf CompiledLibs/boost_*
 mv "Sources/boost_$BOOST_VERSION_2/stage/lib/boost_$BOOST_VERSION_2-RELEASE" "CompiledLibs/boost_$BOOST_VERSION_2-RELEASE"
 rm -rf ../Headers/boost
 cp -rf "Sources/boost_$BOOST_VERSION_2/boost" ../Headers/
