@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+#
+# boost_build
+# Martin Hrubý (hrubymar10), 2018
+#
+
+BOOST_VERSION_1="1.66.0"
+BOOST_VERSION_2="1_66_0"
+
+edit_dylib_deps() {
+        DYLIB=$1
+        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
+
+        for DEP in $DEPS; do
+                DEP_BASE=$(basename ${DEP})
+                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
+                        continue
+                fi
+                # Is this our redistributable file?
+                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
+                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
+                fi
+        done
+}
+
+time_interval_to_string() {
+        local START=$1
+        local END=$2
+
+        declare -i timestamp
+        declare -i days
+        declare -i hours
+        declare -i minutes
+        declare -i seconds
+        timestamp=$END-$START
+
+        days=$timestamp/60/60/24
+        hours=$((($timestamp-($days*60*60*24))/60/60))
+        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
+        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
+        if [ $days -eq 0 ]; then
+        if [ $hours -eq 0 ]; then
+                if [ $minutes -eq 0 ]; then
+                echo "==> Operation took $seconds seconds ..."
+                else
+                echo "==> Operation took $minutes minutes and $seconds seconds ..."
+                fi
+        else
+                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+        else
+        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+}
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname $0` && pwd)
+if [ -z "$MY_PATH" ] ; then
+        # error; for some reason, the path is not accessible
+        # to the script (e.g. permissions re-evaled after suid)
+        echo 'Error: Script path is for some reason not accessible' >&2
+        exit 1  # fail
+fi
+cd "$MY_PATH"
+
+if ! [ -x "$(command -v wget)" ]; then
+        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: Verify checksum
+rm -rf "boost_$BOOST_VERSION_2"
+wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.zip"
+unzip "boost_$BOOST_VERSION_2.zip"
+rm "boost_$BOOST_VERSION_2.zip"
+cd "boost_$BOOST_VERSION_2"
+rm -rf stage
+./bootstrap.sh --with-libraries=filesystem,iostreams,locale,program_options,random,regex,system,test,thread
+./b2
+cd stage/lib
+mkdir "boost_$BOOST_VERSION_2-RELEASE"
+cp libboost_filesystem.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_filesystem-mt.dylib"
+cp libboost_iostreams.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_iostreams-mt.dylib"
+cp libboost_locale.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_locale-mt.dylib"
+cp libboost_program_options.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_program_options-mt.dylib"
+cp libboost_random.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_random-mt.dylib"
+cp libboost_regex.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_regex-mt.dylib"
+cp libboost_system.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_system-mt.dylib"
+cp libboost_thread.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_thread-mt.dylib"
+cp libboost_unit_test_framework.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_unit_test_framework-mt.dylib"
+cd "boost_$BOOST_VERSION_2-RELEASE"
+for filename in * ; do
+        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        edit_dylib_deps $filename
+done
+cd "$MY_PATH"
+rm -rf "boost_$BOOST_VERSION_2-RELEASE"
+mv "boost_$BOOST_VERSION_2/stage/lib/boost_$BOOST_VERSION_2-RELEASE" "boost_$BOOST_VERSION_2-RELEASE"
+rm -rf ../Headers/boost
+cp -rf "boost_$BOOST_VERSION_2/boost" ../Headers/
+rm -rf ../lib/libboost*
+cp -rf "boost_$BOOST_VERSION_2-RELEASE"/* ../lib/
+
+echo "==> DONE ..."
+echo
+time_interval_to_string "$starttimestamp" "$(date +%s)"
+echo

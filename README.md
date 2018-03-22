@@ -6,4 +6,5 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 * wget
 
 ### Versions
+* Boost 1.66.0
 
