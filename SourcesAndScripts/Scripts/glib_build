@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+#
+# glib_build
+# Martin Hrubý (hrubymar10), 2018
+#
+
+GLIB_VERSION_1="2.56.0"
+GLIB_VERSION_2="2.56"
+
+edit_dylib_deps() {
+        DYLIB=$1
+        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
+
+        for DEP in $DEPS; do
+                DEP_BASE=$(basename ${DEP})
+                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
+                        continue
+                fi
+                # Is this our redistributable file?
+                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
+                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
+                fi
+        done
+}
+
+time_interval_to_string() {
+        local START=$1
+        local END=$2
+
+        declare -i timestamp
+        declare -i days
+        declare -i hours
+        declare -i minutes
+        declare -i seconds
+        timestamp=$END-$START
+
+        days=$timestamp/60/60/24
+        hours=$((($timestamp-($days*60*60*24))/60/60))
+        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
+        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
+        if [ $days -eq 0 ]; then
+        if [ $hours -eq 0 ]; then
+                if [ $minutes -eq 0 ]; then
+                echo "==> Operation took $seconds seconds ..."
+                else
+                echo "==> Operation took $minutes minutes and $seconds seconds ..."
+                fi
+        else
+                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+        else
+        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+}
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname $0` && pwd)
+if [ -z "$MY_PATH" ] ; then
+        # error; for some reason, the path is not accessible
+        # to the script (e.g. permissions re-evaled after suid)
+        echo 'Error: Script path is for some reason not accessible' >&2
+        exit 1  # fail
+fi
+cd "$MY_PATH"/../Sources
+
+if ! [ -x "$(command -v wget)" ]; then
+        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+if [ ! -f /usr/local/lib/libffi.dylib ]; then
+        echo 'Error: libffi is not installed or is not linked. Use for example Homebrew, install it and force link it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+if xcode-select --install 2>&1 | grep installed; then
+        echo "==> Xcode Command Line Tools are installed..."
+else
+        echo "==> Xcode Command Line Tools aren't installed, installing..."
+        xcode-select --install
+fi
+
+# TODO: Verify checksum
+rm -rf glib-*
+wget "https://download.gnome.org/sources/glib/$GLIB_VERSION_2/glib-$GLIB_VERSION_1.tar.xz"
+tar xf "glib-$GLIB_VERSION_1.tar.xz"
+rm "glib-$GLIB_VERSION_1.tar.xz"
+cd "glib-$GLIB_VERSION_1"
+./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-static
+make
+mkdir "glib-$GLIB_VERSION_1-RELEASE"
+cp "glib/.libs/libglib-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libglib-2.0.0.dylib"
+cp "gmodule/.libs/libgmodule-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgmodule-2.0.0.dylib"
+cp "gobject/.libs/libgobject-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgobject-2.0.0.dylib"
+cd "glib-$GLIB_VERSION_1-RELEASE"
+for filename in * ; do
+        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        edit_dylib_deps $filename
+done
+cd "$MY_PATH"/../
+rm -rf CompiledLibs/glib-*
+mv "Sources/glib-$GLIB_VERSION_1/glib-$GLIB_VERSION_1-RELEASE" "CompiledLibs/glib-$GLIB_VERSION_1-RELEASE"
+rm -rf ../Headers/glib*
+mkdir ../Headers/glib-2.0
+mkdir ../Headers/glib-2.0/gio
+mkdir ../Headers/glib-2.0/glib
+mkdir ../Headers/glib-2.0/glib/deprecated
+mkdir ../Headers/glib-2.0/gobject
+# TODO: Use glib-public-headers.txt and etc for Headers
+cd "Sources/glib-$GLIB_VERSION_1/glib"
+cp glibconfig.h "$MY_PATH"/../../Headers/
+cp glib-object.h glib-unix.h glib.h "$MY_PATH"/../../Headers/glib-2.0/
+cp gi18n-lib.h gslice.h galloca.h gi18n.h gslist.h garray.h giochannel.h gspawn.h gasyncqueue.h gkeyfile.h gstdio.h gatomic.h glist.h gstrfuncs.h gbacktrace.h gmacros.h gstring.h gbase64.h gmain.h gstringchunk.h gbitlock.h gmappedfile.h gtestutils.h gbookmarkfile.h gmarkup.h gthread.h gbytes.h gmem.h gthreadpool.h gcharset.h gmessages.h gtimer.h gchecksum.h gnode.h gtimezone.h gconvert.h goption.h gtrashstack.h gdataset.h gpattern.h gtree.h gdate.h gpoll.h gtypes.h gdatetime.h gprimes.h gunicode.h gdir.h gprintf.h gurifuncs.h genviron.h gqsort.h gutils.h gerror.h gquark.h gvariant.h gfileutils.h gqueue.h gvarianttype.h ggettext.h grand.h gversion.h ghash.h gregex.h gversionmacros.h ghmac.h gscanner.h gwin32.h ghook.h gsequence.h ghostutils.h gshell.h guuid.h glib-autocleanups.h "$MY_PATH"/../../Headers/glib-2.0/glib
+cd deprecated
+cp gallocator.h gcompletion.h grel.h gcache.h gmain.h gthread.h "$MY_PATH"/../../Headers/glib-2.0/glib/deprecated/
+cd ..
+cd ..
+cd gio
+cp gaction.h gcredentials.h gdbusobjectmanagerclient.h gfilenamecompleter.h gloadableicon.h gpropertyaction.h gsocketaddress.h gtlsconnection.h gactiongroup.h gdatainputstream.h gdbusobjectmanagerserver.h gfileoutputstream.h gmemoryinputstream.h gproxy.h gsocketaddressenumerator.h gtlsdatabase.h gactiongroupexporter.h gdataoutputstream.h gdbusobjectproxy.h gfilterinputstream.h gmemoryoutputstream.h gproxyaddress.h gsocketclient.h gtlsfiledatabase.h gactionmap.h gdbusactiongroup.h gdbusobjectskeleton.h gfilteroutputstream.h gmenu.h  gproxyaddressenumerator.h gsocketconnectable.h gtlsinteraction.h gappinfo.h gdbusaddress.h gdbusproxy.h gicon.h  gmenuexporter.h gproxyresolver.h gsocketconnection.h gtlspassword.h gapplication.h gdbusauthobserver.h gdbusserver.h ginetaddress.h gmenumodel.h gremoteactiongroup.h gsocketcontrolmessage.h gtlsserverconnection.h gapplicationcommandline.h gdbusconnection.h gdbusutils.h ginetaddressmask.h gmount.h gresolver.h gsocketlistener.h gvfs.h gasyncinitable.h gdbuserror.h gdrive.h ginetsocketaddress.h gmountoperation.h gresource.h gsocketservice.h gvolume.h gasyncresult.h gdbusinterface.h gemblem.h ginitable.h gnativevolumemonitor.h gseekable.h gsrvtarget.h gvolumemonitor.h gbufferedinputstream.h gdbusinterfaceskeleton.h gemblemedicon.h ginputstream.h gnetworkaddress.h gsettings.h gtask.h  gzlibcompressor.h gbufferedoutputstream.h gdbusintrospection.h gfile.h  gio.h  gnetworking.h gsettingsbackend.h gtcpconnection.h gzlibdecompressor.h gbytesicon.h gdbusmenumodel.h gfileattribute.h gioenums.h gnetworkmonitor.h gsettingsschema.h gtcpwrapperconnection.h gcancellable.h gdbusmessage.h gfileenumerator.h gioenumtypes.h gnetworkservice.h gsimpleaction.h gtestdbus.h gcharsetconverter.h gdbusmethodinvocation.h gfileicon.h gioerror.h goutputstream.h gsimpleactiongroup.h gthemedicon.h gcontenttype.h gdbusnameowning.h gfileinfo.h giomodule.h gpermission.h gsimpleasyncresult.h gthreadedsocketservice.h gconverter.h gdbusnamewatching.h gfileinputstream.h gioscheduler.h gpollableinputstream.h gsimplepermission.h gtlsbackend.h gconverterinputstream.h gdbusobject.h gfileiostream.h giostream.h gpollableoutputstream.h gsimpleproxyresolver.h gtlscertificate.h gconverteroutputstream.h gdbusobjectmanager.h gfilemonitor.h giotypes.h gpollableutils.h gsocket.h gtlsclientconnection.h "$MY_PATH"/../../Headers/glib-2.0/gio
+cd ..
+cd gmodule
+cp gmodule.h "$MY_PATH"/../../Headers/glib-2.0/
+cd ..
+cd gobject
+cp gbinding.h gobjectnotifyqueue.c gtypeplugin.h gboxed.h gparam.h gvalue.h gclosure.h gparamspecs.h gvaluearray.h genums.h gsignal.h gvaluecollector.h glib-types.h gsourceclosure.h gvaluetypes.h gmarshal.h gtype.h gobject.h gtypemodule.h gobject-autocleanups.h "$MY_PATH"/../../Headers/glib-2.0/gobject
+cd "$MY_PATH"/../
+rm -rf ../lib/libglib-2.0.0.dylib
+rm -rf ../lib/libgmodule-2.0.0.dylib
+rm -rf ../lib/libgobject-2.0.0.dylib
+cp -rf "CompiledLibs/glib-$GLIB_VERSION_1-RELEASE/"* "../lib/"
+echo "==> DONE ..."
+echo
+time_interval_to_string "$starttimestamp" "$(date +%s)"
+echo
