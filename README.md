@@ -8,6 +8,7 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 ### Versions
 * **Boost** 1.66.0
 * **GNU Readline** 7.0
+* **Fontconfig** 2.13.0
 * **Growl** 2.0.1
 * **OpenSSL** 1.1.0g
 * **SDL2** 2.0.8
