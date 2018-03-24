@@ -83,20 +83,13 @@ tar xf "boost_$BOOST_VERSION_2.tar.gz"
 rm "boost_$BOOST_VERSION_2.tar.gz"
 cd "boost_$BOOST_VERSION_2"
 rm -rf stage
-./bootstrap.sh --with-libraries=filesystem,iostreams,locale,program_options,random,regex,system,test,thread
-./b2
+./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread
+./b2 threading=multi --layout=tagged link=shared
 cd stage/lib
 mkdir "boost_$BOOST_VERSION_2-RELEASE"
-cp libboost_filesystem.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_filesystem-mt.dylib"
-cp libboost_iostreams.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_iostreams-mt.dylib"
-cp libboost_locale.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_locale-mt.dylib"
-cp libboost_program_options.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_program_options-mt.dylib"
-cp libboost_random.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_random-mt.dylib"
-cp libboost_regex.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_regex-mt.dylib"
-cp libboost_system.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_system-mt.dylib"
-cp libboost_thread.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_thread-mt.dylib"
-cp libboost_unit_test_framework.dylib "boost_$BOOST_VERSION_2-RELEASE/libboost_unit_test_framework-mt.dylib"
+cp *.dylib "boost_$BOOST_VERSION_2-RELEASE"
 cd "boost_$BOOST_VERSION_2-RELEASE"
+rm libboost_prg_exec_monitor-mt.dylib
 for filename in * ; do
         install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
         edit_dylib_deps $filename
