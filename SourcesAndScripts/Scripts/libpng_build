@@ -81,7 +81,7 @@ wget "http://prdownloads.sourceforge.net/libpng/libpng-$LIBPNG_VERSION.tar.xz?do
 tar xf "libpng-$LIBPNG_VERSION.tar.xz"
 rm "libpng-$LIBPNG_VERSION.tar.xz"
 cd "libpng-$LIBPNG_VERSION"
-./configure --enable-static --disable-dependency-tracking
+./configure --disable-dependency-tracking --enable-shared
 make check
 mkdir "libpng-$LIBPNG_VERSION-RELEASE"
 cp ".libs/libpng16.16.dylib" "libpng-$LIBPNG_VERSION-RELEASE/libpng16.16.dylib"

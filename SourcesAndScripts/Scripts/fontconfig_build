@@ -86,7 +86,7 @@ wget "https://www.freedesktop.org/software/fontconfig/release/fontconfig-$FONTCO
 tar xf "fontconfig-$FONTCONFIG_VERSION.tar.gz"
 rm "fontconfig-$FONTCONFIG_VERSION.tar.gz"
 cd "fontconfig-$FONTCONFIG_VERSION"
-./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-static --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts"
+./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts"
 make
 mkdir "fontconfig-$FONTCONFIG_VERSION-RELEASE"
 cp "src/.libs/libfontconfig.1.dylib" "fontconfig-$FONTCONFIG_VERSION-RELEASE/libfontconfig.1.dylib"

@@ -87,7 +87,7 @@ wget "https://download.gnome.org/sources/glib/$GLIB_VERSION_2/glib-$GLIB_VERSION
 tar xf "glib-$GLIB_VERSION_1.tar.xz"
 rm "glib-$GLIB_VERSION_1.tar.xz"
 cd "glib-$GLIB_VERSION_1"
-./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-static
+./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-shared
 make
 mkdir "glib-$GLIB_VERSION_1-RELEASE"
 cp "glib/.libs/libglib-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libglib-2.0.0.dylib"
