@@ -73,6 +73,12 @@ if ! [ -x "$(command -v uuid)" ]; then
         exit 1
 fi
 
+# TODO: use freetype from MacCompileStuff
+if ! [ -x "$(command -v freetype-config)" ]; then
+        echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
 if xcode-select --install 2>&1 | grep installed; then
         echo "==> Xcode Command Line Tools are installed..."
 else
@@ -93,6 +99,7 @@ cp "src/.libs/libfontconfig.1.dylib" "fontconfig-$FONTCONFIG_VERSION-RELEASE/lib
 cd "fontconfig-$FONTCONFIG_VERSION-RELEASE"
 install_name_tool -id "@executable_path/../Frameworks/libfontconfig.1.dylib" "libfontconfig.1.dylib"
 edit_dylib_deps "libfontconfig.1.dylib"
+install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libfontconfig.1.dylib"
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/fontconfig-*
 mv "Sources/fontconfig-$FONTCONFIG_VERSION/fontconfig-$FONTCONFIG_VERSION-RELEASE" "CompiledLibs/fontconfig-$FONTCONFIG_VERSION-RELEASE"
@@ -101,7 +108,6 @@ mkdir ../Headers/fontconfig
 cp -rf "Sources/fontconfig-$FONTCONFIG_VERSION/fontconfig/fontconfig.h" ../Headers/fontconfig/fontconfig.h
 rm -rf ../lib/libfontconfig*
 cp -rf "CompiledLibs/fontconfig-$FONTCONFIG_VERSION-RELEASE/libfontconfig.1.dylib" "../lib/libfontconfig.1.dylib"
-
 echo "==> DONE ..."
 echo
 time_interval_to_string "$starttimestamp" "$(date +%s)"
