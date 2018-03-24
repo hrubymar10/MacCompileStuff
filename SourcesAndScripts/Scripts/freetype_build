@@ -95,7 +95,7 @@ cp "objs/.libs/libfreetype.6.dylib" "freetype-$FREETYPE_VERSION-RELEASE/libfreet
 cd "freetype-$FREETYPE_VERSION-RELEASE"
 install_name_tool -id "@executable_path/../Frameworks/libfreetype.6.dylib" "libfreetype.6.dylib"
 edit_dylib_deps libfreetype.6.dylib
-install_name_tool -change "/usr/local/opt/libpng/lib/libpng16.16.dylib" "@loader_path//usr/local/opt/libpng/lib/libpng16.16.dylib" "libfreetype.6.dylib"
+install_name_tool -change "/usr/local/opt/libpng/lib/libpng16.16.dylib" "@loader_path/libpng16.16.dylib" "libfreetype.6.dylib"
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/freetype-*
 mv "Sources/freetype-$FREETYPE_VERSION/freetype-$FREETYPE_VERSION-RELEASE" "CompiledLibs/freetype-$FREETYPE_VERSION-RELEASE"
