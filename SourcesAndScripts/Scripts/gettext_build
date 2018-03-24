@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+#
+# gettext_build
+# Martin Hrubý (hrubymar10), 2018
+#
+
+GETTEXT_VERSION="0.19.8.1"
+
+edit_dylib_deps() {
+        DYLIB=$1
+        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
+
+        for DEP in $DEPS; do
+                DEP_BASE=$(basename ${DEP})
+                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
+                        continue
+                fi
+                # Is this our redistributable file?
+                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
+                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
+                fi
+        done
+}
+
+time_interval_to_string() {
+        local START=$1
+        local END=$2
+
+        declare -i timestamp
+        declare -i days
+        declare -i hours
+        declare -i minutes
+        declare -i seconds
+        timestamp=$END-$START
+
+        days=$timestamp/60/60/24
+        hours=$((($timestamp-($days*60*60*24))/60/60))
+        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
+        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
+        if [ $days -eq 0 ]; then
+        if [ $hours -eq 0 ]; then
+                if [ $minutes -eq 0 ]; then
+                echo "==> Operation took $seconds seconds ..."
+                else
+                echo "==> Operation took $minutes minutes and $seconds seconds ..."
+                fi
+        else
+                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+        else
+        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+}
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname $0` && pwd)
+if [ -z "$MY_PATH" ] ; then
+        # error; for some reason, the path is not accessible
+        # to the script (e.g. permissions re-evaled after suid)
+        echo 'Error: Script path is for some reason not accessible' >&2
+        exit 1  # fail
+fi
+cd "$MY_PATH"/../Sources
+
+if ! [ -x "$(command -v wget)" ]; then
+        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+if xcode-select --install 2>&1 | grep installed; then
+        echo "==> Xcode Command Line Tools are installed..."
+else
+        echo "==> Xcode Command Line Tools aren't installed, installing..."
+        xcode-select --install
+fi
+
+# TODO: Verify checksum
+rm -rf gettext-*
+wget "https://ftp.gnu.org/pub/gnu/gettext/gettext-$GETTEXT_VERSION.tar.xz"
+tar xf "gettext-$GETTEXT_VERSION.tar.xz"
+rm "gettext-$GETTEXT_VERSION.tar.xz"
+cd "gettext-$GETTEXT_VERSION"
+./configure --disable-dependency-tracking --enable-shared
+make
+mkdir "gettext-$GETTEXT_VERSION-RELEASE"
+cp "gettext-runtime/intl/.libs/libintl.8.dylib" "gettext-$GETTEXT_VERSION-RELEASE/libintl.8.dylib"
+cd "gettext-$GETTEXT_VERSION-RELEASE"
+install_name_tool -id "@executable_path/../Frameworks/libintl.8.dylib" "libintl.8.dylib"
+edit_dylib_deps libintl.8.dylib
+cd "$MY_PATH"/../
+rm -rf CompiledLibs/gettext-*
+mv "Sources/gettext-$GETTEXT_VERSION/gettext-$GETTEXT_VERSION-RELEASE" "CompiledLibs/gettext-$GETTEXT_VERSION-RELEASE"
+rm -rf ../Headers/libintl.h
+cp "Sources/gettext-$GETTEXT_VERSION/gettext-runtime/intl/libintl.h" ../Headers/libintl.h
+rm -rf ../lib/libintl.8.dylib
+cp -rf "CompiledLibs/gettext-$GETTEXT_VERSION-RELEASE/libintl.8.dylib" "../lib/libintl.8.dylib"
+echo "==> DONE ..."
+echo
+time_interval_to_string "$starttimestamp" "$(date +%s)"
+echo
