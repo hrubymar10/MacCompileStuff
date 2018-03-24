@@ -78,9 +78,9 @@ fi
 
 # TODO: Verify checksum
 rm -rf boost_*
-wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.zip"
-unzip "boost_$BOOST_VERSION_2.zip"
-rm "boost_$BOOST_VERSION_2.zip"
+wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.tar.gz"
+tar xf "boost_$BOOST_VERSION_2.tar.gz"
+rm "boost_$BOOST_VERSION_2.tar.gz"
 cd "boost_$BOOST_VERSION_2"
 rm -rf stage
 ./bootstrap.sh --with-libraries=filesystem,iostreams,locale,program_options,random,regex,system,test,thread
