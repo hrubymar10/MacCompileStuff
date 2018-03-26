@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-FONTCONFIG_VERSION="2.13.0"
+FONTCONFIG_VERSION="2.12.6"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -65,11 +65,6 @@ cd "$MY_PATH"/../Sources
 
 if ! [ -x "$(command -v wget)" ]; then
         echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-if ! [ -x "$(command -v uuid)" ]; then
-        echo 'Error: uuid is not installed. Use for example Homebrew and install ossp-uuid. See https://brew.sh/' >&2
         exit 1
 fi
 
