@@ -93,6 +93,7 @@ mkdir "glib-$GLIB_VERSION_1-RELEASE"
 cp "glib/.libs/libglib-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libglib-2.0.0.dylib"
 cp "gmodule/.libs/libgmodule-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgmodule-2.0.0.dylib"
 cp "gobject/.libs/libgobject-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgobject-2.0.0.dylib"
+cp "gthread/.libs/libgthread-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgthread-2.0.0.dylib"
 cd "glib-$GLIB_VERSION_1-RELEASE"
 # TODO: Use MCS' pcre, libffi and gettext
 for filename in * ; do
@@ -132,6 +133,7 @@ cd "$MY_PATH"/../
 rm -rf ../lib/libglib-2.0.0.dylib
 rm -rf ../lib/libgmodule-2.0.0.dylib
 rm -rf ../lib/libgobject-2.0.0.dylib
+rm -rf ../lib/libgthread-2.0.0.dylib
 cp -rf "CompiledLibs/glib-$GLIB_VERSION_1-RELEASE/"* "../lib/"
 echo "==> DONE ..."
 echo
