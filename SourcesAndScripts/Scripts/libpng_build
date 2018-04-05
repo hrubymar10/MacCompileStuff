@@ -91,10 +91,6 @@ edit_dylib_deps libpng16.16.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/libpng-*
 mv "Sources/libpng-$LIBPNG_VERSION/libpng-$LIBPNG_VERSION-RELEASE" "CompiledLibs/libpng-$LIBPNG_VERSION-RELEASE"
-rm -rf ../Headers/png*
-cp "Sources/libpng-$LIBPNG_VERSION/png.h" ../Headers/png.h
-cp "Sources/libpng-$LIBPNG_VERSION/pngconf.h" ../Headers/pngconf.h
-cp "Sources/libpng-$LIBPNG_VERSION/pnglibconf.h" ../Headers/pnglibconf.h
 rm -rf ../lib/libpng16.16.dylib
 cp -rf "CompiledLibs/libpng-$LIBPNG_VERSION-RELEASE/libpng16.16.dylib" "../lib/libpng16.16.dylib"
 echo "==> DONE ..."
