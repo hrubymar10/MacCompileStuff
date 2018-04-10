@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+#
+# pango_build
+# Martin Hrubý (hrubymar10), 2018
+#
+
+PANGO_VERSION_1="1.40.1" #Note: Every pango after 1.40.1 have thin fonts problem
+PANGO_VERSION_2="1.40"
+
+edit_dylib_deps() {
+        DYLIB=$1
+        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
+
+        for DEP in $DEPS; do
+                DEP_BASE=$(basename ${DEP})
+                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
+                        continue
+                fi
+                # Is this our redistributable file?
+                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
+                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
+                fi
+        done
+}
+
+time_interval_to_string() {
+        local START=$1
+        local END=$2
+
+        declare -i timestamp
+        declare -i days
+        declare -i hours
+        declare -i minutes
+        declare -i seconds
+        timestamp=$END-$START
+
+        days=$timestamp/60/60/24
+        hours=$((($timestamp-($days*60*60*24))/60/60))
+        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
+        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
+        if [ $days -eq 0 ]; then
+        if [ $hours -eq 0 ]; then
+                if [ $minutes -eq 0 ]; then
+                echo "==> Operation took $seconds seconds ..."
+                else
+                echo "==> Operation took $minutes minutes and $seconds seconds ..."
+                fi
+        else
+                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+        else
+        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
+        fi
+}
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname $0` && pwd)
+if [ -z "$MY_PATH" ] ; then
+        # error; for some reason, the path is not accessible
+        # to the script (e.g. permissions re-evaled after suid)
+        echo 'Error: Script path is for some reason not accessible' >&2
+        exit 1  # fail
+fi
+cd "$MY_PATH"/../Sources
+
+if ! [ -x "$(command -v wget)" ]; then
+        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+if xcode-select --install 2>&1 | grep installed; then
+        echo "==> Xcode Command Line Tools are installed..."
+else
+        echo "==> Xcode Command Line Tools aren't installed, installing..."
+        xcode-select --install
+fi
+
+# TODO: use glib from MacCompileStuff
+if ! [ -x "$(command -v gobject-query)" ]; then
+        echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: use cairo from MacCompileStuff
+if ! [ -x "$(command -v cairo-sphinx)" ]; then
+        echo 'Error: cairo is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: use gettext from MacCompileStuff
+if ! [ -x "$(command -v gettext)" ]; then
+        echo 'Error: gettext is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: use harfbuzz from MacCompileStuff
+if ! [ -x "$(command -v hb-view)" ]; then
+        echo 'Error: harfbuzz is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: use fontconfig from MacCompileStuff
+if ! [ -x "$(command -v fc-cache)" ]; then
+        echo 'Error: fontconfig is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: use freetype from MacCompileStuff
+if ! [ -x "$(command -v freetype-config)" ]; then
+        echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+        exit 1
+fi
+
+# TODO: Verify checksum
+rm -rf pango-*
+wget "http://ftp.gnome.org/pub/GNOME/sources/pango/$PANGO_VERSION_2/pango-$PANGO_VERSION_1.tar.xz"
+tar xf "pango-$PANGO_VERSION_1.tar.xz"
+rm "pango-$PANGO_VERSION_1.tar.xz"
+cd "pango-$PANGO_VERSION_1"
+./configure --disable-dependency-tracking --disable-silent-rules --enable-introspection=yes --enable-static --without-xft
+make
+mkdir "pango-$PANGO_VERSION_1-RELEASE"
+cp "pango/.libs/libpango-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpango-1.0.0.dylib"
+cp "pango/.libs/libpangocairo-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangocairo-1.0.0.dylib"
+cp "pango/.libs/libpangoft2-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangoft2-1.0.0.dylib"
+cd "pango-$PANGO_VERSION_1-RELEASE"
+for filename in * ; do
+        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        edit_dylib_deps $filename
+        install_name_tool -change "/usr/local/opt/glib/lib/libgobject-2.0.0.dylib" "@loader_path/libgobject-2.0.0.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/glib/lib/libgthread-2.0.0.dylib" "@loader_path/libgthread-2.0.0.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/glib/lib/libglib-2.0.0.dylib" "@loader_path/libglib-2.0.0.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/cairo/lib/libcairo.2.dylib" "@loader_path/libcairo.2.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/harfbuzz/lib/libharfbuzz.0.dylib" "@loader_path/libharfbuzz.0.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/fontconfig/lib/libfontconfig.1.dylib" "@loader_path/libfontconfig.1.dylib" "$filename"
+        install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "$filename"
+done
+cd "$MY_PATH"/../
+rm -rf CompiledLibs/pango-*
+mv "Sources/pango-$PANGO_VERSION_1/pango-$PANGO_VERSION_1-RELEASE" "CompiledLibs/pango-$PANGO_VERSION_1-RELEASE"
+rm -rf ../lib/libpango*
+cp -rf "CompiledLibs/pango-$PANGO_VERSION_1-RELEASE/"*.dylib "../lib/"
+echo "==> DONE ..."
+echo
+time_interval_to_string "$starttimestamp" "$(date +%s)"
+echo
