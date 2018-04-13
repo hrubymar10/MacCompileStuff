@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-GLIB_VERSION_1="2.56.0"
+GLIB_VERSION_1="2.56.1"
 GLIB_VERSION_2="2.56"
 
 edit_dylib_deps() {
