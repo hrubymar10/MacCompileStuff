@@ -137,6 +137,11 @@ for filename in * ; do
         install_name_tool -change "/usr/local/opt/fontconfig/lib/libfontconfig.1.dylib" "@loader_path/libfontconfig.1.dylib" "$filename"
         install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "$filename"
 done
+cd ..
+rm -rf "$MY_PATH"/../../Headers/pango
+mkdir "$MY_PATH"/../../Headers/pango
+cd pango
+cp pango-attributes.h pango-bidi-type.h pango-break.h pango-context.h pango-coverage.h pango-engine.h pango-enum-types.h pango-features.h pango-font.h pango-fontmap.h pango-fontset.h pango-glyph-item.h pango-glyph.h pango-gravity.h pango-item.h pango-language.h pango-layout.h pango-matrix.h pango-modules.h pango-ot.h pango-renderer.h pango-script.h pango-tabs.h pango-types.h pango-utils.h pango.h pangocairo.h pangofc-decoder.h pangofc-font.h pangofc-fontmap.h pangoft2.h pangoxft-render.h pangoxft.h "$MY_PATH"/../../Headers/pango/
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/pango-*
 mv "Sources/pango-$PANGO_VERSION_1/pango-$PANGO_VERSION_1-RELEASE" "CompiledLibs/pango-$PANGO_VERSION_1-RELEASE"
