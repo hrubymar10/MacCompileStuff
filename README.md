@@ -1,6 +1,10 @@
 # MacCompileStuff
 MacCompileStuff is bundle of precompiled universal libraries for The Battle for Wesnoth. This bundle also cantains build scripts for all of these libraries so they can be easily upgraded to latest version.
 
+### Branches
+* `master` - MacCompileStuff for Wesnoth's `master` branch
+* `1.14` - MacCompileStuff for Wesnoth's `1.14` branch
+
 ### Requirements
 * xcode-tools
 * wget
