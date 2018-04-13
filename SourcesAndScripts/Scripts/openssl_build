@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-OPENSSL_VERSION_1="1.1.0g"
+OPENSSL_VERSION_1="1.1.0h"
 OPENSSL_VERSION_2="1.1"
 
 edit_dylib_deps() {
