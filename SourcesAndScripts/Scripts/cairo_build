@@ -116,6 +116,14 @@ install_name_tool -change "/usr/local/opt/pixman/lib/libpixman-1.0.dylib" "@load
 install_name_tool -change "/usr/local/opt/fontconfig/lib/libfontconfig.1.dylib" "@loader_path/libfontconfig.1.dylib" "libcairo.2.dylib"
 install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libcairo.2.dylib"
 install_name_tool -change "/usr/local/opt/libpng/lib/libpng16.16.dylib" "@loader_path/libpng16.16.dylib" "libcairo.2.dylib"
+cd ..
+rm -rf "$MY_PATH"/../../Headers/cairo
+mkdir "$MY_PATH"/../../Headers/cairo
+cp cairo-version.h "$MY_PATH"/../../Headers/cairo/
+cp util/cairo-gobject/cairo-gobject.h "$MY_PATH"/../../Headers/cairo/
+cp util/cairo-script/cairo-script-interpreter.h "$MY_PATH"/../../Headers/cairo/
+cd src
+cp cairo-deprecated.h cairo-features.h cairo-ft.h cairo-pdf.h cairo-ps.h cairo-script.h cairo-svg.h cairo-tee.h cairo-xcb.h cairo-xlib-xrender.h cairo-xlib.h cairo-xml.h cairo.h "$MY_PATH"/../../Headers/cairo/
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/cairo-*
 mv "Sources/cairo-$CAIRO_VERSION/cairo-$CAIRO_VERSION-RELEASE" "CompiledLibs/cairo-$CAIRO_VERSION-RELEASE"
