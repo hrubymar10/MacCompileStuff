@@ -4,8 +4,8 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-BOOST_VERSION_1="1.66.0"
-BOOST_VERSION_2="1_66_0"
+BOOST_VERSION_1="1.67.0"
+BOOST_VERSION_2="1_67_0"
 
 edit_dylib_deps() {
         DYLIB=$1
