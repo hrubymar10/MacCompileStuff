@@ -89,7 +89,7 @@ rm "fontconfig-$FONTCONFIG_VERSION.tar.gz"
 cd "fontconfig-$FONTCONFIG_VERSION"
 patch -b < ../../Scripts/fontconfig.patch
 ./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts"
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "fontconfig-$FONTCONFIG_VERSION-RELEASE"
 cp "src/.libs/libfontconfig.1.dylib" "fontconfig-$FONTCONFIG_VERSION-RELEASE/libfontconfig.1.dylib"
 cd "fontconfig-$FONTCONFIG_VERSION-RELEASE"

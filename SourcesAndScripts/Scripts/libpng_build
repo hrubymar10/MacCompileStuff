@@ -82,7 +82,7 @@ tar xf "libpng-$LIBPNG_VERSION.tar.xz"
 rm "libpng-$LIBPNG_VERSION.tar.xz"
 cd "libpng-$LIBPNG_VERSION"
 ./configure --disable-dependency-tracking --enable-shared
-make check
+make check MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "libpng-$LIBPNG_VERSION-RELEASE"
 cp ".libs/libpng16.16.dylib" "libpng-$LIBPNG_VERSION-RELEASE/libpng16.16.dylib"
 cd "libpng-$LIBPNG_VERSION-RELEASE"

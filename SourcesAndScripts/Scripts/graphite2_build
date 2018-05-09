@@ -88,7 +88,7 @@ tar xf "graphite2-$GRAPHITE2_VERSION.tgz"
 rm "graphite2-$GRAPHITE2_VERSION.tgz"
 cd "graphite2-$GRAPHITE2_VERSION"
 cmake .
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "graphite2-$GRAPHITE2_VERSION-RELEASE"
 cp "src/libgraphite2.3.0.1.dylib" "graphite2-$GRAPHITE2_VERSION-RELEASE/libgraphite2.3.dylib"
 cd "graphite2-$GRAPHITE2_VERSION-RELEASE"

@@ -88,7 +88,7 @@ tar xf "glib-$GLIB_VERSION_1.tar.xz"
 rm "glib-$GLIB_VERSION_1.tar.xz"
 cd "glib-$GLIB_VERSION_1"
 ./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-shared
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "glib-$GLIB_VERSION_1-RELEASE"
 cp "glib/.libs/libglib-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libglib-2.0.0.dylib"
 cp "gmodule/.libs/libgmodule-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgmodule-2.0.0.dylib"

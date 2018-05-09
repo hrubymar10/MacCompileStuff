@@ -118,7 +118,7 @@ tar xf "pcre-$PCRE_VERSION.tar.bz2"
 rm "pcre-$PCRE_VERSION.tar.bz2"
 cd "pcre-$PCRE_VERSION"
 ./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pcre-$PCRE_VERSION-RELEASE"
 cp ".libs/libpcre.1.dylib" "pcre-$PCRE_VERSION-RELEASE/libpcre.1.dylib"
 cd "pcre-$PCRE_VERSION-RELEASE"

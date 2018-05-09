@@ -82,7 +82,7 @@ tar xf "pixman-$PIXMAN_VERSION.tar.gz"
 rm "pixman-$PIXMAN_VERSION.tar.gz"
 cd "pixman-$PIXMAN_VERSION"
 ./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pixman-$PIXMAN_VERSION-RELEASE"
 cp "pixman/.libs/libpixman-1.0.dylib" "pixman-$PIXMAN_VERSION-RELEASE/libpixman-1.0.dylib"
 cd "pixman-$PIXMAN_VERSION-RELEASE"

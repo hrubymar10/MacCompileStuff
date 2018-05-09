@@ -106,7 +106,7 @@ tar xf "harfbuzz-$HARFBUZZ_VERSION.tar.bz2"
 rm "harfbuzz-$HARFBUZZ_VERSION.tar.bz2"
 cd "harfbuzz-$HARFBUZZ_VERSION"
 ./configure --disable-dependency-tracking --enable-static --with-cairo=yes --with-glib=yes --with-gobject=yes --enable-introspection=yes --with-freetype=yes --with-graphite2=yes
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
 cp "src/.libs/libharfbuzz.0.dylib" "harfbuzz-$HARFBUZZ_VERSION-RELEASE/libharfbuzz.0.dylib"
 cd "harfbuzz-$HARFBUZZ_VERSION-RELEASE"

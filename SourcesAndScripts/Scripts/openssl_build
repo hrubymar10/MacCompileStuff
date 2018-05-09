@@ -83,7 +83,7 @@ tar xf "openssl-$OPENSSL_VERSION_1.tar.gz"
 rm "openssl-$OPENSSL_VERSION_1.tar.gz"
 cd "openssl-$OPENSSL_VERSION_1"
 KERNEL_BITS=64 ./config
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "openssl-$OPENSSL_VERSION_1-RELEASE"
 cp "libcrypto.$OPENSSL_VERSION_2.dylib" "openssl-$OPENSSL_VERSION_1-RELEASE/libcrypto.$OPENSSL_VERSION_2.dylib"
 cd "openssl-$OPENSSL_VERSION_1-RELEASE"

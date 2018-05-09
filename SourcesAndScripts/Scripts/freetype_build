@@ -89,7 +89,7 @@ rm "freetype-$FREETYPE_VERSION.tar.gz"
 cd "freetype-$FREETYPE_VERSION"
 sh autogen.sh
 ./configure --with-harfbuzz=no --enable-shared
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "freetype-$FREETYPE_VERSION-RELEASE"
 cp "objs/.libs/libfreetype.6.dylib" "freetype-$FREETYPE_VERSION-RELEASE/libfreetype.6.dylib"
 cd "freetype-$FREETYPE_VERSION-RELEASE"

@@ -119,7 +119,7 @@ tar xf "pango-$PANGO_VERSION_1.tar.xz"
 rm "pango-$PANGO_VERSION_1.tar.xz"
 cd "pango-$PANGO_VERSION_1"
 ./configure --disable-dependency-tracking --disable-silent-rules --enable-introspection=yes --enable-static --without-xft
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pango-$PANGO_VERSION_1-RELEASE"
 cp "pango/.libs/libpango-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpango-1.0.0.dylib"
 cp "pango/.libs/libpangocairo-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangocairo-1.0.0.dylib"

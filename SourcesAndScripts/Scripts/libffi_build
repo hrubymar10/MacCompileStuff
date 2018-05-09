@@ -82,7 +82,7 @@ tar xf "libffi-$LIBFFI_VERSION.tar.gz"
 rm "libffi-$LIBFFI_VERSION.tar.gz"
 cd "libffi-$LIBFFI_VERSION"
 ./configure --disable-dependency-tracking --enable-shared
-make
+make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "libffi-$LIBFFI_VERSION-RELEASE"
 cp x86_64-apple-darwin*/".libs/libffi.6.dylib" "libffi-$LIBFFI_VERSION-RELEASE/libffi.6.dylib"
 cd "libffi-$LIBFFI_VERSION-RELEASE"

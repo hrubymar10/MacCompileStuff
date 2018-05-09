@@ -77,6 +77,7 @@ else
 fi
 
 # TODO: Verify checksum
+export MACOSX_DEPLOYMENT_TARGET=10.10
 rm -rf boost_*
 wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.tar.gz"
 tar xf "boost_$BOOST_VERSION_2.tar.gz"
