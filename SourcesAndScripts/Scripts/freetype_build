@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-FREETYPE_VERSION="2.9"
+FREETYPE_VERSION="2.9.1"
 
 edit_dylib_deps() {
         DYLIB=$1
