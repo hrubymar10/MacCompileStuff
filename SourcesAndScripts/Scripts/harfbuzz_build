@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-HARFBUZZ_VERSION="1.8.7"
+HARFBUZZ_VERSION="1.8.8"
 
 edit_dylib_deps() {
         DYLIB=$1
