@@ -4,8 +4,8 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-GLIB_VERSION_1="2.56.1"
-GLIB_VERSION_2="2.56"
+GLIB_VERSION_1="2.58.0"
+GLIB_VERSION_2="2.58"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -87,6 +87,7 @@ wget "https://download.gnome.org/sources/glib/$GLIB_VERSION_2/glib-$GLIB_VERSION
 tar xf "glib-$GLIB_VERSION_1.tar.xz"
 rm "glib-$GLIB_VERSION_1.tar.xz"
 cd "glib-$GLIB_VERSION_1"
+./autogen.sh
 ./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-shared
 make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "glib-$GLIB_VERSION_1-RELEASE"
@@ -116,19 +117,17 @@ mkdir ../Headers/glib-2.0/gobject
 cd "Sources/glib-$GLIB_VERSION_1/glib"
 cp glibconfig.h "$MY_PATH"/../../Headers/
 cp glib-object.h glib-unix.h glib.h "$MY_PATH"/../../Headers/glib-2.0/
-cp gi18n-lib.h gslice.h galloca.h gi18n.h gslist.h garray.h giochannel.h gspawn.h gasyncqueue.h gkeyfile.h gstdio.h gatomic.h glist.h gstrfuncs.h gbacktrace.h gmacros.h gstring.h gbase64.h gmain.h gstringchunk.h gbitlock.h gmappedfile.h gtestutils.h gbookmarkfile.h gmarkup.h gthread.h gbytes.h gmem.h gthreadpool.h gcharset.h gmessages.h gtimer.h gchecksum.h gnode.h gtimezone.h gconvert.h goption.h gtrashstack.h gdataset.h gpattern.h gtree.h gdate.h gpoll.h gtypes.h gdatetime.h gprimes.h gunicode.h gdir.h gprintf.h gurifuncs.h genviron.h gqsort.h gutils.h gerror.h gquark.h gvariant.h gfileutils.h gqueue.h gvarianttype.h ggettext.h grand.h gversion.h ghash.h gregex.h gversionmacros.h ghmac.h gscanner.h gwin32.h ghook.h gsequence.h ghostutils.h gshell.h guuid.h glib-autocleanups.h "$MY_PATH"/../../Headers/glib-2.0/glib
+cp *.h "$MY_PATH"/../../Headers/glib-2.0/glib
 cd deprecated
-cp gallocator.h gcompletion.h grel.h gcache.h gmain.h gthread.h "$MY_PATH"/../../Headers/glib-2.0/glib/deprecated/
+cp *.h "$MY_PATH"/../../Headers/glib-2.0/glib/deprecated/
 cd ..
 cd ..
 cd gio
-cp gaction.h gcredentials.h gdbusobjectmanagerclient.h gfilenamecompleter.h gloadableicon.h gpropertyaction.h gsocketaddress.h gtlsconnection.h gactiongroup.h gdatainputstream.h gdbusobjectmanagerserver.h gfileoutputstream.h gmemoryinputstream.h gproxy.h gsocketaddressenumerator.h gtlsdatabase.h gactiongroupexporter.h gdataoutputstream.h gdbusobjectproxy.h gfilterinputstream.h gmemoryoutputstream.h gproxyaddress.h gsocketclient.h gtlsfiledatabase.h gactionmap.h gdbusactiongroup.h gdbusobjectskeleton.h gfilteroutputstream.h gmenu.h  gproxyaddressenumerator.h gsocketconnectable.h gtlsinteraction.h gappinfo.h gdbusaddress.h gdbusproxy.h gicon.h  gmenuexporter.h gproxyresolver.h gsocketconnection.h gtlspassword.h gapplication.h gdbusauthobserver.h gdbusserver.h ginetaddress.h gmenumodel.h gremoteactiongroup.h gsocketcontrolmessage.h gtlsserverconnection.h gapplicationcommandline.h gdbusconnection.h gdbusutils.h ginetaddressmask.h gmount.h gresolver.h gsocketlistener.h gvfs.h gasyncinitable.h gdbuserror.h gdrive.h ginetsocketaddress.h gmountoperation.h gresource.h gsocketservice.h gvolume.h gasyncresult.h gdbusinterface.h gemblem.h ginitable.h gnativevolumemonitor.h gseekable.h gsrvtarget.h gvolumemonitor.h gbufferedinputstream.h gdbusinterfaceskeleton.h gemblemedicon.h ginputstream.h gnetworkaddress.h gsettings.h gtask.h  gzlibcompressor.h gbufferedoutputstream.h gdbusintrospection.h gfile.h  gio.h  gnetworking.h gsettingsbackend.h gtcpconnection.h gzlibdecompressor.h gbytesicon.h gdbusmenumodel.h gfileattribute.h gioenums.h gnetworkmonitor.h gsettingsschema.h gtcpwrapperconnection.h gcancellable.h gdbusmessage.h gfileenumerator.h gioenumtypes.h gnetworkservice.h gsimpleaction.h gtestdbus.h gcharsetconverter.h gdbusmethodinvocation.h gfileicon.h gioerror.h goutputstream.h gsimpleactiongroup.h gthemedicon.h gcontenttype.h gdbusnameowning.h gfileinfo.h giomodule.h gpermission.h gsimpleasyncresult.h gthreadedsocketservice.h gconverter.h gdbusnamewatching.h gfileinputstream.h gioscheduler.h gpollableinputstream.h gsimplepermission.h gtlsbackend.h gconverterinputstream.h gdbusobject.h gfileiostream.h giostream.h gpollableoutputstream.h gsimpleproxyresolver.h gtlscertificate.h gconverteroutputstream.h gdbusobjectmanager.h gfilemonitor.h giotypes.h gpollableutils.h gsocket.h gtlsclientconnection.h "$MY_PATH"/../../Headers/glib-2.0/gio
+cp *.h "$MY_PATH"/../../Headers/glib-2.0/gio
 cd ..
-cd gmodule
-cp gmodule.h "$MY_PATH"/../../Headers/glib-2.0/
-cd ..
+cp gmodule/gmodule.h "$MY_PATH"/../../Headers/glib-2.0/
 cd gobject
-cp gbinding.h gobjectnotifyqueue.c gtypeplugin.h gboxed.h gparam.h gvalue.h gclosure.h gparamspecs.h gvaluearray.h genums.h gsignal.h gvaluecollector.h glib-types.h gsourceclosure.h gvaluetypes.h gmarshal.h gtype.h gobject.h gtypemodule.h gobject-autocleanups.h "$MY_PATH"/../../Headers/glib-2.0/gobject
+cp *.h "$MY_PATH"/../../Headers/glib-2.0/gobject
 cd "$MY_PATH"/../
 rm -rf ../lib/libglib-2.0.0.dylib
 rm -rf ../lib/libgmodule-2.0.0.dylib
