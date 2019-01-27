@@ -85,6 +85,13 @@ cd "SDL2_image-$SDL2_image_VERSION/Xcode"
 plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
+#<key>CFBundleIdentifier</key>
+#<string>org.wesnoth.webp</string>
+for filename in Frameworks/*.framework/Versions/A/*; do
+        if [ -f "$filename" ]; then
+                lipo "$filename" -remove i386 -output "$filename"
+        fi
+done
 xcodebuild -project SDL_image.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2_image.framework
 cp -Rf out/Release/SDL2_image.framework "$MY_PATH"/../../lib/SDL2_image.framework
@@ -98,6 +105,11 @@ cd "SDL2_mixer-$SDL2_mixer_VERSION/Xcode"
 plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
+for filename in Frameworks/*.framework/Versions/A/*; do
+        if [ -f "$filename" ]; then
+                lipo "$filename" -remove i386 -output "$filename"
+        fi
+done
 xcodebuild -project SDL_mixer.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 cp -Rf out/Release/SDL2_mixer.framework "$MY_PATH"/../../lib/SDL2_mixer.framework
 
@@ -120,6 +132,11 @@ cd "SDL2_ttf-$SDL2_ttf_VERSION/Xcode"
 plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
 plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
+for filename in Frameworks/*.framework/Versions/A/*; do
+        if [ -f "$filename" ]; then
+                lipo "$filename" -remove i386 -output "$filename"
+        fi
+done
 xcodebuild -project SDL_ttf.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2_ttf.framework
 cp -Rf out/Release/SDL2_ttf.framework "$MY_PATH"/../../lib/SDL2_ttf.framework
