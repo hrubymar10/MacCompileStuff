@@ -8,6 +8,8 @@
 	<string>FreeType</string>
 	<key>CFBundleGetInfoString</key>
 	<string>FreeType 2.4.8</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.FreeType.FreeType</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -8,6 +8,8 @@
 	<string>mpg123</string>
 	<key>CFBundleGetInfoString</key>
 	<string>libmpg123 1.25.6</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.mpg123.mpg123</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

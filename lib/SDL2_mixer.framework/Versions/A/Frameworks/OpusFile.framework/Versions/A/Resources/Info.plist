@@ -8,6 +8,8 @@
 	<string>OpusFile</string>
 	<key>CFBundleGetInfoString</key>
 	<string>libopusfile 0.10</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.OpusFile.OpusFile</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

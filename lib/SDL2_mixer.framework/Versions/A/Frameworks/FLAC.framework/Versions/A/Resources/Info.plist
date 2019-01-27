@@ -8,6 +8,8 @@
 	<string>FLAC</string>
 	<key>CFBundleGetInfoString</key>
 	<string>libFLAC 1.3.2</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.FLAC.FLAC</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

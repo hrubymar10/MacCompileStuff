@@ -8,6 +8,8 @@
 	<string>modplug</string>
 	<key>CFBundleGetInfoString</key>
 	<string>libmodplug 0.8.9</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.modplug.modplug</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

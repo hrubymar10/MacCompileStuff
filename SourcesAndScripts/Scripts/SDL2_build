@@ -40,6 +40,28 @@ time_interval_to_string() {
         fi
 }
 
+apply_fixes_for_appstore() {
+        for filename in Frameworks/*.framework/Versions/A/*; do
+                if [ -f "$filename" ]; then
+                        lipo "$filename" -remove i386 -output "$filename"
+                else
+                        if [ -f "$filename/Info.plist" ]; then
+                                CFBundleIdentifier=$(plutil -extract CFBundleIdentifier xml1 -o - $filename/Info.plist | sed -n "s/.*<string>\(.*\)<\/string>.*/\1/p")
+                                if [[ -z "${CFBundleIdentifier// }" ]]; then
+                                        CFBundleExecutable=$(plutil -extract CFBundleExecutable xml1 -o - $filename/Info.plist | sed -n "s/.*<string>\(.*\)<\/string>.*/\1/p")
+                                        plutil -insert "CFBundleIdentifier" -string "org.$CFBundleExecutable.$CFBundleExecutable" "$filename/Info.plist"
+                                fi
+
+                                CFBundleSupportedPlatforms=$(plutil -extract CFBundleSupportedPlatforms xml1 -o - $filename/Info.plist | sed -n "s/.*<string>\(.*\)<\/string>.*/\1/p")
+                                if [[ -z "${CFBundleIdentifier// }" ]]; then
+                                        plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" "$filename/Info.plist"
+                                        plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" "$filename/Info.plist"
+                                fi
+                        fi
+                fi
+        done
+}
+
 starttimestamp=$(date +%s)
 
 MY_PATH=$(cd `dirname $0` && pwd)
@@ -72,6 +94,7 @@ tar xf "SDL2-$SDL2_VERSION.tar.gz"
 rm "SDL2-$SDL2_VERSION.tar.gz"
 ln -s "SDL2-$SDL2_VERSION" SDL
 cd SDL/Xcode/SDL/
+apply_fixes_for_appstore
 xcodebuild -project SDL.xcodeproj -target Framework -configuration Release BUILD_DIR="out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2.framework
 cp -Rf out/Release/SDL2.framework "$MY_PATH"/../../lib/SDL2.framework
@@ -82,16 +105,7 @@ wget "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-$SDL2_image_V
 tar xf "SDL2_image-$SDL2_image_VERSION.tar.gz"
 rm "SDL2_image-$SDL2_image_VERSION.tar.gz"
 cd "SDL2_image-$SDL2_image_VERSION/Xcode"
-plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
-#<key>CFBundleIdentifier</key>
-#<string>org.wesnoth.webp</string>
-for filename in Frameworks/*.framework/Versions/A/*; do
-        if [ -f "$filename" ]; then
-                lipo "$filename" -remove i386 -output "$filename"
-        fi
-done
+apply_fixes_for_appstore
 xcodebuild -project SDL_image.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2_image.framework
 cp -Rf out/Release/SDL2_image.framework "$MY_PATH"/../../lib/SDL2_image.framework
@@ -102,14 +116,7 @@ wget "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-$SDL2_mixer_V
 tar xf "SDL2_mixer-$SDL2_mixer_VERSION.tar.gz"
 rm "SDL2_mixer-$SDL2_mixer_VERSION.tar.gz"
 cd "SDL2_mixer-$SDL2_mixer_VERSION/Xcode"
-plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
-for filename in Frameworks/*.framework/Versions/A/*; do
-        if [ -f "$filename" ]; then
-                lipo "$filename" -remove i386 -output "$filename"
-        fi
-done
+apply_fixes_for_appstore
 xcodebuild -project SDL_mixer.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 cp -Rf out/Release/SDL2_mixer.framework "$MY_PATH"/../../lib/SDL2_mixer.framework
 
@@ -119,6 +126,7 @@ wget "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-$SDL2_net_VERSION
 tar xf "SDL2_net-$SDL2_net_VERSION.tar.gz"
 rm "SDL2_net-$SDL2_net_VERSION.tar.gz"
 cd "SDL2_net-$SDL2_net_VERSION/Xcode"
+apply_fixes_for_appstore
 xcodebuild -project SDL_net.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2_net.framework
 cp -Rf out/Release/SDL2_net.framework "$MY_PATH"/../../lib/SDL2_net.framework
@@ -129,14 +137,7 @@ wget "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-$SDL2_ttf_VERSION
 tar xf "SDL2_ttf-$SDL2_ttf_VERSION.tar.gz"
 rm "SDL2_ttf-$SDL2_ttf_VERSION.tar.gz"
 cd "SDL2_ttf-$SDL2_ttf_VERSION/Xcode"
-plutil -remove "CFBundleSupportedPlatforms" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms" -xml "<array/>" Frameworks/*.framework/Resources/Info.plist
-plutil -insert "CFBundleSupportedPlatforms.0" -string "MacOSX" Frameworks/*.framework/Resources/Info.plist
-for filename in Frameworks/*.framework/Versions/A/*; do
-        if [ -f "$filename" ]; then
-                lipo "$filename" -remove i386 -output "$filename"
-        fi
-done
+apply_fixes_for_appstore
 xcodebuild -project SDL_ttf.xcodeproj -target Framework -configuration Release BUILD_DIR="out" SYMROOT="./out" MACOSX_DEPLOYMENT_TARGET="10.8"
 rm -rf "$MY_PATH"/../../lib/SDL2_ttf.framework
 cp -Rf out/Release/SDL2_ttf.framework "$MY_PATH"/../../lib/SDL2_ttf.framework

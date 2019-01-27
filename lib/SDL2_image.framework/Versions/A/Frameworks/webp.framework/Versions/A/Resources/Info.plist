@@ -8,6 +8,8 @@
 	<string>webp</string>
 	<key>CFBundleGetInfoString</key>
 	<string>libwebp 0.6.0</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.webp.webp</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
