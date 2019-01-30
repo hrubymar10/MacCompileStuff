@@ -10,7 +10,7 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 * wget
 
 ### Versions
-* **Boost** 1.67.0
+* **Boost** 1.68.0
 * **Cairo** 1.16.0
 * **GNU Readline** 7.0
 * **Fontconfig** 2.12.6
