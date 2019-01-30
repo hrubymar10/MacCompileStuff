@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # libpng_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
-LIBPNG_VERSION="1.6.35"
+LIBPNG_VERSION="1.6.36"
 
 edit_dylib_deps() {
         DYLIB=$1
