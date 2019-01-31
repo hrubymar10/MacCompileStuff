@@ -85,7 +85,7 @@ rm "boost_$BOOST_VERSION_2.tar.gz"
 cd "boost_$BOOST_VERSION_2"
 rm -rf stage
 ./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread
-./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1
+./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1 cxxstd=14
 cd stage/lib
 mkdir "boost_$BOOST_VERSION_2-RELEASE"
 cp *.dylib "boost_$BOOST_VERSION_2-RELEASE"
