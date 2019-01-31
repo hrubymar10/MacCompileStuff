@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # readline_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
-READLINE_VERSION="7.0"
+READLINE_VERSION="8.0"
 
 edit_dylib_deps() {
         DYLIB=$1
