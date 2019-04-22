@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # cairo_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
 CAIRO_VERSION="1.16.0"
@@ -99,12 +99,19 @@ if ! [ -x "$(command -v libpng-config)" ]; then
         exit 1
 fi
 
+# TODO: use libffi from MacCompileStuff
+if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
+        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
+        exit 1
+fi
+
 # TODO: Verify checksum
 rm -rf cairo-*
 wget "https://cairographics.org/releases/cairo-$CAIRO_VERSION.tar.xz"
 tar xf "cairo-$CAIRO_VERSION.tar.xz"
 rm "cairo-$CAIRO_VERSION.tar.xz"
 cd "cairo-$CAIRO_VERSION"
+export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
 ./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no
 make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "cairo-$CAIRO_VERSION-RELEASE"
