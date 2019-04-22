@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # pango_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
 PANGO_VERSION_1="1.40.1" #Note: Every pango after 1.40.1 have thin fonts problem
@@ -76,6 +76,12 @@ else
         xcode-select --install
 fi
 
+# TODO: use libffi from MacCompileStuff
+if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
+        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
+        exit 1
+fi
+
 # TODO: use glib from MacCompileStuff
 if ! [ -x "$(command -v gobject-query)" ]; then
         echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
@@ -118,6 +124,7 @@ wget "http://ftp.gnome.org/pub/GNOME/sources/pango/$PANGO_VERSION_2/pango-$PANGO
 tar xf "pango-$PANGO_VERSION_1.tar.xz"
 rm "pango-$PANGO_VERSION_1.tar.xz"
 cd "pango-$PANGO_VERSION_1"
+export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
 ./configure --disable-dependency-tracking --disable-silent-rules --enable-introspection=yes --enable-static --without-xft
 make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pango-$PANGO_VERSION_1-RELEASE"
