@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # glib_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
-GLIB_VERSION_1="2.58.0"
+GLIB_VERSION_1="2.58.3"
 GLIB_VERSION_2="2.58"
 
 edit_dylib_deps() {
@@ -69,8 +69,8 @@ if ! [ -x "$(command -v wget)" ]; then
         exit 1
 fi
 
-if [ ! -f /usr/local/lib/libffi.dylib ]; then
-        echo 'Error: libffi is not installed or is not linked. Use for example Homebrew, install it and force link it. See https://brew.sh/' >&2
+if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
+        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
         exit 1
 fi
 
@@ -87,6 +87,7 @@ wget "https://download.gnome.org/sources/glib/$GLIB_VERSION_2/glib-$GLIB_VERSION
 tar xf "glib-$GLIB_VERSION_1.tar.xz"
 rm "glib-$GLIB_VERSION_1.tar.xz"
 cd "glib-$GLIB_VERSION_1"
+export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
 ./autogen.sh
 ./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-shared
 make MACOSX_DEPLOYMENT_TARGET=10.8
