@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018-2019
 #
 
-LIBPNG_VERSION="1.6.36"
+LIBPNG_VERSION="1.6.37"
 
 edit_dylib_deps() {
         DYLIB=$1
