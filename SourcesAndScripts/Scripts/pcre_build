@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # pcre_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
-PCRE_VERSION="8.42"
+PCRE_VERSION="8.43"
 
 edit_dylib_deps() {
         DYLIB=$1
