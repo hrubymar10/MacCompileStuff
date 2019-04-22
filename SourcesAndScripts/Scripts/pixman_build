@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018-2019
 #
 
-PIXMAN_VERSION="0.36.0"
+PIXMAN_VERSION="0.38.4"
 
 edit_dylib_deps() {
         DYLIB=$1
