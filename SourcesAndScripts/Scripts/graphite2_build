@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # graphite2_build
-# Martin Hrubý (hrubymar10), 2018
+# Martin Hrubý (hrubymar10), 2018-2019
 #
 
-GRAPHITE2_VERSION="1.3.11"
+GRAPHITE2_VERSION="1.3.13"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -87,10 +87,10 @@ wget "https://github.com/silnrsi/graphite/releases/download/$GRAPHITE2_VERSION/g
 tar xf "graphite2-$GRAPHITE2_VERSION.tgz"
 rm "graphite2-$GRAPHITE2_VERSION.tgz"
 cd "graphite2-$GRAPHITE2_VERSION"
-cmake .
+cmake -E env CXXFLAGS='-stdlib=libc++' cmake .
 make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "graphite2-$GRAPHITE2_VERSION-RELEASE"
-cp "src/libgraphite2.3.0.1.dylib" "graphite2-$GRAPHITE2_VERSION-RELEASE/libgraphite2.3.dylib"
+cp "src/libgraphite2.3.2.1.dylib" "graphite2-$GRAPHITE2_VERSION-RELEASE/libgraphite2.3.dylib"
 cd "graphite2-$GRAPHITE2_VERSION-RELEASE"
 install_name_tool -id "@executable_path/../Frameworks/libgraphite2.3.dylib" "libgraphite2.3.dylib"
 edit_dylib_deps libgraphite2.3.dylib
