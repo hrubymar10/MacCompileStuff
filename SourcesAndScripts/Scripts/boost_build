@@ -91,7 +91,7 @@ mkdir "boost_$BOOST_VERSION_2-RELEASE"
 cp *.dylib "boost_$BOOST_VERSION_2-RELEASE"
 cd "boost_$BOOST_VERSION_2-RELEASE"
 for filename in * ; do
-        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        install_name_tool -id "@rpath/$filename" "$filename"
         edit_dylib_deps $filename
 done
 cd "$MY_PATH"/../

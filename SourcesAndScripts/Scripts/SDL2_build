@@ -95,7 +95,7 @@ rm -rf "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
 mkdir -p "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
 cp "build/.libs/libSDL2-2.0.0.dylib" "$MY_PATH"/../CompiledLibs/SDL2-RELEASE/libSDL2-2.0.0.dylib
 cd "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
-install_name_tool -id "@executable_path/../Frameworks/libSDL2-2.0.0.dylib" "libSDL2-2.0.0.dylib"
+install_name_tool -id "@rpath/libSDL2-2.0.0.dylib" "libSDL2-2.0.0.dylib"
 edit_dylib_deps libSDL2-2.0.0.dylib
 rm -rf "$MY_PATH"/../../lib/libSDL2-2.0.0.dylib
 cp -rf libSDL2-2.0.0.dylib "$MY_PATH"/../../lib/libSDL2-2.0.0.dylib
@@ -117,7 +117,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 cp ".libs/libSDL2_image-2.0.0.dylib" "$MY_PATH"/../CompiledLibs/SDL2-RELEASE/libSDL2_image-2.0.0.dylib
 cp -rf SDL_image.h "$MY_PATH"/../../Headers/SDL2/SDL_image.h
 cd "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
-install_name_tool -id "@executable_path/../Frameworks/libSDL2_image-2.0.0.dylib" "libSDL2_image-2.0.0.dylib"
+install_name_tool -id "@rpath/libSDL2_image-2.0.0.dylib" "libSDL2_image-2.0.0.dylib"
 edit_dylib_deps libSDL2_image-2.0.0.dylib
 rm -rf "$MY_PATH"/../../lib/libSDL2_image-2.0.0.dylib
 cp -rf libSDL2_image-2.0.0.dylib "$MY_PATH"/../../lib/libSDL2_image-2.0.0.dylib
@@ -133,7 +133,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 cp "build/.libs/libSDL2_mixer-2.0.0.dylib" "$MY_PATH"/../CompiledLibs/SDL2-RELEASE/libSDL2_mixer-2.0.0.dylib
 cp -rf SDL_mixer.h "$MY_PATH"/../../Headers/SDL2/SDL_mixer.h
 cd "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
-install_name_tool -id "@executable_path/../Frameworks/libSDL2_mixer-2.0.0.dylib" "libSDL2_mixer-2.0.0.dylib"
+install_name_tool -id "@rpath/libSDL2_mixer-2.0.0.dylib" "libSDL2_mixer-2.0.0.dylib"
 edit_dylib_deps libSDL2_mixer-2.0.0.dylib
 rm -rf "$MY_PATH"/../../lib/libSDL2_mixer-2.0.0.dylib
 cp -rf libSDL2_mixer-2.0.0.dylib "$MY_PATH"/../../lib/libSDL2_mixer-2.0.0.dylib
@@ -149,7 +149,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 cp ".libs/libSDL2_net-2.0.0.dylib" "$MY_PATH"/../CompiledLibs/SDL2-RELEASE/libSDL2_net-2.0.0.dylib
 cp -rf SDL_net.h "$MY_PATH"/../../Headers/SDL2/SDL_net.h
 cd "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
-install_name_tool -id "@executable_path/../Frameworks/libSDL2_net-2.0.0.dylib" "libSDL2_net-2.0.0.dylib"
+install_name_tool -id "@rpath/libSDL2_net-2.0.0.dylib" "libSDL2_net-2.0.0.dylib"
 edit_dylib_deps libSDL2_net-2.0.0.dylib
 rm -rf "$MY_PATH"/../../lib/libSDL2_net-2.0.0.dylib
 cp -rf libSDL2_net-2.0.0.dylib "$MY_PATH"/../../lib/libSDL2_net-2.0.0.dylib
@@ -165,7 +165,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 cp ".libs/libSDL2_ttf-2.0.0.dylib" "$MY_PATH"/../CompiledLibs/SDL2-RELEASE/libSDL2_ttf-2.0.0.dylib
 cp -rf SDL_ttf.h "$MY_PATH"/../../Headers/SDL2/SDL_ttf.h
 cd "$MY_PATH"/../CompiledLibs/SDL2-RELEASE
-install_name_tool -id "@executable_path/../Frameworks/libSDL2_ttf-2.0.0.dylib" "libSDL2_ttf-2.0.0.dylib"
+install_name_tool -id "@rpath/libSDL2_ttf-2.0.0.dylib" "libSDL2_ttf-2.0.0.dylib"
 edit_dylib_deps libSDL2_ttf-2.0.0.dylib
 install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libSDL2_ttf-2.0.0.dylib"
 rm -rf "$MY_PATH"/../../lib/libSDL2_ttf-2.0.0.dylib

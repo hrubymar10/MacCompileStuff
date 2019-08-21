@@ -133,7 +133,7 @@ cp "pango/.libs/libpangocairo-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpa
 cp "pango/.libs/libpangoft2-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangoft2-1.0.0.dylib"
 cd "pango-$PANGO_VERSION_1-RELEASE"
 for filename in * ; do
-        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        install_name_tool -id "@rpath/$filename" "$filename"
         edit_dylib_deps $filename
         install_name_tool -change "/usr/local/opt/glib/lib/libgobject-2.0.0.dylib" "@loader_path/libgobject-2.0.0.dylib" "$filename"
         install_name_tool -change "/usr/local/opt/glib/lib/libgthread-2.0.0.dylib" "@loader_path/libgthread-2.0.0.dylib" "$filename"

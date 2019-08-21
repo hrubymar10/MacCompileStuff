@@ -92,7 +92,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "graphite2-$GRAPHITE2_VERSION-RELEASE"
 cp "src/libgraphite2.3.2.1.dylib" "graphite2-$GRAPHITE2_VERSION-RELEASE/libgraphite2.3.dylib"
 cd "graphite2-$GRAPHITE2_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libgraphite2.3.dylib" "libgraphite2.3.dylib"
+install_name_tool -id "@rpath/libgraphite2.3.dylib" "libgraphite2.3.dylib"
 edit_dylib_deps libgraphite2.3.dylib
 install_name_tool -change "$MY_PATH/src/libgraphite2.3.dylib" "@loader_path/libgraphite2.3.dylib" "libgraphite2.3.dylib"
 cd "$MY_PATH"/../

@@ -86,7 +86,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pixman-$PIXMAN_VERSION-RELEASE"
 cp "pixman/.libs/libpixman-1.0.dylib" "pixman-$PIXMAN_VERSION-RELEASE/libpixman-1.0.dylib"
 cd "pixman-$PIXMAN_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libpixman-1.0.dylib" "libpixman-1.0.dylib"
+install_name_tool -id "@rpath/libpixman-1.0.dylib" "libpixman-1.0.dylib"
 edit_dylib_deps libpixman-1.0.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/pixman-*

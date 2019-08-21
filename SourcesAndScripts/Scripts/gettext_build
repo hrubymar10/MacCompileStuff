@@ -86,7 +86,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "gettext-$GETTEXT_VERSION-RELEASE"
 cp "gettext-runtime/intl/.libs/libintl.8.dylib" "gettext-$GETTEXT_VERSION-RELEASE/libintl.8.dylib"
 cd "gettext-$GETTEXT_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libintl.8.dylib" "libintl.8.dylib"
+install_name_tool -id "@rpath/libintl.8.dylib" "libintl.8.dylib"
 edit_dylib_deps libintl.8.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/gettext-*

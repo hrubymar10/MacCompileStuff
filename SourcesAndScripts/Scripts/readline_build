@@ -86,7 +86,7 @@ make shared MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "readline-$READLINE_VERSION-RELEASE"
 cp "shlib/libreadline.$READLINE_VERSION.dylib" "readline-$READLINE_VERSION-RELEASE/libreadline.$READLINE_VERSION.dylib"
 cd "readline-$READLINE_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libreadline.$READLINE_VERSION.dylib" "libreadline.$READLINE_VERSION.dylib"
+install_name_tool -id "@rpath/libreadline.$READLINE_VERSION.dylib" "libreadline.$READLINE_VERSION.dylib"
 edit_dylib_deps "libreadline.$READLINE_VERSION.dylib"
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/readline-*

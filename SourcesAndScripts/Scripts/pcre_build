@@ -122,7 +122,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "pcre-$PCRE_VERSION-RELEASE"
 cp ".libs/libpcre.1.dylib" "pcre-$PCRE_VERSION-RELEASE/libpcre.1.dylib"
 cd "pcre-$PCRE_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libpcre.1.dylib" "libpcre.1.dylib"
+install_name_tool -id "@rpath/libpcre.1.dylib" "libpcre.1.dylib"
 edit_dylib_deps libpcre.1.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/pcre-*

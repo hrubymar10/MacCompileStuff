@@ -86,7 +86,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "libffi-$LIBFFI_VERSION-RELEASE"
 cp x86_64-apple-darwin*/".libs/libffi.6.dylib" "libffi-$LIBFFI_VERSION-RELEASE/libffi.6.dylib"
 cd "libffi-$LIBFFI_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libffi.6.dylib" "libffi.6.dylib"
+install_name_tool -id "@rpath/libffi.6.dylib" "libffi.6.dylib"
 edit_dylib_deps libffi.6.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/libffi-*

@@ -99,7 +99,7 @@ cp "gthread/.libs/libgthread-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgthre
 cd "glib-$GLIB_VERSION_1-RELEASE"
 # TODO: Use MCS' pcre, libffi and gettext
 for filename in * ; do
-        install_name_tool -id "@executable_path/../Frameworks/$filename" "$filename"
+        install_name_tool -id "@rpath/$filename" "$filename"
         edit_dylib_deps $filename
         install_name_tool -change "/usr/local/opt/pcre/lib/libpcre.1.dylib" "@loader_path/libpcre.1.dylib" $filename
         install_name_tool -change "/usr/local/opt/libffi/lib/libffi.6.dylib" "@loader_path/libffi.6.dylib" $filename

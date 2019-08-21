@@ -87,8 +87,8 @@ mkdir "libvorbis-$LIBVORBIS_VERSION-RELEASE"
 cp "lib/.libs/libvorbis.0.dylib" "libvorbis-$LIBVORBIS_VERSION-RELEASE/libvorbis.0.dylib"
 cp "lib/.libs/libvorbisfile.3.dylib" "libvorbis-$LIBVORBIS_VERSION-RELEASE/libvorbisfile.dylib"
 cd "libvorbis-$LIBVORBIS_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libvorbis.0.dylib" "libvorbis.0.dylib"
-install_name_tool -id "@executable_path/../Frameworks/libvorbisfile.dylib" "libvorbisfile.dylib"
+install_name_tool -id "@rpath/libvorbis.0.dylib" "libvorbis.0.dylib"
+install_name_tool -id "@rpath/libvorbisfile.dylib" "libvorbisfile.dylib"
 edit_dylib_deps libvorbis.0.dylib
 edit_dylib_deps libvorbisfile.dylib
 install_name_tool -change "/usr/local/opt/libogg/lib/libogg.0.dylib" "@loader_path/libogg.0.dylib" "libvorbis.0.dylib"

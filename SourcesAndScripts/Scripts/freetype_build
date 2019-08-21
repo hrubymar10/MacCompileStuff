@@ -93,7 +93,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "freetype-$FREETYPE_VERSION-RELEASE"
 cp "objs/.libs/libfreetype.6.dylib" "freetype-$FREETYPE_VERSION-RELEASE/libfreetype.6.dylib"
 cd "freetype-$FREETYPE_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libfreetype.6.dylib" "libfreetype.6.dylib"
+install_name_tool -id "@rpath/libfreetype.6.dylib" "libfreetype.6.dylib"
 edit_dylib_deps libfreetype.6.dylib
 install_name_tool -change "/usr/local/opt/libpng/lib/libpng16.16.dylib" "@loader_path/libpng16.16.dylib" "libfreetype.6.dylib"
 cd "$MY_PATH"/../

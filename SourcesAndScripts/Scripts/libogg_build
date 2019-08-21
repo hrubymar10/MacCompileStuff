@@ -86,7 +86,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "libogg-$LIBOGG_VERSION-RELEASE"
 cp "src/.libs/libogg.0.dylib" "libogg-$LIBOGG_VERSION-RELEASE/libogg.0.dylib"
 cd "libogg-$LIBOGG_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libogg.0.dylib" "libogg.0.dylib"
+install_name_tool -id "@rpath/libogg.0.dylib" "libogg.0.dylib"
 edit_dylib_deps libogg.0.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/libogg-*

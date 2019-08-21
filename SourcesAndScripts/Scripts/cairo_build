@@ -117,7 +117,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "cairo-$CAIRO_VERSION-RELEASE"
 cp "src/.libs/libcairo.2.dylib" "cairo-$CAIRO_VERSION-RELEASE/libcairo.2.dylib"
 cd "cairo-$CAIRO_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libcairo.2.dylib" "libcairo.2.dylib"
+install_name_tool -id "@rpath/libcairo.2.dylib" "libcairo.2.dylib"
 edit_dylib_deps libcairo.2.dylib
 install_name_tool -change "/usr/local/opt/pixman/lib/libpixman-1.0.dylib" "@loader_path/libpixman-1.0.dylib" "libcairo.2.dylib"
 install_name_tool -change "/usr/local/opt/fontconfig/lib/libfontconfig.1.dylib" "@loader_path/libfontconfig.1.dylib" "libcairo.2.dylib"

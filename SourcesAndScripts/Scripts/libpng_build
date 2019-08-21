@@ -86,7 +86,7 @@ make check MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "libpng-$LIBPNG_VERSION-RELEASE"
 cp ".libs/libpng16.16.dylib" "libpng-$LIBPNG_VERSION-RELEASE/libpng16.16.dylib"
 cd "libpng-$LIBPNG_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libpng16.16.dylib" "libpng16.16.dylib"
+install_name_tool -id "@rpath/libpng16.16.dylib" "libpng16.16.dylib"
 edit_dylib_deps libpng16.16.dylib
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/libpng-*

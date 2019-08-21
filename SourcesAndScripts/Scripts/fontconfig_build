@@ -93,7 +93,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "fontconfig-$FONTCONFIG_VERSION-RELEASE"
 cp "src/.libs/libfontconfig.1.dylib" "fontconfig-$FONTCONFIG_VERSION-RELEASE/libfontconfig.1.dylib"
 cd "fontconfig-$FONTCONFIG_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libfontconfig.1.dylib" "libfontconfig.1.dylib"
+install_name_tool -id "@rpath/libfontconfig.1.dylib" "libfontconfig.1.dylib"
 edit_dylib_deps "libfontconfig.1.dylib"
 install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libfontconfig.1.dylib"
 cd "$MY_PATH"/../

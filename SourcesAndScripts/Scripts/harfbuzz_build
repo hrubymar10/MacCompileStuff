@@ -117,7 +117,7 @@ make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
 cp "src/.libs/libharfbuzz.0.dylib" "harfbuzz-$HARFBUZZ_VERSION-RELEASE/libharfbuzz.0.dylib"
 cd "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
-install_name_tool -id "@executable_path/../Frameworks/libharfbuzz.0.dylib" "libharfbuzz.0.dylib"
+install_name_tool -id "@rpath/libharfbuzz.0.dylib" "libharfbuzz.0.dylib"
 edit_dylib_deps "libharfbuzz.0.dylib"
 install_name_tool -change "/usr/local/opt/glib/lib/libglib-2.0.0.dylib" "@loader_path/libglib-2.0.0.dylib" "libharfbuzz.0.dylib"
 install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" "libharfbuzz.0.dylib"
