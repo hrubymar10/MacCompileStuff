@@ -40,14 +40,15 @@
 #ifndef BOOST_GEOMETRY_PROJECTIONS_CEA_HPP
 #define BOOST_GEOMETRY_PROJECTIONS_CEA_HPP
 
-#include <boost/geometry/util/math.hpp>
-
 #include <boost/geometry/srs/projections/impl/base_static.hpp>
 #include <boost/geometry/srs/projections/impl/base_dynamic.hpp>
-#include <boost/geometry/srs/projections/impl/projects.hpp>
 #include <boost/geometry/srs/projections/impl/factory_entry.hpp>
 #include <boost/geometry/srs/projections/impl/pj_auth.hpp>
+#include <boost/geometry/srs/projections/impl/pj_param.hpp>
 #include <boost/geometry/srs/projections/impl/pj_qsfn.hpp>
+#include <boost/geometry/srs/projections/impl/projects.hpp>
+
+#include <boost/geometry/util/math.hpp>
 
 namespace boost { namespace geometry
 {
@@ -163,7 +164,7 @@ namespace projections
                     par.e = sqrt(par.es);
                     proj_parm.apa = pj_authset<T>(par.es);
 
-                    proj_parm.qp = pj_qsfn(1., par.e, par.one_es);
+                    proj_parm.qp = pj_qsfn(T(1), par.e, par.one_es);
                 }
             }
 

@@ -16,6 +16,7 @@
 #include <system_error>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 namespace boost { namespace process { namespace detail { namespace posix {
 
@@ -58,14 +59,14 @@ inline bool wait_until(
         std::error_code & ec) noexcept
 {
 
-    ::sigset_t  sigset;
     ::siginfo_t siginfo;
 
-    ::sigemptyset(&sigset);
-    ::sigaddset(&sigset, SIGCHLD);
+    bool timed_out = false;
+    int ret;
 
-    auto get_timespec = 
-            [](const Duration & dur)
+#if defined(BOOST_POSIX_HAS_SIGTIMEDWAIT)
+    auto get_timespec =
+            +[](const Duration & dur)
             {
                 ::timespec ts;
                 ts.tv_sec  = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
@@ -73,9 +74,18 @@ inline bool wait_until(
                 return ts;
             };
 
+    ::sigset_t  sigset;
 
-    bool timed_out = false;
-    int ret;
+    if (sigemptyset(&sigset) != 0)
+    {
+        ec = get_last_error();
+        return false;
+    }
+    if (sigaddset(&sigset, SIGCHLD) != 0)
+    {
+        ec = get_last_error();
+        return false;
+    }
 
     struct ::sigaction old_sig;
     if (-1 == ::sigaction(SIGCHLD, nullptr, &old_sig))
@@ -95,17 +105,23 @@ inline bool wait_until(
         ret = ::waitpid(-p.grp, &siginfo.si_status, 0); //so in case it exited, we wanna reap it first
         if (ret == -1)
         {
-            ec = get_last_error();
-            return false; 
+			if ((errno == ECHILD) || (errno == ESRCH))
+			{
+				ec.clear();
+				return true;
+			}
+			else
+			{
+				ec = get_last_error();
+				return false; 
+			}
         }
 
-
-        //check if we're done
+        //check if we're done ->
         ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WNOHANG);
+    }
+    while (((ret != -1) || ((errno != ECHILD) && (errno != ESRCH))) && !(timed_out = (Clock::now() > time_out)));
 
-    } 
-    while (((ret != -1) || (errno != ECHILD)) && !(timed_out = (Clock::now() > time_out)))  ;
-   
     if (errno != ECHILD)
     {
         ec = boost::process::detail::get_last_error();
@@ -117,6 +133,30 @@ inline bool wait_until(
         return true; //even if timed out, there are no child proccessess left
     }
 
+#else
+    ::timespec sleep_interval;
+    sleep_interval.tv_sec = 0;
+    sleep_interval.tv_nsec = 1000000;
+
+
+    while (!(timed_out = (Clock::now() > time_out)))
+    {
+        ret = ::waitid(P_PGID, p.grp, &siginfo, WEXITED | WSTOPPED | WNOHANG);
+        if (ret == -1)
+        {
+            if ((errno == ECHILD) || (errno == ESRCH))
+            {
+                ec.clear();
+                return true;
+            }
+            ec = boost::process::detail::get_last_error();
+            return false;
+        }
+        //we can wait, because unlike in the wait_for_exit, we have no race condition regarding eh exit code.
+        ::nanosleep(&sleep_interval, nullptr);
+    }
+    return !timed_out;
+#endif
 }
 
 template< class Clock, class Duration >

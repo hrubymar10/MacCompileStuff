@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////
 //  Copyright 2012 John Maddock. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_
+//  LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt
 
 #ifndef BOOST_MATH_LOGGED_ADAPTER_HPP
 #define BOOST_MATH_LOGGED_ADAPTER_HPP
@@ -157,7 +157,7 @@ public:
    void serialize(Archive& ar, const unsigned int /*version*/)
    {
       log_prefix_event(m_value, "serialize");
-      ar & m_value;
+      ar & boost::serialization::make_nvp("value", m_value);
       log_postfix_event(m_value, "serialize");
    }
    static unsigned default_precision() BOOST_NOEXCEPT

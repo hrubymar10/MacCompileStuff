@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////
 //  Copyright 2011 John Maddock. Distributed under the Boost
 //  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_
+//  LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt
 
 #ifndef BOOST_MATH_RATIONAL_ADAPTER_HPP
 #define BOOST_MATH_RATIONAL_ADAPTER_HPP
@@ -186,16 +186,16 @@ struct rational_adaptor
    {
       // Saving
       integer_type n(m_value.numerator()), d(m_value.denominator());
-      ar & n;
-      ar & d;
+      ar & boost::serialization::make_nvp("numerator", n);
+      ar & boost::serialization::make_nvp("denominator", d);
    }
    template <class Archive>
    void serialize(Archive& ar, const mpl::false_&)
    {
       // Loading
       integer_type n, d;
-      ar & n;
-      ar & d;
+      ar & boost::serialization::make_nvp("numerator", n);
+      ar & boost::serialization::make_nvp("denominator", d);
       m_value.assign(n, d);
    }
    template <class Archive>

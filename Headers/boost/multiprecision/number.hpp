@@ -6,6 +6,7 @@
 #ifndef BOOST_MATH_EXTENDED_REAL_HPP
 #define BOOST_MATH_EXTENDED_REAL_HPP
 
+#include <boost/config.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/mpl/max.hpp>
 #include <boost/mpl/plus.hpp>
@@ -130,7 +131,8 @@ public:
       //
       // Attempt a generic interconvertion:
       //
-      detail::scoped_default_precision<number<Backend, ExpressionTemplates> > precision_guard(val);
+      detail::scoped_default_precision<number<Backend, ExpressionTemplates> > precision_guard_1(val);
+      detail::scoped_default_precision<number<Other, ET> > precision_guard_2(val);
       using detail::generic_interconvert;
       generic_interconvert(backend(), val.backend(), number_category<Backend>(), number_category<Other>());
    }
@@ -224,11 +226,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_assign(e, tag_type());
       return *this;
    }
@@ -247,12 +249,12 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t;
-            t.assign(e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t;
+         t.assign(e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_assign(e, tag_type());
       return *this;
    }
@@ -295,6 +297,7 @@ public:
       //
       using detail::generic_interconvert;
       detail::scoped_default_precision<number<Backend, ExpressionTemplates> > precision_guard(v);
+      detail::scoped_default_precision<number<Other, ET> > precision_guard2(v);
       //
       // If the current precision of *this differs from that of value v, then we
       // create a temporary (which will have the correct precision thanks to precision_guard)
@@ -305,11 +308,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(v) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(v);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(v);
+         return *this = BOOST_MP_MOVE(t);
+      }
       generic_interconvert(backend(), v.backend(), number_category<Backend>(), number_category<Other>());
       return *this;
    }
@@ -317,22 +320,9 @@ public:
    template <class tag, class Arg1, class Arg2, class Arg3, class Arg4>
    number(const detail::expression<tag, Arg1, Arg2, Arg3, Arg4>& e, typename boost::enable_if_c<is_convertible<typename detail::expression<tag, Arg1, Arg2, Arg3, Arg4>::result_type, self_type>::value>::type* = 0)
    {
-      detail::scoped_default_precision<number<Backend, ExpressionTemplates> > precision_guard(e);
       //
-      // If the current precision of *this differs from that of expression e, then we
-      // create a temporary (which will have the correct precision thanks to precision_guard)
-      // and then move the result into *this.  In C++17 we add a leading "if constexpr"
-      // which causes this code to be eliminated in the common case that this type is
-      // not actually variable precision.  Pre C++17 this code should still be mostly
-      // optimised away, but we can't prevent instantiation of the dead code leading
-      // to longer build and possibly link times.
+      // No preicsion guard here, we already have one in operator=
       //
-      BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(e);
-            *this = BOOST_MP_MOVE(t);
-         }
       *this = e;
    }
    template <class tag, class Arg1, class Arg2, class Arg3, class Arg4>
@@ -340,22 +330,9 @@ public:
       typename boost::enable_if_c<!is_convertible<typename detail::expression<tag, Arg1, Arg2, Arg3, Arg4>::result_type, self_type>::value
       && boost::multiprecision::detail::is_explicitly_convertible<typename detail::expression<tag, Arg1, Arg2, Arg3, Arg4>::result_type, self_type>::value>::type* = 0)
    {
-      detail::scoped_default_precision<number<Backend, ExpressionTemplates> > precision_guard(e);
       //
-      // If the current precision of *this differs from that of expression e, then we
-      // create a temporary (which will have the correct precision thanks to precision_guard)
-      // and then move the result into *this.  In C++17 we add a leading "if constexpr"
-      // which causes this code to be eliminated in the common case that this type is
-      // not actually variable precision.  Pre C++17 this code should still be mostly
-      // optimised away, but we can't prevent instantiation of the dead code leading
-      // to longer build and possibly link times.
+      // No precision guard as assign has one already:
       //
-      BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(e);
-            *this = BOOST_MP_MOVE(t);
-         }
       assign(e);
    }
 
@@ -383,11 +360,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(val) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this + val);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this + val);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_add(detail::expression<detail::terminal, self_type>(val), detail::terminal());
       return *this;
    }
@@ -424,11 +401,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this + e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this + e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       //
       // Fused multiply-add:
       //
@@ -459,11 +436,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(val) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this - val);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this - val);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_subtract(detail::expression<detail::terminal, self_type>(val), detail::terminal());
       return *this;
    }
@@ -508,11 +485,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this - e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this - e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       //
       // Fused multiply-subtract:
       //
@@ -535,11 +512,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this * e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this * e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_multiplies(detail::expression<detail::terminal, self_type>(e), detail::terminal());
       return *this;
    }
@@ -585,11 +562,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this % e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this % e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_modulus(detail::expression<detail::terminal, self_type>(e), detail::terminal());
       return *this;
    }
@@ -689,11 +666,11 @@ public:
       // to longer build and possibly link times.
       //
       BOOST_MP_CONSTEXPR_IF_VARIABLE_PRECISION(number)
-         if (boost::multiprecision::detail::current_precision_of(e) != boost::multiprecision::detail::current_precision_of(*this))
-         {
-            number t(*this / e);
-            return *this = BOOST_MP_MOVE(t);
-         }
+      if (precision_guard.precision() != boost::multiprecision::detail::current_precision_of(*this))
+      {
+         number t(*this / e);
+         return *this = BOOST_MP_MOVE(t);
+      }
       do_divide(detail::expression<detail::terminal, self_type>(e), detail::terminal());
       return *this;
    }
@@ -856,7 +833,7 @@ public:
    template<class Archive>
    void serialize(Archive & ar, const unsigned int /*version*/)
    {
-      ar & m_backend;
+      ar & boost::serialization::make_nvp("backend", m_backend);
    }
 private:
    template <class T>
