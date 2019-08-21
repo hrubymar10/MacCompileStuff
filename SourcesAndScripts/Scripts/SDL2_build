@@ -4,8 +4,8 @@
 # Martin Hrubý (hrubymar10), 2019
 #
 
-SDL2_VERSION="2.0.9"
-SDL2_image_VERSION="2.0.4"
+SDL2_VERSION="2.0.10"
+SDL2_image_VERSION="2.0.5"
 SDL2_mixer_VERSION="2.0.4"
 SDL2_net_VERSION="2.0.1"
 SDL2_ttf_VERSION="2.0.15"
