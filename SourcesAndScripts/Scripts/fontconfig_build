@@ -4,7 +4,7 @@
 # Martin Hrubý (hrubymar10), 2018
 #
 
-FONTCONFIG_VERSION="2.12.6"
+FONTCONFIG_VERSION="2.13.1"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -96,6 +96,7 @@ cd "fontconfig-$FONTCONFIG_VERSION-RELEASE"
 install_name_tool -id "@rpath/libfontconfig.1.dylib" "libfontconfig.1.dylib"
 edit_dylib_deps "libfontconfig.1.dylib"
 install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libfontconfig.1.dylib"
+install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" "libfontconfig.1.dylib"
 cd "$MY_PATH"/../
 rm -rf CompiledLibs/fontconfig-*
 mv "Sources/fontconfig-$FONTCONFIG_VERSION/fontconfig-$FONTCONFIG_VERSION-RELEASE" "CompiledLibs/fontconfig-$FONTCONFIG_VERSION-RELEASE"
