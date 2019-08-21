@@ -3,11 +3,8 @@
 # harfbuzz_build
 # Martin Hrubý (hrubymar10), 2018-2019
 #
-# libstdc++ is removed from Xcode 10 and higher. You have to use this workaround to
-# build this: https://stackoverflow.com/a/53644801 .
-#
 
-HARFBUZZ_VERSION="2.4.0"
+HARFBUZZ_VERSION="2.6.0"
 
 edit_dylib_deps() {
         DYLIB=$1
@@ -110,12 +107,12 @@ fi
 
 # TODO: Verify checksum
 rm -rf harfbuzz-*
-wget "https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-$HARFBUZZ_VERSION.tar.bz2"
-tar xf "harfbuzz-$HARFBUZZ_VERSION.tar.bz2"
-rm "harfbuzz-$HARFBUZZ_VERSION.tar.bz2"
+wget "https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-$HARFBUZZ_VERSION.tar.xz"
+tar xf "harfbuzz-$HARFBUZZ_VERSION.tar.xz"
+rm "harfbuzz-$HARFBUZZ_VERSION.tar.xz"
 cd "harfbuzz-$HARFBUZZ_VERSION"
 export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-./configure --disable-dependency-tracking --enable-static --with-cairo=yes --with-glib=yes --with-gobject=yes --with-freetype=yes --with-graphite2=yes
+./configure --disable-dependency-tracking --enable-static --with-cairo=yes --with-glib=yes --with-gobject=yes --with-freetype=yes --with-graphite2=yes CXXFLAGS='-stdlib=libc++'
 make MACOSX_DEPLOYMENT_TARGET=10.8
 mkdir "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
 cp "src/.libs/libharfbuzz.0.dylib" "harfbuzz-$HARFBUZZ_VERSION-RELEASE/libharfbuzz.0.dylib"
