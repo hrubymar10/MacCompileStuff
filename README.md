@@ -18,7 +18,7 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 * **Glib** 2.58.3
 * **GNU Readline** 8.0
 * **Graphite2** 1.3.13
-* **harfbuzz** 2.6.0
+* **harfbuzz** 2.6.1
 * **libffi** 3.2.1
 * **libogg** 1.3.3
 * **libpng** 1.6.37
