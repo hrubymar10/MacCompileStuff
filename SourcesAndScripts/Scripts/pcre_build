@@ -1,135 +1,54 @@
 #!/usr/bin/env bash
 #
 # pcre_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-PCRE_VERSION="8.43"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+PCRE_VERSION="8.44"
+SHA256="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
+check_cairo
+check_glib
+check_gettext
+check_harfbuzz
+check_fontconfig
+check_freetype
 
-# TODO: use glib from MacCompileStuff
-if ! [ -x "$(command -v gobject-query)" ]; then
-        echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use cairo from MacCompileStuff
-if ! [ -x "$(command -v cairo-sphinx)" ]; then
-        echo 'Error: cairo is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use gettext from MacCompileStuff
-if ! [ -x "$(command -v gettext)" ]; then
-        echo 'Error: gettext is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use harfbuzz from MacCompileStuff
-if ! [ -x "$(command -v hb-view)" ]; then
-        echo 'Error: harfbuzz is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use fontconfig from MacCompileStuff
-if ! [ -x "$(command -v fc-cache)" ]; then
-        echo 'Error: fontconfig is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use freetype from MacCompileStuff
-if ! [ -x "$(command -v freetype-config)" ]; then
-        echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: Verify checksum
-rm -rf pcre-*
-wget "https://ftp.pcre.org/pub/pcre/pcre-$PCRE_VERSION.tar.bz2"
-tar xf "pcre-$PCRE_VERSION.tar.bz2"
-rm "pcre-$PCRE_VERSION.tar.bz2"
-cd "pcre-$PCRE_VERSION"
+rm -rf "pcre-"*
+get_src_and_verify_checksum "pcre-${PCRE_VERSION}.tar.bz2" "${SHA256}" "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2"
+tar xf "${MY_PATH}/../Sources/archives/pcre-${PCRE_VERSION}.tar.bz2" -C .
+cd "pcre-${PCRE_VERSION}"
 ./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit
-make MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "pcre-$PCRE_VERSION-RELEASE"
-cp ".libs/libpcre.1.dylib" "pcre-$PCRE_VERSION-RELEASE/libpcre.1.dylib"
-cd "pcre-$PCRE_VERSION-RELEASE"
+make
+mkdir "pcre-${PCRE_VERSION}-RELEASE"
+cp ".libs/libpcre.1.dylib" "pcre-${PCRE_VERSION}-RELEASE/libpcre.1.dylib"
+cd "pcre-${PCRE_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libpcre.1.dylib" "libpcre.1.dylib"
-edit_dylib_deps libpcre.1.dylib
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/pcre-*
-mv "Sources/pcre-$PCRE_VERSION/pcre-$PCRE_VERSION-RELEASE" "CompiledLibs/pcre-$PCRE_VERSION-RELEASE"
-rm -rf ../lib/libpcre.1.dylib
-cp -rf "CompiledLibs/pcre-$PCRE_VERSION-RELEASE/libpcre.1.dylib" "../lib/libpcre.1.dylib"
+edit_dylib_deps "libpcre.1.dylib"
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/pcre-"*
+mv "Sources/pcre-${PCRE_VERSION}/pcre-${PCRE_VERSION}-RELEASE" "CompiledLibs/pcre-${PCRE_VERSION}-RELEASE"
+rm -rf "../lib/libpcre.1.dylib"
+cp -rf "CompiledLibs/pcre-${PCRE_VERSION}-RELEASE/libpcre.1.dylib" "../lib/libpcre.1.dylib"
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
