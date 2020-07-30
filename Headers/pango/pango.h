@@ -27,6 +27,7 @@
 #include <pango/pango-break.h>
 #include <pango/pango-context.h>
 #include <pango/pango-coverage.h>
+#include <pango/pango-direction.h>
 #include <pango/pango-engine.h>
 #include <pango/pango-enum-types.h>
 #include <pango/pango-features.h>
@@ -44,5 +45,6 @@
 #include <pango/pango-tabs.h>
 #include <pango/pango-types.h>
 #include <pango/pango-utils.h>
+#include <pango/pango-version-macros.h>
 
 #endif /* __PANGO_H__ */

@@ -122,12 +122,6 @@ struct _PangoGlyphString {
   gint num_glyphs;
 
   PangoGlyphInfo *glyphs;
-
-  /* This is a memory inefficient way of representing the information
-   * here - each value gives the byte index within the text
-   * corresponding to the glyph string of the start of the cluster to
-   * which the glyph belongs.
-   */
   gint *log_clusters;
 
   /*< private >*/
@@ -141,18 +135,26 @@ struct _PangoGlyphString {
  */
 #define PANGO_TYPE_GLYPH_STRING (pango_glyph_string_get_type ())
 
+PANGO_AVAILABLE_IN_ALL
 PangoGlyphString *pango_glyph_string_new      (void);
+PANGO_AVAILABLE_IN_ALL
 void              pango_glyph_string_set_size (PangoGlyphString *string,
 					       gint              new_len);
+PANGO_AVAILABLE_IN_ALL
 GType             pango_glyph_string_get_type (void) G_GNUC_CONST;
+PANGO_AVAILABLE_IN_ALL
 PangoGlyphString *pango_glyph_string_copy     (PangoGlyphString *string);
+PANGO_AVAILABLE_IN_ALL
 void              pango_glyph_string_free     (PangoGlyphString *string);
+PANGO_AVAILABLE_IN_ALL
 void              pango_glyph_string_extents  (PangoGlyphString *glyphs,
 					       PangoFont        *font,
 					       PangoRectangle   *ink_rect,
 					       PangoRectangle   *logical_rect);
+PANGO_AVAILABLE_IN_1_14
 int               pango_glyph_string_get_width(PangoGlyphString *glyphs);
 
+PANGO_AVAILABLE_IN_ALL
 void              pango_glyph_string_extents_range  (PangoGlyphString *glyphs,
 						     int               start,
 						     int               end,
@@ -160,12 +162,14 @@ void              pango_glyph_string_extents_range  (PangoGlyphString *glyphs,
 						     PangoRectangle   *ink_rect,
 						     PangoRectangle   *logical_rect);
 
+PANGO_AVAILABLE_IN_ALL
 void pango_glyph_string_get_logical_widths (PangoGlyphString *glyphs,
 					    const char       *text,
 					    int               length,
 					    int               embedding_level,
 					    int              *logical_widths);
 
+PANGO_AVAILABLE_IN_ALL
 void pango_glyph_string_index_to_x (PangoGlyphString *glyphs,
 				    char             *text,
 				    int               length,
@@ -173,6 +177,7 @@ void pango_glyph_string_index_to_x (PangoGlyphString *glyphs,
 				    int               index_,
 				    gboolean          trailing,
 				    int              *x_pos);
+PANGO_AVAILABLE_IN_ALL
 void pango_glyph_string_x_to_index (PangoGlyphString *glyphs,
 				    char             *text,
 				    int               length,
@@ -183,18 +188,46 @@ void pango_glyph_string_x_to_index (PangoGlyphString *glyphs,
 
 /* Turn a string of characters into a string of glyphs
  */
-void pango_shape (const gchar      *text,
-		  gint              length,
-		  const PangoAnalysis *analysis,
-		  PangoGlyphString *glyphs);
+PANGO_AVAILABLE_IN_ALL
+void pango_shape (const char          *text,
+                  int                  length,
+                  const PangoAnalysis *analysis,
+                  PangoGlyphString    *glyphs);
 
-void pango_shape_full (const gchar      *item_text,
-		       gint              item_length,
-		       const gchar      *paragraph_text,
-		       gint              paragraph_length,
-		       const PangoAnalysis *analysis,
-		       PangoGlyphString *glyphs);
+PANGO_AVAILABLE_IN_1_32
+void pango_shape_full (const char          *item_text,
+                       int                  item_length,
+                       const char          *paragraph_text,
+                       int                  paragraph_length,
+                       const PangoAnalysis *analysis,
+                       PangoGlyphString    *glyphs);
 
+/**
+ * PangoShapeFlags:
+ * @PANGO_SHAPE_NONE: Default value.
+ * @PANGO_SHAPE_ROUND_POSITIONS: Round glyph positions
+ *     and widths to whole device units. This option should
+ *     be set if the target renderer can't do subpixel
+ *     positioning of glyphs.
+ *
+ * Flags influencing the shaping process.
+ * These can be passed to pango_shape_with_flags().
+ */
+typedef enum {
+  PANGO_SHAPE_NONE            = 0,
+  PANGO_SHAPE_ROUND_POSITIONS = 1 << 0,
+} PangoShapeFlags;
+
+PANGO_AVAILABLE_IN_1_44
+void pango_shape_with_flags (const char          *item_text,
+                             int                  item_length,
+                             const char          *paragraph_text,
+                             int                  paragraph_length,
+                             const PangoAnalysis *analysis,
+                             PangoGlyphString    *glyphs,
+                             PangoShapeFlags      flags);
+
+PANGO_AVAILABLE_IN_ALL
 GList *pango_reorder_items (GList *logical_items);
 
 G_END_DECLS

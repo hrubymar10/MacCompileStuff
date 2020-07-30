@@ -1,160 +1,79 @@
 #!/usr/bin/env bash
 #
 # pango_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-PANGO_VERSION_1="1.40.1" #Note: Every pango after 1.40.1 have thin fonts problem
-PANGO_VERSION_2="1.40"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+PANGO_VERSION="1.45.3"
+PANGO_VERSION_SHORT="1.45"
+SHA256="1f75c1ebab3d298bb0c18f420440b507a95ce4b98905274f4af80831ff7ee67d"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+unset MACOSX_DEPLOYMENT_TARGET
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
+check_libffi
+check_glib
+check_cairo
+check_gettext
+check_harfbuzz
+check_fontconfig
+check_freetype
+check_fribidi
+check_meson
+check_ninja
 
-# TODO: use libffi from MacCompileStuff
-if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
-        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use glib from MacCompileStuff
-if ! [ -x "$(command -v gobject-query)" ]; then
-        echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use cairo from MacCompileStuff
-if ! [ -x "$(command -v cairo-sphinx)" ]; then
-        echo 'Error: cairo is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use gettext from MacCompileStuff
-if ! [ -x "$(command -v gettext)" ]; then
-        echo 'Error: gettext is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use harfbuzz from MacCompileStuff
-if ! [ -x "$(command -v hb-view)" ]; then
-        echo 'Error: harfbuzz is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use fontconfig from MacCompileStuff
-if ! [ -x "$(command -v fc-cache)" ]; then
-        echo 'Error: fontconfig is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use freetype from MacCompileStuff
-if ! [ -x "$(command -v freetype-config)" ]; then
-        echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: Verify checksum
-rm -rf pango-*
-wget "http://ftp.gnome.org/pub/GNOME/sources/pango/$PANGO_VERSION_2/pango-$PANGO_VERSION_1.tar.xz"
-tar xf "pango-$PANGO_VERSION_1.tar.xz"
-rm "pango-$PANGO_VERSION_1.tar.xz"
-cd "pango-$PANGO_VERSION_1"
-export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-./configure --disable-dependency-tracking --disable-silent-rules --enable-introspection=yes --enable-static --without-xft
-make MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "pango-$PANGO_VERSION_1-RELEASE"
-cp "pango/.libs/libpango-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpango-1.0.0.dylib"
-cp "pango/.libs/libpangocairo-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangocairo-1.0.0.dylib"
-cp "pango/.libs/libpangoft2-1.0.0.dylib" "pango-$PANGO_VERSION_1-RELEASE/libpangoft2-1.0.0.dylib"
-cd "pango-$PANGO_VERSION_1-RELEASE"
+rm -rf "pango-"*
+get_src_and_verify_checksum "pango-${PANGO_VERSION}.tar.xz" "${SHA256}" "http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_VERSION_SHORT}/pango-${PANGO_VERSION}.tar.xz"
+tar xf "${MY_PATH}/../Sources/archives/pango-${PANGO_VERSION}.tar.xz" -C .
+cd "pango-${PANGO_VERSION}"
+mkdir "build"
+sed -i -e "/Werror=implicit-fallthrough/d" "meson.build"
+meson -Dintrospection=true -Duse_fontconfig=true --default-library=shared --buildtype=release . "build"
+cd "build"
+ninja
+mkdir "pango-${PANGO_VERSION}-RELEASE"
+cp "pango/libpango-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpango-1.0.0.dylib"
+cp "pango/libpangocairo-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpangocairo-1.0.0.dylib"
+cp "pango/libpangoft2-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpangoft2-1.0.0.dylib"
+cd "pango-${PANGO_VERSION}-RELEASE"
 for filename in * ; do
-        install_name_tool -id "@rpath/$filename" "$filename"
-        edit_dylib_deps $filename
-        install_name_tool -change "/usr/local/opt/glib/lib/libgobject-2.0.0.dylib" "@loader_path/libgobject-2.0.0.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/glib/lib/libgthread-2.0.0.dylib" "@loader_path/libgthread-2.0.0.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/glib/lib/libglib-2.0.0.dylib" "@loader_path/libglib-2.0.0.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/cairo/lib/libcairo.2.dylib" "@loader_path/libcairo.2.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/harfbuzz/lib/libharfbuzz.0.dylib" "@loader_path/libharfbuzz.0.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/fontconfig/lib/libfontconfig.1.dylib" "@loader_path/libfontconfig.1.dylib" "$filename"
-        install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "$filename"
+  install_name_tool -id "@rpath/${filename}" "${filename}"
+  edit_dylib_deps "${filename}"
+  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/cairo/"
+  remove_rpath_if_exists "${filename}" "/usr/local/opt/freetype/lib"
+  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/harfbuzz/"
+  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/fribidi/"
+  remove_rpath_if_exists "${filename}" "@loader_path/"
 done
-cd ..
-rm -rf "$MY_PATH"/../../Headers/pango
-mkdir "$MY_PATH"/../../Headers/pango
-cd pango
-cp pango-attributes.h pango-bidi-type.h pango-break.h pango-context.h pango-coverage.h pango-engine.h pango-enum-types.h pango-features.h pango-font.h pango-fontmap.h pango-fontset.h pango-glyph-item.h pango-glyph.h pango-gravity.h pango-item.h pango-language.h pango-layout.h pango-matrix.h pango-modules.h pango-ot.h pango-renderer.h pango-script.h pango-tabs.h pango-types.h pango-utils.h pango.h pangocairo.h pangofc-decoder.h pangofc-font.h pangofc-fontmap.h pangoft2.h pangoxft-render.h pangoxft.h "$MY_PATH"/../../Headers/pango/
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/pango-*
-mv "Sources/pango-$PANGO_VERSION_1/pango-$PANGO_VERSION_1-RELEASE" "CompiledLibs/pango-$PANGO_VERSION_1-RELEASE"
-rm -rf ../lib/libpango*
-cp -rf "CompiledLibs/pango-$PANGO_VERSION_1-RELEASE/"*.dylib "../lib/"
+cd "../.."
+rm -rf "${MY_PATH}/../../Headers/pango"
+mkdir "${MY_PATH}/../../Headers/pango"
+cp "${MY_PATH}/../Sources/pango-${PANGO_VERSION}/build/pango/pango-enum-types.h" "${MY_PATH}/../../Headers/pango/"
+cp "${MY_PATH}/../Sources/pango-${PANGO_VERSION}/build/pango/pango-features.h" "${MY_PATH}/../../Headers/pango/"
+cd "pango"
+cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${MY_PATH}/../../Headers/pango/"
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/pango-"*
+mv "Sources/pango-${PANGO_VERSION}/build/pango-${PANGO_VERSION}-RELEASE" "CompiledLibs/pango-${PANGO_VERSION}-RELEASE"
+rm -rf "../lib/libpango"*
+cp -rf "CompiledLibs/pango-${PANGO_VERSION}-RELEASE/"* "../lib/"
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
