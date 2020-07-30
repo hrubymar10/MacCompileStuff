@@ -1,99 +1,48 @@
 #!/usr/bin/env bash
 #
 # pixman_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-PIXMAN_VERSION="0.38.4"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+PIXMAN_VERSION="0.40.0"
+SHA256="6d200dec3740d9ec4ec8d1180e25779c00bc749f94278c8b9021f5534db223fc"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
 
-# TODO: Verify checksum
-rm -rf pixman-*
-wget "https://cairographics.org/releases/pixman-$PIXMAN_VERSION.tar.gz"
-tar xf "pixman-$PIXMAN_VERSION.tar.gz"
-rm "pixman-$PIXMAN_VERSION.tar.gz"
-cd "pixman-$PIXMAN_VERSION"
+rm -rf "pixman-"*
+get_src_and_verify_checksum "pixman-${PIXMAN_VERSION}.tar.gz" "${SHA256}" "https://cairographics.org/releases/pixman-${PIXMAN_VERSION}.tar.gz"
+tar xf "${MY_PATH}/../Sources/archives/pixman-${PIXMAN_VERSION}.tar.gz" -C .
+cd "pixman-${PIXMAN_VERSION}"
 ./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules
-make MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "pixman-$PIXMAN_VERSION-RELEASE"
-cp "pixman/.libs/libpixman-1.0.dylib" "pixman-$PIXMAN_VERSION-RELEASE/libpixman-1.0.dylib"
-cd "pixman-$PIXMAN_VERSION-RELEASE"
+make
+mkdir "pixman-${PIXMAN_VERSION}-RELEASE"
+cp "pixman/.libs/libpixman-1.0.dylib" "pixman-${PIXMAN_VERSION}-RELEASE/libpixman-1.0.dylib"
+cd "pixman-${PIXMAN_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libpixman-1.0.dylib" "libpixman-1.0.dylib"
-edit_dylib_deps libpixman-1.0.dylib
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/pixman-*
-mv "Sources/pixman-$PIXMAN_VERSION/pixman-$PIXMAN_VERSION-RELEASE" "CompiledLibs/pixman-$PIXMAN_VERSION-RELEASE"
-rm -rf ../lib/libpixman-1.0.dylib
-cp -rf "CompiledLibs/pixman-$PIXMAN_VERSION-RELEASE/libpixman-1.0.dylib" "../lib/libpixman-1.0.dylib"
+edit_dylib_deps "libpixman-1.0.dylib"
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/pixman-"*
+mv "Sources/pixman-${PIXMAN_VERSION}/pixman-${PIXMAN_VERSION}-RELEASE" "CompiledLibs/pixman-${PIXMAN_VERSION}-RELEASE"
+rm -rf "../lib/libpixman-1.0.dylib"
+cp -rf "CompiledLibs/pixman-${PIXMAN_VERSION}-RELEASE/libpixman-1.0.dylib" "../lib/libpixman-1.0.dylib"
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
