@@ -1,6 +1,6 @@
 /* GIO - GLib Input, Output and Streaming Library
  *
- * Copyright 2016 Red Hat, Inc.
+ * Copyright 2019 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,16 +16,16 @@
  * Public License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __G_PORTAL_SUPPORT_H__
+#ifndef __G_MEMORY_MONITOR_PORTAL_H__
+#define __G_MEMORY_MONITOR_PORTAL_H__
 
-#include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-gboolean glib_should_use_portal (void);
-gboolean glib_network_available_in_sandbox (void);
-gboolean glib_has_dconf_access_in_sandbox (void);
+#define G_TYPE_MEMORY_MONITOR_PORTAL         (g_memory_monitor_portal_get_type ())
+G_DECLARE_FINAL_TYPE (GMemoryMonitorPortal, g_memory_monitor_portal, G, MEMORY_MONITOR_PORTAL, GObject)
 
 G_END_DECLS
 
-#endif
+#endif /* __G_MEMORY_MONITOR_PORTAL_H__ */

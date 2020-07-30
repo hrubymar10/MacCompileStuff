@@ -1,6 +1,6 @@
 /*
   If G_HAS_CONSTRUCTORS is true then the compiler support *both* constructors and
-  destructors, in a sane way, including e.g. on library unload. If not you're on
+  destructors, in a usable way, including e.g. on library unload. If not you're on
   your own.
 
   Some compilers need #pragma to handle this, which does not work with macros,
@@ -27,6 +27,8 @@
 
 #elif defined (_MSC_VER) && (_MSC_VER >= 1500)
 /* Visual studio 2008 and later has _Pragma */
+
+#include <stdlib.h>
 
 #define G_HAS_CONSTRUCTORS 1
 

@@ -1,141 +1,88 @@
 #!/usr/bin/env bash
 #
 # glib_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-GLIB_VERSION_1="2.58.3"
-GLIB_VERSION_2="2.58"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+GLIB_VERSION="2.64.4"
+GLIB_VERSION_SHORT="2.64"
+SHA256="f7e0b325b272281f0462e0f7fff25a833820cac19911ff677251daf6d87bce50"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+unset MACOSX_DEPLOYMENT_TARGET
 
-if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
-        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
-        exit 1
-fi
+check_wget
+check_xcode
+check_meson
+check_ninja
+check_pcre
+check_libffi
+check_gettext
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
-
-# TODO: Verify checksum
-rm -rf glib-*
-wget "https://download.gnome.org/sources/glib/$GLIB_VERSION_2/glib-$GLIB_VERSION_1.tar.xz"
-tar xf "glib-$GLIB_VERSION_1.tar.xz"
-rm "glib-$GLIB_VERSION_1.tar.xz"
-cd "glib-$GLIB_VERSION_1"
-export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-./autogen.sh
-./configure --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --disable-dtrace --disable-libelf --enable-shared
-make MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "glib-$GLIB_VERSION_1-RELEASE"
-cp "glib/.libs/libglib-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libglib-2.0.0.dylib"
-cp "gmodule/.libs/libgmodule-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgmodule-2.0.0.dylib"
-cp "gobject/.libs/libgobject-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgobject-2.0.0.dylib"
-cp "gthread/.libs/libgthread-2.0.0.dylib" "glib-$GLIB_VERSION_1-RELEASE/libgthread-2.0.0.dylib"
-cd "glib-$GLIB_VERSION_1-RELEASE"
+rm -rf "glib-"*
+get_src_and_verify_checksum "glib-${GLIB_VERSION}.tar.xz" "${SHA256}" "https://download.gnome.org/sources/glib/${GLIB_VERSION_SHORT}/glib-${GLIB_VERSION}.tar.xz"
+tar xf "${MY_PATH}/../Sources/archives/glib-${GLIB_VERSION}.tar.xz" -C .
+cd "glib-${GLIB_VERSION}"
+mkdir "build"
+meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
+cd "build"
+ninja
+mkdir "glib-${GLIB_VERSION}-RELEASE"
+cp "glib/libglib-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libglib-2.0.0.dylib"
+cp "gmodule/libgmodule-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgmodule-2.0.0.dylib"
+cp "gobject/libgobject-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgobject-2.0.0.dylib"
+cp "gthread/libgthread-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgthread-2.0.0.dylib"
+cp "gio/libgio-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgio-2.0.0.dylib"
+cd "glib-${GLIB_VERSION}-RELEASE"
 # TODO: Use MCS' pcre, libffi and gettext
 for filename in * ; do
-        install_name_tool -id "@rpath/$filename" "$filename"
-        edit_dylib_deps $filename
-        install_name_tool -change "/usr/local/opt/pcre/lib/libpcre.1.dylib" "@loader_path/libpcre.1.dylib" $filename
-        install_name_tool -change "/usr/local/opt/libffi/lib/libffi.6.dylib" "@loader_path/libffi.6.dylib" $filename
-        install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" $filename
+  install_name_tool -id "@rpath/${filename}" "${filename}"
+  edit_dylib_deps "${filename}"
+  remove_rpath_if_exists "${filename}" "@loader_path/../glib"
+  remove_rpath_if_exists "${filename}" "@loader_path/../gmodule"
+  remove_rpath_if_exists "${filename}" "@loader_path/../gobject"
+  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/pcre/"
+  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/libffi/"
 done
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/glib-*
-mv "Sources/glib-$GLIB_VERSION_1/glib-$GLIB_VERSION_1-RELEASE" "CompiledLibs/glib-$GLIB_VERSION_1-RELEASE"
-rm -rf ../Headers/glib*
-mkdir ../Headers/glib-2.0
-mkdir ../Headers/glib-2.0/gio
-mkdir ../Headers/glib-2.0/glib
-mkdir ../Headers/glib-2.0/glib/deprecated
-mkdir ../Headers/glib-2.0/gobject
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/glib-"*
+mv "Sources/glib-${GLIB_VERSION}/build/glib-${GLIB_VERSION}-RELEASE" "CompiledLibs/glib-${GLIB_VERSION}-RELEASE"
+rm -rf "../Headers/glib"*
+mkdir -p "../Headers/glib-2.0/gio"
+mkdir -p "../Headers/glib-2.0/glib/deprecated"
+mkdir -p "../Headers/glib-2.0/gobject"
 # TODO: Use glib-public-headers.txt and etc for Headers
-cd "Sources/glib-$GLIB_VERSION_1/glib"
-cp glibconfig.h "$MY_PATH"/../../Headers/
-cp glib-object.h glib-unix.h glib.h "$MY_PATH"/../../Headers/glib-2.0/
-cp *.h "$MY_PATH"/../../Headers/glib-2.0/glib
-cd deprecated
-cp *.h "$MY_PATH"/../../Headers/glib-2.0/glib/deprecated/
-cd ..
-cd ..
-cd gio
-cp *.h "$MY_PATH"/../../Headers/glib-2.0/gio
-cd ..
-cp gmodule/gmodule.h "$MY_PATH"/../../Headers/glib-2.0/
-cd gobject
-cp *.h "$MY_PATH"/../../Headers/glib-2.0/gobject
-cd "$MY_PATH"/../
-rm -rf ../lib/libglib-2.0.0.dylib
-rm -rf ../lib/libgmodule-2.0.0.dylib
-rm -rf ../lib/libgobject-2.0.0.dylib
-rm -rf ../lib/libgthread-2.0.0.dylib
-cp -rf "CompiledLibs/glib-$GLIB_VERSION_1-RELEASE/"* "../lib/"
+cp "Sources/glib-${GLIB_VERSION}/build/glib/glibconfig.h" "${MY_PATH}/../../Headers/"
+cp "${MY_PATH}/../Sources/glib-${GLIB_VERSION}/build/gobject/glib-enumtypes.h" "${MY_PATH}/../../Headers/glib-2.0/gobject/glib-enumtypes.h"
+cd "Sources/glib-${GLIB_VERSION}/glib"
+cp "glib-object.h" "glib-unix.h" "glib.h" "${MY_PATH}/../../Headers/glib-2.0/"
+cp *.h "${MY_PATH}/../../Headers/glib-2.0/glib/"
+cd "deprecated"
+cp *.h "${MY_PATH}/../../Headers/glib-2.0/glib/deprecated/"
+cd "../../gio"
+cp *.h "${MY_PATH}/../../Headers/glib-2.0/gio/"
+cd "../gmodule"
+cp "gmodule.h" "${MY_PATH}/../../Headers/glib-2.0/"
+cd "../gobject"
+cp *.h "${MY_PATH}/../../Headers/glib-2.0/gobject/"
+cd "${MY_PATH}/../"
+rm -rf "../lib/libglib-2.0.0.dylib" "../lib/libgmodule-2.0.0.dylib" "../lib/libgobject-2.0.0.dylib" "../lib/libgthread-2.0.0.dylib"
+cp -rf "CompiledLibs/glib-${GLIB_VERSION}-RELEASE/"* "../lib/"
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
