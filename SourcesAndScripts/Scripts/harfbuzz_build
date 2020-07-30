@@ -1,135 +1,65 @@
 #!/usr/bin/env bash
 #
 # harfbuzz_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-HARFBUZZ_VERSION="2.6.1"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+HARFBUZZ_VERSION="2.6.8"
+SHA256="6648a571a27f186e47094121f0095e1b809e918b3037c630c7f38ffad86e3035"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+unset MACOSX_DEPLOYMENT_TARGET
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
+check_meson
+check_ninja
+check_libffi
+check_glib
+check_gettext
+check_freetype
+check_graphite2
 
-# TODO: use libffi from MacCompileStuff
-if [ ! -f /usr/local/Cellar/libffi/*/lib/libffi.dylib ]; then
-        echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use glib from MacCompileStuff
-if ! [ -x "$(command -v gobject-query)" ]; then
-        echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use gettext from MacCompileStuff
-if ! [ -x "$(command -v gettext)" ]; then
-        echo 'Error: gettext is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use freetype from MacCompileStuff
-if ! [ -x "$(command -v freetype-config)" ]; then
-        echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: use graphite2 from MacCompileStuff
-if ! [ -x "$(command -v gr2fonttest)" ]; then
-        echo 'Error: graphite2 is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
-
-# TODO: Verify checksum
-rm -rf harfbuzz-*
-wget "https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-$HARFBUZZ_VERSION.tar.xz"
-tar xf "harfbuzz-$HARFBUZZ_VERSION.tar.xz"
-rm "harfbuzz-$HARFBUZZ_VERSION.tar.xz"
-cd "harfbuzz-$HARFBUZZ_VERSION"
-export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-./configure --disable-dependency-tracking --enable-static --with-cairo=yes --with-glib=yes --with-gobject=yes --with-freetype=yes --with-graphite2=yes CXXFLAGS='-stdlib=libc++'
-make MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
-cp "src/.libs/libharfbuzz.0.dylib" "harfbuzz-$HARFBUZZ_VERSION-RELEASE/libharfbuzz.0.dylib"
-cd "harfbuzz-$HARFBUZZ_VERSION-RELEASE"
+rm -rf "harfbuzz-"*
+get_src_and_verify_checksum "harfbuzz-${HARFBUZZ_VERSION}.tar.xz" "${SHA256}" "https://github.com/harfbuzz/harfbuzz/releases/download/${HARFBUZZ_VERSION}/harfbuzz-${HARFBUZZ_VERSION}.tar.xz"
+tar xf "${MY_PATH}/../Sources/archives/harfbuzz-${HARFBUZZ_VERSION}.tar.xz" -C .
+cd "harfbuzz-${HARFBUZZ_VERSION}"
+mkdir "build"
+meson -Dgraphite=enabled -Dcoretext=enabled --buildtype=release --default-library=shared . "build"
+cd "build"
+ninja
+mkdir "harfbuzz-${HARFBUZZ_VERSION}-RELEASE"
+cp "src/libharfbuzz.0.dylib" "harfbuzz-${HARFBUZZ_VERSION}-RELEASE/libharfbuzz.0.dylib"
+cd "harfbuzz-${HARFBUZZ_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libharfbuzz.0.dylib" "libharfbuzz.0.dylib"
 edit_dylib_deps "libharfbuzz.0.dylib"
-install_name_tool -change "/usr/local/opt/glib/lib/libglib-2.0.0.dylib" "@loader_path/libglib-2.0.0.dylib" "libharfbuzz.0.dylib"
-install_name_tool -change "/usr/local/opt/gettext/lib/libintl.8.dylib" "@loader_path/libintl.8.dylib" "libharfbuzz.0.dylib"
-install_name_tool -change "/usr/local/opt/freetype/lib/libfreetype.6.dylib" "@loader_path/libfreetype.6.dylib" "libharfbuzz.0.dylib"
-install_name_tool -change "/usr/local/opt/graphite2/lib/libgraphite2.3.dylib" "@loader_path/libgraphite2.3.dylib" "libharfbuzz.0.dylib"
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/harfbuzz-*
-mv "Sources/harfbuzz-$HARFBUZZ_VERSION/harfbuzz-$HARFBUZZ_VERSION-RELEASE" "CompiledLibs/harfbuzz-$HARFBUZZ_VERSION-RELEASE"
-rm -rf ../lib/libharfbuzz.0.dylib
-cp -rf "CompiledLibs/harfbuzz-$HARFBUZZ_VERSION-RELEASE/libharfbuzz.0.dylib" "../lib/libharfbuzz.0.dylib"
+remove_rpath_if_exists "libharfbuzz.0.dylib" "/usr/local/opt/freetype/lib"
+remove_rpath_if_exists "libharfbuzz.0.dylib" "/usr/local/Cellar/graphite2/"
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/harfbuzz-"*
+mv "Sources/harfbuzz-${HARFBUZZ_VERSION}/build/harfbuzz-${HARFBUZZ_VERSION}-RELEASE" "CompiledLibs/harfbuzz-${HARFBUZZ_VERSION}-RELEASE"
+rm -rf "../lib/libharfbuzz.0.dylib"
+cp -rf "CompiledLibs/harfbuzz-${HARFBUZZ_VERSION}-RELEASE/libharfbuzz.0.dylib" "../lib/libharfbuzz.0.dylib"
+rm -rf "${MY_PATH}/../../Headers/harfbuzz"
+mkdir "${MY_PATH}/../../Headers/harfbuzz"
+cd "${MY_PATH}/../Sources/harfbuzz-${HARFBUZZ_VERSION}/src"
+cp "hb-blob.h" "hb-buffer.h" "hb-common.h" "hb-deprecated.h" "hb-draw.h" "hb-face.h" "hb-font.h" "hb-map.h" "hb-set.h" "hb-shape-plan.h" "hb-shape.h" "hb-style.h" "hb-unicode.h" "hb-version.h" "hb.h" "${MY_PATH}/../../Headers/harfbuzz/"
 
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
