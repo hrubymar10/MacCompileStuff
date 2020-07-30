@@ -1,111 +1,65 @@
 #!/usr/bin/env bash
 #
 # readline_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
+set -e
+
 READLINE_VERSION="8.0"
-
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+PATCH_PREFIX="readline80"
+NUM_OF_PATHES="4"
+SHA256="e339f51971478d369f8a053a330a190781acb9864cf4c541060f12078948e461"
+SHA256_PATCHES=(
+  "d8e5e98933cf5756f862243c0601cb69d3667bb33f2c7b751fe4e40b2c3fd069"
+  "36b0febff1e560091ae7476026921f31b6d1dd4c918dcb7b741aa2dad1aec8f7"
+  "94ddb2210b71eb5389c7756865d60e343666dfb722c85892f8226b26bb3eeaef"
+  "b1aa3d2a40eee2dea9708229740742e649c32bb8db13535ea78f8ac15377394c"
+)
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
 
-# TODO: Verify checksum
-rm -rf readline-*
-wget "https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz"
-tar xf "readline-$READLINE_VERSION.tar.gz"
-rm "readline-$READLINE_VERSION.tar.gz"
-cd "readline-$READLINE_VERSION"
+rm -rf "readline-"*
+get_src_and_verify_checksum "readline-${READLINE_VERSION}.tar.gz" "${SHA256}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}.tar.gz"
+tar xf "${MY_PATH}/../Sources/archives/readline-${READLINE_VERSION}.tar.gz" -C .
+cd "readline-${READLINE_VERSION}"
+for i in $(seq 1 ${NUM_OF_PATHES}); do
+  PATCH=`printf "%03d\n" ${i}`
+  get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
+  patch -b < "${MY_PATH}/../Sources/archives/${PATCH_PREFIX}-${PATCH}"
+done
 ./configure --enable-shared
-make shared MACOSX_DEPLOYMENT_TARGET=10.8
-mkdir "readline-$READLINE_VERSION-RELEASE"
-cp "shlib/libreadline.$READLINE_VERSION.dylib" "readline-$READLINE_VERSION-RELEASE/libreadline.$READLINE_VERSION.dylib"
-cd "readline-$READLINE_VERSION-RELEASE"
-install_name_tool -id "@rpath/libreadline.$READLINE_VERSION.dylib" "libreadline.$READLINE_VERSION.dylib"
-edit_dylib_deps "libreadline.$READLINE_VERSION.dylib"
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/readline-*
-
-mv "Sources/readline-$READLINE_VERSION/readline-$READLINE_VERSION-RELEASE" "CompiledLibs/readline-$READLINE_VERSION-RELEASE"
-rm -rf ../Headers/readline
-mkdir ../Headers/readline
-cp -rf "Sources/readline-$READLINE_VERSION/chardefs.h" ../Headers/readline/chardefs.h
-cp -rf "Sources/readline-$READLINE_VERSION/history.h" ../Headers/readline/history.h
-cp -rf "Sources/readline-$READLINE_VERSION/keymaps.h" ../Headers/readline/keymaps.h
-cp -rf "Sources/readline-$READLINE_VERSION/readline.h" ../Headers/readline/readline.h
-cp -rf "Sources/readline-$READLINE_VERSION/rlconf.h" ../Headers/readline/rlconf.h
-cp -rf "Sources/readline-$READLINE_VERSION/rlstdc.h" ../Headers/readline/rlstdc.h
-cp -rf "Sources/readline-$READLINE_VERSION/rltypedefs.h" ../Headers/readline/rltypedefs.h
-cp -rf "Sources/readline-$READLINE_VERSION/tilde.h" ../Headers/readline/tilde.h
-rm -rf ../lib/libreadline*
-cp -rf "CompiledLibs/readline-$READLINE_VERSION-RELEASE/libreadline.$READLINE_VERSION.dylib" "../lib/libreadline.$READLINE_VERSION.dylib"
+make shared
+mkdir "readline-${READLINE_VERSION}-RELEASE"
+cp "shlib/libreadline.${READLINE_VERSION}.dylib" "readline-${READLINE_VERSION}-RELEASE/libreadline.${READLINE_VERSION}.dylib"
+cd "readline-${READLINE_VERSION}-RELEASE"
+install_name_tool -id "@rpath/libreadline.${READLINE_VERSION}.dylib" "libreadline.${READLINE_VERSION}.dylib"
+edit_dylib_deps "libreadline.${READLINE_VERSION}.dylib"
+cd ..
+rm -rf "${MY_PATH}/../CompiledLibs/readline-"*
+mv "${MY_PATH}/../Sources/readline-${READLINE_VERSION}/readline-${READLINE_VERSION}-RELEASE" "${MY_PATH}/../CompiledLibs/readline-${READLINE_VERSION}-RELEASE"
+rm -rf "${MY_PATH}/../../Headers/readline"
+mkdir "${MY_PATH}/../../Headers/readline"
+cp -rf "chardefs.h" "history.h" "keymaps.h" "readline.h" "rlconf.h" "rlstdc.h" "rltypedefs.h" "tilde.h" "${MY_PATH}/../../Headers/readline/"
+rm -rf "${MY_PATH}/../../lib/libreadline"*
+cp -rf "${MY_PATH}/../CompiledLibs/readline-${READLINE_VERSION}-RELEASE/libreadline.${READLINE_VERSION}.dylib" "${MY_PATH}/../../lib/libreadline.${READLINE_VERSION}.dylib"
 
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
