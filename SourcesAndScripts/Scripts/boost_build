@@ -1,108 +1,58 @@
 #!/usr/bin/env bash
 #
 # boost_build
-# Martin Hrubý (hrubymar10), 2018-2019
+# Martin Hrubý (hrubymar10), 2018-2020
 #
 
-BOOST_VERSION_1="1.71.0"
-BOOST_VERSION_2="1_71_0"
+set -e
 
-edit_dylib_deps() {
-        DYLIB=$1
-        DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-
-        for DEP in $DEPS; do
-                DEP_BASE=$(basename ${DEP})
-                if [ "$DEP_BASE" == "$(basename $DYLIB)" ]; then
-                        continue
-                fi
-                # Is this our redistributable file?
-                if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-                        install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-                fi
-        done
-}
-
-time_interval_to_string() {
-        local START=$1
-        local END=$2
-
-        declare -i timestamp
-        declare -i days
-        declare -i hours
-        declare -i minutes
-        declare -i seconds
-        timestamp=$END-$START
-
-        days=$timestamp/60/60/24
-        hours=$((($timestamp-($days*60*60*24))/60/60))
-        minutes=$((($timestamp-($days*60*60*24)-($hours*60*60))/60))
-        seconds=$((($timestamp-($days*60*60*24)-($hours*60*60)-($minutes*60))))
-        if [ $days -eq 0 ]; then
-        if [ $hours -eq 0 ]; then
-                if [ $minutes -eq 0 ]; then
-                echo "==> Operation took $seconds seconds ..."
-                else
-                echo "==> Operation took $minutes minutes and $seconds seconds ..."
-                fi
-        else
-                echo "==> Operation took $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-        else
-        echo "==> Operation took $days days $hours hours $minutes minutes and $seconds seconds ..."
-        fi
-}
+BOOST_VERSION_1="1.73.0"
+BOOST_VERSION_2="1_73_0"
+SHA256="9995e192e68528793755692917f9eb6422f3052a53c5e13ba278a228af6c7acf"
 
 starttimestamp=$(date +%s)
 
-MY_PATH=$(cd `dirname $0` && pwd)
-if [ -z "$MY_PATH" ] ; then
-        # error; for some reason, the path is not accessible
-        # to the script (e.g. permissions re-evaled after suid)
-        echo 'Error: Script path is for some reason not accessible' >&2
-        exit 1  # fail
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
 fi
-cd "$MY_PATH"/../Sources
+cd "${MY_PATH}/../Sources"
 
-if ! [ -x "$(command -v wget)" ]; then
-        echo 'Error: wget is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
-        exit 1
-fi
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
 
-if xcode-select --install 2>&1 | grep installed; then
-        echo "==> Xcode Command Line Tools are installed..."
-else
-        echo "==> Xcode Command Line Tools aren't installed, installing..."
-        xcode-select --install
-fi
+check_wget
+check_xcode
 
-# TODO: Verify checksum
-export MACOSX_DEPLOYMENT_TARGET=10.10
-rm -rf boost_*
-wget "https://dl.bintray.com/boostorg/release/$BOOST_VERSION_1/source/boost_$BOOST_VERSION_2.tar.gz"
-tar xf "boost_$BOOST_VERSION_2.tar.gz"
-rm "boost_$BOOST_VERSION_2.tar.gz"
-cd "boost_$BOOST_VERSION_2"
-rm -rf stage
-./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread
-./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1 cxxstd=14
-cd stage/lib
-mkdir "boost_$BOOST_VERSION_2-RELEASE"
-cp *.dylib "boost_$BOOST_VERSION_2-RELEASE"
-cd "boost_$BOOST_VERSION_2-RELEASE"
+export MACOSX_DEPLOYMENT_TARGET=10.9
+export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET=10.9
+rm -rf "boost_"*
+get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.gz" "${SHA256}" "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.gz"
+tar xf "${MY_PATH}/../Sources/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
+cd "boost_${BOOST_VERSION_2}"
+rm -rf "stage"
+./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread --with-toolset=clang
+./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14
+cd "stage/lib"
+mkdir "boost_${BOOST_VERSION_2}-RELEASE"
+cp *.dylib "boost_${BOOST_VERSION_2}-RELEASE"
+cd "boost_${BOOST_VERSION_2}-RELEASE"
 for filename in * ; do
-        install_name_tool -id "@rpath/$filename" "$filename"
-        edit_dylib_deps $filename
+  install_name_tool -id "@rpath/${filename}" "${filename}"
+  edit_dylib_deps "${filename}"
 done
-cd "$MY_PATH"/../
-rm -rf CompiledLibs/boost_*
-mv "Sources/boost_$BOOST_VERSION_2/stage/lib/boost_$BOOST_VERSION_2-RELEASE" "CompiledLibs/boost_$BOOST_VERSION_2-RELEASE"
-rm -rf ../Headers/boost
-cp -rf "Sources/boost_$BOOST_VERSION_2/boost" ../Headers/
-rm -rf ../lib/libboost*
-cp -rf "CompiledLibs/boost_$BOOST_VERSION_2-RELEASE"/* ../lib/
+cd "${MY_PATH}/../"
+rm -rf "CompiledLibs/boost_"*
+mv "Sources/boost_${BOOST_VERSION_2}/stage/lib/boost_${BOOST_VERSION_2}-RELEASE" "CompiledLibs/boost_${BOOST_VERSION_2}-RELEASE"
+rm -rf "../Headers/boost"
+cp -rf "Sources/boost_${BOOST_VERSION_2}/boost" "../Headers/"
+rm -rf "../lib/libboost"*
+cp -rf "CompiledLibs/boost_${BOOST_VERSION_2}-RELEASE/"* "../lib/"
 
 echo "==> DONE ..."
 echo
-time_interval_to_string "$starttimestamp" "$(date +%s)"
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
 echo
