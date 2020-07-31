@@ -1,0 +1,37 @@
+--- src/video/cocoa/SDL_cocoamodes.m	2020-03-11 02:36:18.000000000 +0100
++++ src/video/cocoa/SDL_cocoamodes.m	2020-07-31 22:25:16.518153676 +0200
+@@ -449,31 +449,18 @@
+ 
+     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
+ 
+-    /* we need the backingScaleFactor for Retina displays, which is only exposed through NSScreen, not CGDisplay, afaik, so find our screen... */
+-    CGFloat scaleFactor = 1.0f;
+-    NSArray *screens = [NSScreen screens];
+-    for (NSScreen *screen in screens) {
+-        const CGDirectDisplayID dpyid = (const CGDirectDisplayID ) [[[screen deviceDescription] objectForKey:@"NSScreenNumber"] unsignedIntValue];
+-        if (dpyid == data->display) {
+-            if ([screen respondsToSelector:@selector(backingScaleFactor)]) {  // Mac OS X 10.7 and later
+-                scaleFactor = [screen backingScaleFactor];
+-                break;
+-            }
+-        }
+-    }
+-
+     const CGSize displaySize = CGDisplayScreenSize(data->display);
+     const int pixelWidth =  (int) CGDisplayPixelsWide(data->display);
+     const int pixelHeight = (int) CGDisplayPixelsHigh(data->display);
+ 
+     if (ddpi) {
+-        *ddpi = (SDL_ComputeDiagonalDPI(pixelWidth, pixelHeight, displaySize.width / MM_IN_INCH, displaySize.height / MM_IN_INCH)) * scaleFactor;
++        *ddpi = SDL_ComputeDiagonalDPI(pixelWidth, pixelHeight, displaySize.width / MM_IN_INCH, displaySize.height / MM_IN_INCH);
+     }
+     if (hdpi) {
+-        *hdpi = (pixelWidth * MM_IN_INCH / displaySize.width) * scaleFactor;
++        *hdpi = pixelWidth * MM_IN_INCH / displaySize.width;
+     }
+     if (vdpi) {
+-        *vdpi = (pixelHeight * MM_IN_INCH / displaySize.height) * scaleFactor;
++        *vdpi = pixelHeight * MM_IN_INCH / displaySize.height;
+     }
+ 
+     return 0;
