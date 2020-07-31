@@ -81,7 +81,7 @@ cd "${MY_PATH}/../Sources/SDL2"
 get_src_and_verify_checksum "SDL2_mixer-${SDL2_mixer_VERSION}.tar.gz" "${SDL2_mixer_SHA256}" "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-${SDL2_mixer_VERSION}.tar.gz"
 tar xf "${MY_PATH}/../Sources/archives/SDL2_mixer-${SDL2_mixer_VERSION}.tar.gz" -C .
 cd "SDL2_mixer-${SDL2_mixer_VERSION}"
-./configure --disable-dependency-tracking --enable-shared
+./configure --disable-dependency-tracking --enable-shared --disable-music-flac --disable-music-flac-shared --disable-music-midi-fluidsynth --disable-music-midi-fluidsynth-shared --disable-music-mod-mikmod-shared --disable-music-mod-modplug-shared --disable-music-mp3-mpg123 --disable-music-mp3-mpg123-shared --disable-music-mod-mikmod --disable-music-mod-modplug --enable-music-ogg --enable-music-ogg-shared
 make
 cp "build/.libs/libSDL2_mixer-2.0.0.dylib" "${MY_PATH}/../CompiledLibs/SDL2-RELEASE/libSDL2_mixer-2.0.0.dylib"
 cp -rf "SDL_mixer.h" "${MY_PATH}/../../Headers/SDL2/SDL_mixer.h"
