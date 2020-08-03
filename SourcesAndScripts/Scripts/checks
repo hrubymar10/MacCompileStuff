@@ -17,9 +17,21 @@ cd "${MY_PATH}/../../lib"
 
 check_min_macos_version() {
   echo "==> Checking \"LC_VERSION_MIN_MACOSX\" atribute:"
-  for DYLIB in *.dylib; do
-    VERSION=$(otool -l "${DYLIB}" | grep "LC_VERSION_MIN_MACOSX" -A2 | grep "version" | awk '{print $2;}')
-    printf "    %-50s %s\n" ${DYLIB} ${VERSION}
+  for DYLIB in *".dylib"; do
+    if [[ -L "${DYLIB}" ]]; then continue; fi
+    VERSION="$(otool -l "${DYLIB}" | grep "LC_VERSION_MIN_MACOSX" -A2 | grep "version" | awk '{print $2;}')"
+    printf "    %-50s %s\n" "${DYLIB}" "${VERSION}"
+  done
+  echo "==> Done"
+  echo ""
+}
+
+check_architectures() {
+  echo "==> Checking architectures:"
+  for DYLIB in *".dylib"; do
+    if [[ -L "${DYLIB}" ]]; then continue; fi
+    ARCHS=$(file ${DYLIB} | grep -E 'shared library .*[^]]$' | awk '{print $NF}')
+    printf "    %-50s %s\n" "${DYLIB}" "${ARCHS//$'\n'/ }"
   done
   echo "==> Done"
   echo ""
@@ -27,16 +39,17 @@ check_min_macos_version() {
 
 check_for_bad_references() {
   echo "==> Checking for bad references:"
-  for DYLIB in *.dylib; do
-    BAD_REFERENCES=$(otool -L ${DYLIB} | grep "/usr/local/" | awk '{print $1;}')
+  for DYLIB in *".dylib"; do
+    if [[ -L "${DYLIB}" ]]; then continue; fi
+    BAD_REFERENCES="$(otool -L ${DYLIB} | grep "/usr/local/" | awk '{print $1;}')"
     SAVEIFS="${IFS}"
     IFS=$'\n'
     BAD_REFERENCES=(${BAD_REFERENCES})
-    IFS=${SAVEIFS}
+    IFS="${SAVEIFS}"
 
-    if (( ${#BAD_REFERENCES[@]} > 0 )); then
+    if (( "${#BAD_REFERENCES[@]}" > 0 )); then
       echo "${DYLIB}"
-      for (( i=0; i<${#BAD_REFERENCES[@]}; i++ )); do
+      for (( i=0; i<"${#BAD_REFERENCES[@]}"; i++ )); do
         echo "    ${BAD_REFERENCES[$i]}"
       done
     fi
@@ -47,16 +60,17 @@ check_for_bad_references() {
 
 check_for_rpaths() {
   echo "==> Checking for rpaths:"
-  for DYLIB in *.dylib; do
-    PATHS=$(otool -l "${DYLIB}" | grep "RPATH" -A2 | grep "path" | awk '{print $2;}')
+  for DYLIB in *".dylib"; do
+    if [[ -L "${DYLIB}" ]]; then continue; fi
+    PATHS="$(otool -l "${DYLIB}" | grep "RPATH" -A2 | grep "path" | awk '{print $2;}')"
     SAVEIFS="${IFS}"
     IFS=$'\n'
     PATHS=(${PATHS})
-    IFS=${SAVEIFS}
+    IFS="${SAVEIFS}"
 
-    if (( ${#PATHS[@]} > 0 )); then
+    if (( "${#PATHS[@]}" > 0 )); then
       echo "${DYLIB}"
-      for (( i=0; i<${#PATHS[@]}; i++ )); do
+      for (( i=0; i<"${#PATHS[@]}"; i++ )); do
         echo "    ${PATHS[$i]}"
       done
     fi
@@ -66,5 +80,6 @@ check_for_rpaths() {
 }
 
 check_min_macos_version
+check_architectures
 check_for_bad_references
 check_for_rpaths
