@@ -19,7 +19,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -27,31 +26,29 @@ source "${MY_PATH}/functions"
 check_wget
 check_xcode
 
+cd "${SOURCES_PATH}"
 export MACOSX_DEPLOYMENT_TARGET=10.9
 export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET=10.9
-rm -rf "boost_"*
+rm -rf "boost"*
 get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.gz" "${SHA256}" "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.gz"
-tar xf "${MY_PATH}/../Sources/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
-cd "boost_${BOOST_VERSION_2}"
+tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
+ln -s "boost_${BOOST_VERSION_2}" "boost"
+cd "boost"
 rm -rf "stage"
 ./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread --with-toolset=clang
 ./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14
 cd "stage/lib"
 mkdir "boost_${BOOST_VERSION_2}-RELEASE"
-cp *.dylib "boost_${BOOST_VERSION_2}-RELEASE"
+cp *".dylib" "boost_${BOOST_VERSION_2}-RELEASE"
 cd "boost_${BOOST_VERSION_2}-RELEASE"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
   edit_dylib_deps "${filename}"
 done
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/boost_"*
-mv "Sources/boost_${BOOST_VERSION_2}/stage/lib/boost_${BOOST_VERSION_2}-RELEASE" "CompiledLibs/boost_${BOOST_VERSION_2}-RELEASE"
-rm -rf "../Headers/boost"
-cp -rf "Sources/boost_${BOOST_VERSION_2}/boost" "../Headers/"
-rm -rf "../lib/libboost"*
-cp -rf "CompiledLibs/boost_${BOOST_VERSION_2}-RELEASE/"* "../lib/"
-
+rm -rf "${LIBS_PATH}/libboost"*
+cp -rf * "${LIBS_PATH}/"
+rm -rf "${HEADERS_PATH}/boost"
+cp -rf "${SOURCES_PATH}/boost/boost" "${HEADERS_PATH}/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

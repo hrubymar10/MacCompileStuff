@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -32,10 +31,12 @@ check_harfbuzz
 check_fontconfig
 check_freetype
 
-rm -rf "pcre-"*
+cd "${SOURCES_PATH}"
+rm -rf "pcre"*
 get_src_and_verify_checksum "pcre-${PCRE_VERSION}.tar.bz2" "${SHA256}" "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2"
-tar xf "${MY_PATH}/../Sources/archives/pcre-${PCRE_VERSION}.tar.bz2" -C .
-cd "pcre-${PCRE_VERSION}"
+tar xf "${SOURCES_PATH}/archives/pcre-${PCRE_VERSION}.tar.bz2" -C .
+ln -s "pcre-${PCRE_VERSION}" "pcre"
+cd "pcre"
 ./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit
 make
 mkdir "pcre-${PCRE_VERSION}-RELEASE"
@@ -43,11 +44,9 @@ cp ".libs/libpcre.1.dylib" "pcre-${PCRE_VERSION}-RELEASE/libpcre.1.dylib"
 cd "pcre-${PCRE_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libpcre.1.dylib" "libpcre.1.dylib"
 edit_dylib_deps "libpcre.1.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/pcre-"*
-mv "Sources/pcre-${PCRE_VERSION}/pcre-${PCRE_VERSION}-RELEASE" "CompiledLibs/pcre-${PCRE_VERSION}-RELEASE"
-rm -rf "../lib/libpcre.1.dylib"
-cp -rf "CompiledLibs/pcre-${PCRE_VERSION}-RELEASE/libpcre.1.dylib" "../lib/libpcre.1.dylib"
+rm -rf "${LIBS_PATH}/libpcre.1.dylib" "${LIBS_PATH}/libpcre.dylib"
+cp -rf "libpcre.1.dylib" "${LIBS_PATH}/libpcre.1.dylib"
+ln -s "libpcre.1.dylib" "${LIBS_PATH}/libpcre.dylib"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

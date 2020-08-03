@@ -32,29 +32,27 @@ check_libpng
 check_libffi
 
 rm -rf "cairo-"*
-get_src_and_verify_checksum "cairo-$CAIRO_VERSION.tar.xz" "${SHA256}" "https://cairographics.org/releases/cairo-$CAIRO_VERSION.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/cairo-$CAIRO_VERSION.tar.xz" -C .
-cd "cairo-$CAIRO_VERSION"
+get_src_and_verify_checksum "cairo-${CAIRO_VERSION}.tar.xz" "${SHA256}" "https://cairographics.org/releases/cairo-${CAIRO_VERSION}.tar.xz"
+tar xf "${SOURCES_PATH}/archives/cairo-${CAIRO_VERSION}.tar.xz" -C .
+ln -s "cairo-${CAIRO_VERSION}" "cairo"
+cd "cairo"
 ./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no
 make
-mkdir "cairo-$CAIRO_VERSION-RELEASE"
-cp "src/.libs/libcairo.2.dylib" "cairo-$CAIRO_VERSION-RELEASE/libcairo.2.dylib"
-cd "cairo-$CAIRO_VERSION-RELEASE"
+mkdir "cairo-${CAIRO_VERSION}-RELEASE"
+cp "src/.libs/libcairo.2.dylib" "cairo-${CAIRO_VERSION}-RELEASE/libcairo.2.dylib"
+cd "cairo-${CAIRO_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libcairo.2.dylib" "libcairo.2.dylib"
 edit_dylib_deps "libcairo.2.dylib"
-cd ".."
-rm -rf "${MY_PATH}/../../Headers/cairo"
-mkdir "${MY_PATH}/../../Headers/cairo"
-cp "cairo-version.h" "${MY_PATH}/../../Headers/cairo/"
-cp "util/cairo-gobject/cairo-gobject.h" "${MY_PATH}/../../Headers/cairo/"
-cp "util/cairo-script/cairo-script-interpreter.h" "${MY_PATH}/../../Headers/cairo/"
-cd "src"
-cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${MY_PATH}/../../Headers/cairo/"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/cairo-"*
-mv "Sources/cairo-$CAIRO_VERSION/cairo-$CAIRO_VERSION-RELEASE" "CompiledLibs/cairo-$CAIRO_VERSION-RELEASE"
-rm -rf "../lib/libcairo.2.dylib"
-cp -rf "CompiledLibs/cairo-$CAIRO_VERSION-RELEASE/libcairo.2.dylib" "../lib/libcairo.2.dylib"
+rm -rf "${LIBS_PATH}/libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
+cp -rf "libcairo.2.dylib" "${LIBS_PATH}/libcairo.2.dylib"
+ln -s "libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
+rm -rf "${HEADERS_PATH}/cairo"
+mkdir "${HEADERS_PATH}/cairo"
+cp "${SOURCES_PATH}/cairo/cairo-version.h" "${HEADERS_PATH}/cairo/"
+cp "${SOURCES_PATH}/cairo/util/cairo-gobject/cairo-gobject.h" "${HEADERS_PATH}/cairo/"
+cp "${SOURCES_PATH}/cairo/util/cairo-script/cairo-script-interpreter.h" "${HEADERS_PATH}/cairo/"
+cd "${SOURCES_PATH}/cairo/src"
+cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${HEADERS_PATH}/cairo/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

@@ -19,7 +19,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -38,10 +37,12 @@ check_fribidi
 check_meson
 check_ninja
 
-rm -rf "pango-"*
+cd "${SOURCES_PATH}"
+rm -rf "pango"*
 get_src_and_verify_checksum "pango-${PANGO_VERSION}.tar.xz" "${SHA256}" "http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_VERSION_SHORT}/pango-${PANGO_VERSION}.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/pango-${PANGO_VERSION}.tar.xz" -C .
-cd "pango-${PANGO_VERSION}"
+tar xf "${SOURCES_PATH}/archives/pango-${PANGO_VERSION}.tar.xz" -C .
+ln -s "pango-${PANGO_VERSION}" "pango"
+cd "pango"
 mkdir "build"
 sed -i -e "/Werror=implicit-fallthrough/d" "meson.build"
 meson -Dintrospection=true -Duse_fontconfig=true --default-library=shared --buildtype=release . "build"
@@ -61,18 +62,14 @@ for filename in * ; do
   remove_rpath_if_exists "${filename}" "/usr/local/Cellar/fribidi/"
   remove_rpath_if_exists "${filename}" "@loader_path/"
 done
-cd "../.."
-rm -rf "${MY_PATH}/../../Headers/pango"
-mkdir "${MY_PATH}/../../Headers/pango"
-cp "${MY_PATH}/../Sources/pango-${PANGO_VERSION}/build/pango/pango-enum-types.h" "${MY_PATH}/../../Headers/pango/"
-cp "${MY_PATH}/../Sources/pango-${PANGO_VERSION}/build/pango/pango-features.h" "${MY_PATH}/../../Headers/pango/"
-cd "pango"
-cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${MY_PATH}/../../Headers/pango/"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/pango-"*
-mv "Sources/pango-${PANGO_VERSION}/build/pango-${PANGO_VERSION}-RELEASE" "CompiledLibs/pango-${PANGO_VERSION}-RELEASE"
-rm -rf "../lib/libpango"*
-cp -rf "CompiledLibs/pango-${PANGO_VERSION}-RELEASE/"* "../lib/"
+rm -rf "${LIBS_PATH}/libpango"*
+cp -rf * "${LIBS_PATH}/"
+rm -rf "${HEADERS_PATH}/pango"
+mkdir "${HEADERS_PATH}/pango"
+cp "${SOURCES_PATH}/pango/build/pango/pango-enum-types.h" "${HEADERS_PATH}/pango/"
+cp "${SOURCES_PATH}/pango/build/pango/pango-features.h" "${HEADERS_PATH}/pango/"
+cd "${SOURCES_PATH}/pango/pango"
+cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${HEADERS_PATH}/pango/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

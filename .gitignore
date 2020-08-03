@@ -1,4 +1,2 @@
-SourcesAndScripts/CompiledLibs/*
-!SourcesAndScripts/CompiledLibs/.gitkeep
 SourcesAndScripts/Sources/*
 !SourcesAndScripts/Sources/.gitkeep

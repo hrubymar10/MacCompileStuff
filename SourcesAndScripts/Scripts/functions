@@ -181,7 +181,7 @@ get_src_and_verify_checksum() {
   NAME=$1
   SHA256=$2
   URL=$3
-  OUT_PATH="${MY_PATH}/../Sources/archives"
+  OUT_PATH="${SOURCES_PATH}/archives"
 
   mkdir -p "${OUT_PATH}"
 

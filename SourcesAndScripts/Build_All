@@ -42,7 +42,7 @@ SCRIPTS=(
 
 for SCRIPT in "${SCRIPTS[@]}"; do
   echo "==> Building ${SCRIPT}"
-  ./"${SCRIPT}_build"
+  "./${SCRIPT}_build"
 done
 
 echo "==> DONE ..."

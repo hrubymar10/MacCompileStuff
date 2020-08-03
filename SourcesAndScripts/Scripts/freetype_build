@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -27,10 +26,12 @@ check_wget
 check_xcode
 check_libpng
 
-rm -rf "freetype-"*
+cd "${SOURCES_PATH}"
+rm -rf "freetype"*
 get_src_and_verify_checksum "freetype-${FREETYPE_VERSION}.tar.gz" "${SHA256}" "https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz"
-tar xf "${MY_PATH}/../Sources/archives/freetype-${FREETYPE_VERSION}.tar.gz" -C .
-cd "freetype-${FREETYPE_VERSION}"
+tar xf "${SOURCES_PATH}/archives/freetype-${FREETYPE_VERSION}.tar.gz" -C .
+ln -s "freetype-${FREETYPE_VERSION}" "freetype"
+cd "freetype"
 ./autogen.sh
 ./configure --with-harfbuzz=no --with-brotli=no --enable-shared
 make
@@ -39,11 +40,9 @@ cp "objs/.libs/libfreetype.6.dylib" "freetype-${FREETYPE_VERSION}-RELEASE/libfre
 cd "freetype-${FREETYPE_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libfreetype.6.dylib" "libfreetype.6.dylib"
 edit_dylib_deps "libfreetype.6.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/freetype-"*
-mv "Sources/freetype-${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}-RELEASE" "CompiledLibs/freetype-${FREETYPE_VERSION}-RELEASE"
-rm -rf "../lib/libfreetype.6.dylib"
-cp -rf "CompiledLibs/freetype-${FREETYPE_VERSION}-RELEASE/libfreetype.6.dylib" "../lib/libfreetype.6.dylib"
+rm -rf "${LIBS_PATH}/libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.dylib"
+cp -rf "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.6.dylib"
+ln -s "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.dylib"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

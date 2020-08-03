@@ -6,6 +6,25 @@
 
 set -e
 
+if [ -z ${MY_PATH+x} ]; then
+  echo "Error: MY_PATH isn't set. 'env' script isn't meant to be run directly." >&2
+  exit 1
+fi
+
+cd "${MY_PATH}/../../"
+export ROOT_PATH="$(pwd)"
+cd "${OLDPWD}"
+
+if ! [ -d "${ROOT_PATH}/.git" ]; then
+  echo "Error: ROOT_PATH '${ROOT_PATH}' doesn't contain .git directory." >&2
+  exit 1
+fi
+
+export HEADERS_PATH="${ROOT_PATH}/Headers"
+export LIBS_PATH="${ROOT_PATH}/lib"
+export SCRIPTS_PATH="${ROOT_PATH}/SourcesAndScripts/Scripts"
+export SOURCES_PATH="${ROOT_PATH}/SourcesAndScripts/Sources"
+
 export PKG_CONFIG_PATH='/usr/local/opt/libffi/lib/pkgconfig'
 export MACOSX_DEPLOYMENT_TARGET='10.8'
 export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET='10.8'

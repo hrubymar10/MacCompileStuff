@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -26,10 +25,12 @@ source "${MY_PATH}/functions"
 check_wget
 check_xcode
 
-rm -rf "libpng-"*
+cd "${SOURCES_PATH}"
+rm -rf "libpng"*
 get_src_and_verify_checksum "libpng-${LIBPNG_VERSION}.tar.xz" "${SHA256}" "http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz?download" -O "libpng-${LIBPNG_VERSION}.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/libpng-${LIBPNG_VERSION}.tar.xz" -C .
-cd "libpng-${LIBPNG_VERSION}"
+tar xf "${SOURCES_PATH}/archives/libpng-${LIBPNG_VERSION}.tar.xz" -C .
+ln -s "libpng-${LIBPNG_VERSION}" "libpng"
+cd "libpng"
 ./configure --disable-dependency-tracking --enable-shared
 make check
 mkdir "libpng-${LIBPNG_VERSION}-RELEASE"
@@ -37,11 +38,9 @@ cp ".libs/libpng16.16.dylib" "libpng-${LIBPNG_VERSION}-RELEASE/libpng16.16.dylib
 cd "libpng-${LIBPNG_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libpng16.16.dylib" "libpng16.16.dylib"
 edit_dylib_deps "libpng16.16.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/libpng-"*
-mv "Sources/libpng-${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}-RELEASE" "CompiledLibs/libpng-${LIBPNG_VERSION}-RELEASE"
-rm -rf "../lib/libpng16.16.dylib"
-cp -rf "CompiledLibs/libpng-${LIBPNG_VERSION}-RELEASE/libpng16.16.dylib" "../lib/libpng16.16.dylib"
+rm -rf "${LIBS_PATH}/libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
+cp "libpng16.16.dylib" "${LIBS_PATH}/libpng16.16.dylib"
+ln -s "libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

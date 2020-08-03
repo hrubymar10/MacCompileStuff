@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -26,10 +25,12 @@ source "${MY_PATH}/functions"
 check_wget
 check_xcode
 
-rm -rf "gettext-"*
+cd "${SOURCES_PATH}"
+rm -rf "gettext"*
 get_src_and_verify_checksum "gettext-${GETTEXT_VERSION}.tar.xz" "${SHA256}" "https://ftp.gnu.org/pub/gnu/gettext/gettext-${GETTEXT_VERSION}.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/gettext-${GETTEXT_VERSION}.tar.xz" -C .
-cd "gettext-${GETTEXT_VERSION}"
+tar xf "${SOURCES_PATH}/archives/gettext-${GETTEXT_VERSION}.tar.xz" -C .
+ln -s "gettext-${GETTEXT_VERSION}" "gettext"
+cd "gettext"
 ./configure --disable-dependency-tracking --enable-shared
 make
 mkdir "gettext-${GETTEXT_VERSION}-RELEASE"
@@ -37,13 +38,11 @@ cp "gettext-runtime/intl/.libs/libintl.8.dylib" "gettext-${GETTEXT_VERSION}-RELE
 cd "gettext-${GETTEXT_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libintl.8.dylib" "libintl.8.dylib"
 edit_dylib_deps "libintl.8.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/gettext-"*
-mv "Sources/gettext-${GETTEXT_VERSION}/gettext-${GETTEXT_VERSION}-RELEASE" "CompiledLibs/gettext-${GETTEXT_VERSION}-RELEASE"
-rm -rf "../Headers/libintl.h"
-cp "Sources/gettext-${GETTEXT_VERSION}/gettext-runtime/intl/libintl.h" "../Headers/libintl.h"
-rm -rf "../lib/libintl.8.dylib"
-cp -rf "CompiledLibs/gettext-${GETTEXT_VERSION}-RELEASE/libintl.8.dylib" "../lib/libintl.8.dylib"
+rm -rf "${LIBS_PATH}/libintl.8.dylib" "${LIBS_PATH}/libintl.dylib"
+cp "libintl.8.dylib" "${LIBS_PATH}/libintl.8.dylib"
+ln -s "libintl.8.dylib" "${LIBS_PATH}/libintl.dylib"
+rm -rf "${HEADERS_PATH}/libintl.h"
+cp "${SOURCES_PATH}/gettext/gettext-runtime/intl/libintl.h" "${HEADERS_PATH}/libintl.h"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -26,10 +25,12 @@ source "${MY_PATH}/functions"
 check_wget
 check_xcode
 
-rm -rf "fribidi-"*
+cd "${SOURCES_PATH}"
+rm -rf "fribidi"*
 get_src_and_verify_checksum "fribidi-${FRIBIDI_VERSION}.tar.xz" "${SHA256}" "https://github.com/fribidi/fribidi/releases/download/v${FRIBIDI_VERSION}/fribidi-${FRIBIDI_VERSION}.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/fribidi-${FRIBIDI_VERSION}.tar.xz" -C .
-cd "fribidi-${FRIBIDI_VERSION}"
+tar xf "${SOURCES_PATH}/archives/fribidi-${FRIBIDI_VERSION}.tar.xz" -C .
+ln -s "fribidi-${FRIBIDI_VERSION}" "fribidi"
+cd "fribidi"
 ./configure --disable-debug --disable-dependency-tracking --disable-silent-rules --enable-shared
 make
 mkdir "fribidi-${FRIBIDI_VERSION}-RELEASE"
@@ -37,11 +38,9 @@ cp "lib/.libs/libfribidi.0.dylib" "fribidi-${FRIBIDI_VERSION}-RELEASE/libfribidi
 cd "fribidi-${FRIBIDI_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libfribidi.0.dylib" "libfribidi.0.dylib"
 edit_dylib_deps "libfribidi.0.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/fribidi-"*
-mv "Sources/fribidi-${FRIBIDI_VERSION}/fribidi-${FRIBIDI_VERSION}-RELEASE" "CompiledLibs/fribidi-${FRIBIDI_VERSION}-RELEASE"
-rm -rf "../lib/libfribidi.0.dylib"
-cp -rf "CompiledLibs/fribidi-${FRIBIDI_VERSION}-RELEASE/libfribidi.0.dylib" "../lib/libfribidi.0.dylib"
+rm -rf "${LIBS_PATH}/libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.dylib"
+cp -rf "libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.0.dylib"
+ln -s "libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.dylib"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

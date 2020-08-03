@@ -18,7 +18,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -26,10 +25,12 @@ source "${MY_PATH}/functions"
 check_wget
 check_xcode
 
-rm -rf "libogg-"*
+cd "${SOURCES_PATH}"
+rm -rf "libogg"*
 get_src_and_verify_checksum "libogg-${LIBOGG_VERSION}.tar.gz" "${SHA256}" "https://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz"
-tar xf "${MY_PATH}/../Sources/archives/libogg-${LIBOGG_VERSION}.tar.gz" -C .
-cd "libogg-${LIBOGG_VERSION}"
+tar xf "${SOURCES_PATH}/archives/libogg-${LIBOGG_VERSION}.tar.gz" -C .
+ln -s "libogg-${LIBOGG_VERSION}" "libogg"
+cd "libogg"
 ./configure --disable-dependency-tracking --enable-shared
 make
 mkdir "libogg-${LIBOGG_VERSION}-RELEASE"
@@ -37,13 +38,11 @@ cp "src/.libs/libogg.0.dylib" "libogg-${LIBOGG_VERSION}-RELEASE/libogg.0.dylib"
 cd "libogg-${LIBOGG_VERSION}-RELEASE"
 install_name_tool -id "@rpath/libogg.0.dylib" "libogg.0.dylib"
 edit_dylib_deps "libogg.0.dylib"
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/libogg-"*
-mv "Sources/libogg-${LIBOGG_VERSION}/libogg-${LIBOGG_VERSION}-RELEASE" "CompiledLibs/libogg-${LIBOGG_VERSION}-RELEASE"
-rm -rf "../lib/libogg.0.dylib"
-cp -rf "CompiledLibs/libogg-${LIBOGG_VERSION}-RELEASE/libogg.0.dylib" "../lib/libogg.0.dylib"
-rm -rf "../Headers/ogg"
-mkdir "../Headers/ogg"
-cp -rf "Sources/libogg-${LIBOGG_VERSION}/include/ogg/"*.h "../Headers/ogg/"
+rm -rf "${LIBS_PATH}/libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
+cp "libogg.0.dylib" "${LIBS_PATH}/libogg.0.dylib"
+ln -s "libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
+rm -rf "${HEADERS_PATH}/ogg"
+mkdir "${HEADERS_PATH}/ogg"
+cp -rf "${SOURCES_PATH}/libogg/include/ogg/"*.h "${HEADERS_PATH}/ogg/"
 echo "==> DONE ..."
 echo

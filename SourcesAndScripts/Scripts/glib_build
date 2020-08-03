@@ -19,7 +19,6 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
@@ -33,10 +32,12 @@ check_pcre
 check_libffi
 check_gettext
 
-rm -rf "glib-"*
+cd "${SOURCES_PATH}"
+rm -rf "glib"*
 get_src_and_verify_checksum "glib-${GLIB_VERSION}.tar.xz" "${SHA256}" "https://download.gnome.org/sources/glib/${GLIB_VERSION_SHORT}/glib-${GLIB_VERSION}.tar.xz"
-tar xf "${MY_PATH}/../Sources/archives/glib-${GLIB_VERSION}.tar.xz" -C .
-cd "glib-${GLIB_VERSION}"
+tar xf "${SOURCES_PATH}/archives/glib-${GLIB_VERSION}.tar.xz" -C .
+ln -s "glib-${GLIB_VERSION}" "glib"
+cd "glib"
 mkdir "build"
 meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
 cd "build"
@@ -58,30 +59,22 @@ for filename in * ; do
   remove_rpath_if_exists "${filename}" "/usr/local/Cellar/pcre/"
   remove_rpath_if_exists "${filename}" "/usr/local/Cellar/libffi/"
 done
-cd "${MY_PATH}/../"
-rm -rf "CompiledLibs/glib-"*
-mv "Sources/glib-${GLIB_VERSION}/build/glib-${GLIB_VERSION}-RELEASE" "CompiledLibs/glib-${GLIB_VERSION}-RELEASE"
-rm -rf "../Headers/glib"*
-mkdir -p "../Headers/glib-2.0/gio"
-mkdir -p "../Headers/glib-2.0/glib/deprecated"
-mkdir -p "../Headers/glib-2.0/gobject"
+rm -rf "${LIBS_PATH}/libglib-2.0.0.dylib" "${LIBS_PATH}/libgmodule-2.0.0.dylib" "${LIBS_PATH}/libgobject-2.0.0.dylib" "${LIBS_PATH}/libgthread-2.0.0.dylib"
+cp -rf * "${LIBS_PATH}/"
+rm -rf "${HEADERS_PATH}/glib"*
+mkdir -p "${HEADERS_PATH}/glib-2.0/gio"
+mkdir -p "${HEADERS_PATH}/glib-2.0/glib/deprecated"
+mkdir -p "${HEADERS_PATH}/glib-2.0/gobject"
 # TODO: Use glib-public-headers.txt and etc for Headers
-cp "Sources/glib-${GLIB_VERSION}/build/glib/glibconfig.h" "${MY_PATH}/../../Headers/"
-cp "${MY_PATH}/../Sources/glib-${GLIB_VERSION}/build/gobject/glib-enumtypes.h" "${MY_PATH}/../../Headers/glib-2.0/gobject/glib-enumtypes.h"
-cd "Sources/glib-${GLIB_VERSION}/glib"
-cp "glib-object.h" "glib-unix.h" "glib.h" "${MY_PATH}/../../Headers/glib-2.0/"
-cp *.h "${MY_PATH}/../../Headers/glib-2.0/glib/"
-cd "deprecated"
-cp *.h "${MY_PATH}/../../Headers/glib-2.0/glib/deprecated/"
-cd "../../gio"
-cp *.h "${MY_PATH}/../../Headers/glib-2.0/gio/"
-cd "../gmodule"
-cp "gmodule.h" "${MY_PATH}/../../Headers/glib-2.0/"
-cd "../gobject"
-cp *.h "${MY_PATH}/../../Headers/glib-2.0/gobject/"
-cd "${MY_PATH}/../"
-rm -rf "../lib/libglib-2.0.0.dylib" "../lib/libgmodule-2.0.0.dylib" "../lib/libgobject-2.0.0.dylib" "../lib/libgthread-2.0.0.dylib"
-cp -rf "CompiledLibs/glib-${GLIB_VERSION}-RELEASE/"* "../lib/"
+cp "${SOURCES_PATH}/glib/build/glib/glibconfig.h" "${HEADERS_PATH}/"
+cp "${SOURCES_PATH}/glib/build/gobject/glib-enumtypes.h" "${HEADERS_PATH}/glib-2.0/gobject/glib-enumtypes.h"
+cd "${SOURCES_PATH}/glib/glib"
+cp "glib-object.h" "glib-unix.h" "glib.h" "${HEADERS_PATH}/glib-2.0/"
+cp "${SOURCES_PATH}/glib/glib/"*.h "${HEADERS_PATH}/glib-2.0/glib/"
+cp "${SOURCES_PATH}/glib/glib/deprecated/"*.h "${HEADERS_PATH}/glib-2.0/glib/deprecated/"
+cp "${SOURCES_PATH}/glib/gio/"*.h "${HEADERS_PATH}/glib-2.0/gio/"
+cp "${SOURCES_PATH}/glib/gmodule/gmodule.h" "${HEADERS_PATH}/glib-2.0/"
+cp "${SOURCES_PATH}/glib/gobject/"*.h "${HEADERS_PATH}/glib-2.0/gobject/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
