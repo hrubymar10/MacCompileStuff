@@ -43,8 +43,6 @@ get_src_and_verify_checksum "SDL2-${SDL2_VERSION}.tar.gz" "${SDL2_SHA256}" "http
 tar xf "${SOURCES_PATH}/archives/SDL2-${SDL2_VERSION}.tar.gz" -C .
 ln -s "SDL2-${SDL2_VERSION}" "SDL"
 cd "SDL"
-# Patch SDL_GetDisplayDPI until wesnoth is updated
-patch -b -p0 < "${MY_PATH}/SDL2.patch"
 ./configure --without-x --disable-dependency-tracking --enable-shared
 make update-revision
 make
