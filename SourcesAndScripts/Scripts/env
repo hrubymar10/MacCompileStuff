@@ -26,8 +26,8 @@ export SCRIPTS_PATH="${ROOT_PATH}/SourcesAndScripts/Scripts"
 export SOURCES_PATH="${ROOT_PATH}/SourcesAndScripts/Sources"
 
 export PKG_CONFIG_PATH='/usr/local/opt/libffi/lib/pkgconfig'
-export MACOSX_DEPLOYMENT_TARGET='10.8'
-export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET='10.8'
-export LDFLAGS='-mmacosx-version-min=10.8'
-export CFLAGS='-stdlib=libc++ -mmacosx-version-min=10.8'
-export CXXFLAGS='-stdlib=libc++ -mmacosx-version-min=10.8'
+export MACOSX_DEPLOYMENT_TARGET='10.11'
+export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET='10.11'
+export LDFLAGS='-mmacosx-version-min=10.11'
+export CFLAGS='-stdlib=libc++ -mmacosx-version-min=10.11'
+export CXXFLAGS='-stdlib=libc++ -mmacosx-version-min=10.11'

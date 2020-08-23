@@ -27,8 +27,6 @@ check_wget
 check_xcode
 
 cd "${SOURCES_PATH}"
-export MACOSX_DEPLOYMENT_TARGET=10.9
-export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET=10.9
 rm -rf "boost"*
 get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.gz" "${SHA256}" "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
