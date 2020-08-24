@@ -1,0 +1,11 @@
+--- configure	2018-08-30 10:24:28.000000000 +0200
++++ configure	2019-08-21 23:14:56.288408139 +0200
+@@ -16713,7 +16713,7 @@
+ fi
+ rm -f conftest.mmap conftest.txt
+ 
+-for ac_func in link mkstemp mkostemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat strerror strerror_r
++for ac_func in link mkstemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat strerror strerror_r
+ do :
+   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

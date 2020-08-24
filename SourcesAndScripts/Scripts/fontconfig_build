@@ -32,6 +32,7 @@ get_src_and_verify_checksum "fontconfig-${FONTCONFIG_VERSION}.tar.gz" "${SHA256}
 tar xf "${SOURCES_PATH}/archives/fontconfig-${FONTCONFIG_VERSION}.tar.gz" -C .
 ln -s "fontconfig-${FONTCONFIG_VERSION}" "fontconfig"
 cd "fontconfig"
+patch -b < "${SCRIPTS_PATH}/fontconfig.patch"
 ./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts"
 make
 mkdir "fontconfig-${FONTCONFIG_VERSION}-RELEASE"
