@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#
+# openssl_build
+# Martin Hrubý (hrubymar10), 2018-2020
+#
+
+set -e
+
+OPENSSL_VERSION="1.1.1h"
+SHA256="5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9"
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
+fi
+
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+
+check_wget
+check_xcode
+
+cd "${SOURCES_PATH}"
+rm -rf openssl-*
+get_src_and_verify_checksum "openssl-${OPENSSL_VERSION}.tar.gz" "${SHA256}" "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+tar xf "${SOURCES_PATH}/archives/openssl-${OPENSSL_VERSION}.tar.gz" -C .
+ln -s "openssl-${OPENSSL_VERSION}" "openssl"
+cd "openssl"
+# TODO: 'darwin64-x86_64-cc enable-ec_nistp_64_gcc_128' part is Intel specific
+perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
+make
+install_name_tool -id "@rpath/libcrypto.1.1.dylib" "libcrypto.1.1.dylib"
+edit_dylib_deps "libcrypto.1.1.dylib"
+rm -rf "${LIBS_PATH}/libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.1.1.dylib"
+cp -rf "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.1.1.dylib"
+ln -s "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
+rm -rf "${HEADERS_PATH}/openssl"*
+cp "${SOURCES_PATH}/openssl/include/openssl" "${HEADERS_PATH}/"
+echo "==> DONE ..."
+echo
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
+echo

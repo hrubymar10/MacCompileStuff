@@ -38,6 +38,7 @@ SCRIPTS=(
   "cairo"
   "harfbuzz"
   "pango"
+  "openssl"
 )
 
 for SCRIPT in "${SCRIPTS[@]}"; do
