@@ -6,9 +6,9 @@
 
 set -e
 
-PANGO_VERSION="1.46.1"
-PANGO_VERSION_SHORT="1.46"
-SHA256="fe516b10711bbb6fd75011d66dd08fabfce18f7931aed7415136d53c4aadf1c5"
+PANGO_VERSION="1.48.0"
+PANGO_VERSION_SHORT="1.48"
+SHA256="391f26f3341c2d7053e0fb26a956bd42360dadd825efe7088b1e9340a65e74e6"
 
 starttimestamp=$(date +%s)
 
@@ -45,7 +45,7 @@ ln -s "pango-${PANGO_VERSION}" "pango"
 cd "pango"
 mkdir "build"
 sed -i -e "/Werror=implicit-fallthrough/d" "meson.build"
-meson -Dintrospection=true -Duse_fontconfig=true --default-library=shared --buildtype=release . "build"
+meson -Dintrospection=enabled -Duse_fontconfig=enabled --default-library=shared --buildtype=release . "build"
 cd "build"
 ninja
 mkdir "pango-${PANGO_VERSION}-RELEASE"
