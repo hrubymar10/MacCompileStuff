@@ -6,8 +6,8 @@
 
 set -e
 
-HARFBUZZ_VERSION="2.7.1"
-SHA256="e95ee43b6bd0d3d1307e2aacf0f9c0050e5baceb21988b367b833028114aa569"
+HARFBUZZ_VERSION="2.7.2"
+SHA256="b8c048d7c2964a12f2c80deb6634dfc836b603dd12bf0d0a3df1627698e220ce"
 
 starttimestamp=$(date +%s)
 
