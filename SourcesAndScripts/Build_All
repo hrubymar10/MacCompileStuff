@@ -33,12 +33,12 @@ SCRIPTS=(
   "graphite2"
   "readline"
   "pcre"
+  "openssl"
   "boost"
   "glib"
   "cairo"
   "harfbuzz"
   "pango"
-  "openssl"
 )
 
 for SCRIPT in "${SCRIPTS[@]}"; do

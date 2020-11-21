@@ -34,13 +34,22 @@ cd "openssl"
 # TODO: 'darwin64-x86_64-cc enable-ec_nistp_64_gcc_128' part is Intel specific
 perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
 make
-install_name_tool -id "@rpath/libcrypto.1.1.dylib" "libcrypto.1.1.dylib"
-edit_dylib_deps "libcrypto.1.1.dylib"
-rm -rf "${LIBS_PATH}/libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.1.1.dylib"
+mkdir "openssl-${OPENSSL_VERSION}-RELEASE"
+cp -rf "libcrypto.1.1.dylib" "openssl-${OPENSSL_VERSION}-RELEASE/libcrypto.1.1.dylib"
+cp -rf "libssl.1.1.dylib" "openssl-${OPENSSL_VERSION}-RELEASE/libssl.1.1.dylib"
+cd "openssl-${OPENSSL_VERSION}-RELEASE"
+for filename in * ; do
+  install_name_tool -id "@rpath/${filename}" "${filename}"
+  edit_dylib_deps "${filename}"
+done
+rm -rf "${LIBS_PATH}/libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
+rm -rf "${LIBS_PATH}/libssl.1.1.dylib" "${LIBS_PATH}/libssl.dylib"
 cp -rf "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.1.1.dylib"
+cp -rf "libssl.1.1.dylib" "${LIBS_PATH}/libssl.1.1.dylib"
 ln -s "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
+ln -s "libssl.1.1.dylib" "${LIBS_PATH}/libssl.dylib"
 rm -rf "${HEADERS_PATH}/openssl"*
-cp "${SOURCES_PATH}/openssl/include/openssl" "${HEADERS_PATH}/"
+cp -rf "${SOURCES_PATH}/openssl/include/openssl" "${HEADERS_PATH}/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
