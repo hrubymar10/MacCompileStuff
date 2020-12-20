@@ -23,23 +23,39 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
 rm -rf "pixman"*
 get_src_and_verify_checksum "pixman-${PIXMAN_VERSION}.tar.gz" "${SHA256}" "https://cairographics.org/releases/pixman-${PIXMAN_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/pixman-${PIXMAN_VERSION}.tar.gz" -C .
+cp -R "pixman-${PIXMAN_VERSION}" "pixman-${PIXMAN_VERSION}-arm64"
 ln -s "pixman-${PIXMAN_VERSION}" "pixman"
 cd "pixman"
-./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=aarch64-apple-darwin
 make
 mkdir "pixman-${PIXMAN_VERSION}-RELEASE"
-cp "pixman/.libs/libpixman-1.0.dylib" "pixman-${PIXMAN_VERSION}-RELEASE/libpixman-1.0.dylib"
 cd "pixman-${PIXMAN_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64/pixman/.libs/libpixman-1.0.40.0.dylib" "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}/pixman/.libs/libpixman-1.0.40.0.dylib" -output "libpixman-1.0.dylib"
 install_name_tool -id "@rpath/libpixman-1.0.dylib" "libpixman-1.0.dylib"
-edit_dylib_deps "libpixman-1.0.dylib"
-rm -rf "${LIBS_PATH}/libpixman-1.0.dylib"
+rm -rf "${LIBS_PATH}/libpixman-1.0.dylib" "${LIBS_PATH}/libpixman.dylib"
 cp -rf "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.0.dylib"
+ln -s "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman.dylib"
+rm -rf "${HEADERS_PATH}/pixman"
+mkdir -p "${HEADERS_PATH}/pixman"
+cp "${SOURCES_PATH}/pixman/pixman/pixman.h" "${SOURCES_PATH}/pixman/pixman/pixman-version.h" "${HEADERS_PATH}/pixman/"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

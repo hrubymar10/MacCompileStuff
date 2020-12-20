@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/SourcesAndScripts/Sources/freetype/include
+
+Name: FreeType 2
+URL: https://freetype.org
+Description: A free, high-quality, and portable font engine.
+Version: VERSION
+Libs: -L${libdir} -lfreetype
+Cflags: -I${includedir}

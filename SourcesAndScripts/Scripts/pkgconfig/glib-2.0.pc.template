@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers/glib-2.0
+
+Name: GLib
+Description: C Utility Library
+Version: VERSION
+Libs: -L${libdir} -lglib-2.0 -lintl
+Libs.private: -Wl,-framework,CoreFoundation -Wl,-framework,Carbon -Wl,-framework,Foundation -Wl,-framework,AppKit -liconv -lm
+Cflags: -I${includedir}

@@ -25,7 +25,6 @@ source "${MY_PATH}/functions"
 unset MACOSX_DEPLOYMENT_TARGET
 
 check_wget
-check_xcode
 check_libffi
 check_glib
 check_cairo
@@ -37,30 +36,50 @@ check_fribidi
 check_meson
 check_ninja
 
+if ! [ is_apple_silicon_mac ]; then
+  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
+
 cd "${SOURCES_PATH}"
 rm -rf "pango"*
 get_src_and_verify_checksum "pango-${PANGO_VERSION}.tar.xz" "${SHA256}" "http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_VERSION_SHORT}/pango-${PANGO_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/pango-${PANGO_VERSION}.tar.xz" -C .
+cp -R "pango-${PANGO_VERSION}" "pango-${PANGO_VERSION}-arm64"
 ln -s "pango-${PANGO_VERSION}" "pango"
 cd "pango"
+# Build x86_64
+source "${MY_PATH}/env"
+unset MACOSX_DEPLOYMENT_TARGET
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir "build"
 sed -i -e "/Werror=implicit-fallthrough/d" "meson.build"
-meson -Dintrospection=enabled -Duse_fontconfig=enabled --default-library=shared --buildtype=release . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dintrospection=disabled -Duse_fontconfig=enabled --default-library=shared --buildtype=release . "build"
 cd "build"
-ninja
+arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+# Build arm64
+cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64"
+source "${MY_PATH}/env"
+unset MACOSX_DEPLOYMENT_TARGET
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+mkdir "build"
+sed -i -e "/Werror=implicit-fallthrough/d" "meson.build"
+arch -arm64 /opt/homebrew/bin/meson -Dintrospection=disabled -Duse_fontconfig=enabled --default-library=shared --buildtype=release . "build"
+cd "build"
+arch -arm64 /opt/homebrew/bin/ninja
 mkdir "pango-${PANGO_VERSION}-RELEASE"
-cp "pango/libpango-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpango-1.0.0.dylib"
-cp "pango/libpangocairo-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpangocairo-1.0.0.dylib"
-cp "pango/libpangoft2-1.0.0.dylib" "pango-${PANGO_VERSION}-RELEASE/libpangoft2-1.0.0.dylib"
 cd "pango-${PANGO_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpango-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpango-1.0.0.dylib" -output "libpango-1.0.0.dylib"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangocairo-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpangocairo-1.0.0.dylib" -output "libpangocairo-1.0.0.dylib"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangoft2-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpangoft2-1.0.0.dylib" -output "libpangoft2-1.0.0.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-  edit_dylib_deps "${filename}"
-  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/cairo/"
-  remove_rpath_if_exists "${filename}" "/usr/local/opt/freetype/lib"
-  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/harfbuzz/"
-  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/fribidi/"
-  remove_rpath_if_exists "${filename}" "@loader_path/"
+    remove_rpath_if_exists "${filename}" "@loader_path/"
+  remove_rpath_if_exists "${filename}" "${LIBS_PATH}"
 done
 rm -rf "${LIBS_PATH}/libpango"*
 cp -rf * "${LIBS_PATH}/"

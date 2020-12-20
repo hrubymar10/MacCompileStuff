@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/SourcesAndScripts/Sources/pcre
+
+Name: libpcre
+Description: PCRE - Perl compatible regular expressions C library with 8 bit character support
+Version: VERSION
+Libs: -L${libdir} -lpcre
+Libs.private:  
+Cflags: -I${includedir} 

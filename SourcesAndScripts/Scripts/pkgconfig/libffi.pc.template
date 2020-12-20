@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+toolexeclibdir=${libdir}
+includedir=${prefix}/Headers/libffi
+
+Name: libffi
+Description: Library supporting Foreign Function Interfaces
+Version: VERSION
+Libs: -L${toolexeclibdir} -lffi
+Cflags: -I${includedir}

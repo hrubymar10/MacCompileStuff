@@ -6,9 +6,9 @@
 
 set -e
 
-GLIB_VERSION="2.66.3"
+GLIB_VERSION="2.66.4"
 GLIB_VERSION_SHORT="2.66"
-SHA256="79f31365a99cb1cc9db028625635d1438890702acde9e2802eae0acebcf7b5b1"
+SHA256="97df8670e32f9fd4f7392b0980e661dd625012015d58350da1e58e343f4af984"
 
 starttimestamp=$(date +%s)
 
@@ -22,52 +22,86 @@ fi
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
-unset MACOSX_DEPLOYMENT_TARGET
 
 check_wget
-check_xcode
 check_meson
 check_ninja
 check_pcre
 check_libffi
 check_gettext
 
+if ! [ is_apple_silicon_mac ]; then
+  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
+
 cd "${SOURCES_PATH}"
 rm -rf "glib"*
 get_src_and_verify_checksum "glib-${GLIB_VERSION}.tar.xz" "${SHA256}" "https://download.gnome.org/sources/glib/${GLIB_VERSION_SHORT}/glib-${GLIB_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/glib-${GLIB_VERSION}.tar.xz" -C .
+cp -R "glib-${GLIB_VERSION}" "glib-${GLIB_VERSION}-arm64"
 ln -s "glib-${GLIB_VERSION}" "glib"
 cd "glib"
-mkdir "build"
-meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
-cd "build"
-ninja
+# Build x86_64
+source "${MY_PATH}/env"
+unset MACOSX_DEPLOYMENT_TARGET
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+mkdir -p "build/glib"
+#meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release --cross-file="${SCRIPTS_PATH}/cross_file_x86_64.txt" . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
+cd "build/glib"
+ln -s "${LIBS_PATH}/libpcre.1.dylib"
+ln -s "${LIBS_PATH}/libintl.8.dylib"
+cd ..
+arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+# Build arm64
+cd "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64"
+source "${MY_PATH}/env"
+unset MACOSX_DEPLOYMENT_TARGET
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+mkdir -p "build/glib"
+#meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release --cross-file="${SCRIPTS_PATH}/cross_file_arm64.txt" . "build"
+arch -arm64 /opt/homebrew/bin/meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
+cd "build/glib"
+ln -s "${LIBS_PATH}/libpcre.1.dylib"
+ln -s "${LIBS_PATH}/libintl.8.dylib"
+cd ..
+arch -arm64 /opt/homebrew/bin/ninja
 mkdir "glib-${GLIB_VERSION}-RELEASE"
-cp "glib/libglib-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libglib-2.0.0.dylib"
-cp "gmodule/libgmodule-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgmodule-2.0.0.dylib"
-cp "gobject/libgobject-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgobject-2.0.0.dylib"
-cp "gthread/libgthread-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgthread-2.0.0.dylib"
-cp "gio/libgio-2.0.0.dylib" "glib-${GLIB_VERSION}-RELEASE/libgio-2.0.0.dylib"
 cd "glib-${GLIB_VERSION}-RELEASE"
-# TODO: Use MCS' pcre, libffi and gettext
+lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/glib/libglib-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/glib/libglib-2.0.0.dylib" -output "libglib-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gmodule/libgmodule-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/gmodule/libgmodule-2.0.0.dylib" -output "libgmodule-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gobject/libgobject-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/gobject/libgobject-2.0.0.dylib" -output "libgobject-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gthread/libgthread-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/gthread/libgthread-2.0.0.dylib" -output "libgthread-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gio/libgio-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/gio/libgio-2.0.0.dylib" -output "libgio-2.0.0.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-  edit_dylib_deps "${filename}"
-  remove_rpath_if_exists "${filename}" "@loader_path/../glib"
+    remove_rpath_if_exists "${filename}" "@loader_path/../glib"
   remove_rpath_if_exists "${filename}" "@loader_path/../gmodule"
   remove_rpath_if_exists "${filename}" "@loader_path/../gobject"
-  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/pcre/"
-  remove_rpath_if_exists "${filename}" "/usr/local/Cellar/libffi/"
+  remove_rpath_if_exists "${filename}" "${LIBS_PATH}"
 done
-rm -rf "${LIBS_PATH}/libglib-2.0.0.dylib" "${LIBS_PATH}/libgmodule-2.0.0.dylib" "${LIBS_PATH}/libgobject-2.0.0.dylib" "${LIBS_PATH}/libgthread-2.0.0.dylib"
+rm -rf "${LIBS_PATH}/libglib-2.0.0.dylib" "${LIBS_PATH}/libgmodule-2.0.0.dylib" "${LIBS_PATH}/libgobject-2.0.0.dylib" "${LIBS_PATH}/libgthread-2.0.0.dylib" "${LIBS_PATH}/libgio-2.0.0.dylib" "${LIBS_PATH}/libglib-2.0.dylib" "${LIBS_PATH}/libgmodule-2.0.dylib" "${LIBS_PATH}/libgobject-2.0.dylib" "${LIBS_PATH}/libgthread-2.0.dylib" "${LIBS_PATH}/libgio-2.0.dylib"
 cp -rf * "${LIBS_PATH}/"
+ln -s "libglib-2.0.0.dylib" "${LIBS_PATH}/libglib-2.0.dylib"
+ln -s "libgmodule-2.0.0.dylib" "${LIBS_PATH}/libgmodule-2.0.dylib"
+ln -s "libgobject-2.0.0.dylib" "${LIBS_PATH}/libgobject-2.0.dylib"
+ln -s "libgthread-2.0.0.dylib" "${LIBS_PATH}/libgthread-2.0.dylib"
+ln -s "libgio-2.0.0.dylib" "${LIBS_PATH}/libgio-2.0.dylib"
 rm -rf "${HEADERS_PATH}/glib"*
 mkdir -p "${HEADERS_PATH}/glib-2.0/gio"
 mkdir -p "${HEADERS_PATH}/glib-2.0/glib/deprecated"
 mkdir -p "${HEADERS_PATH}/glib-2.0/gobject"
 # TODO: Use glib-public-headers.txt and etc for Headers
-cp "${SOURCES_PATH}/glib/build/glib/glibconfig.h" "${HEADERS_PATH}/"
+cp "${SOURCES_PATH}/glib/build/glib/glibconfig.h" "${HEADERS_PATH}/glibconfig_x86_64.h"
+cp "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/glib/glibconfig.h" "${HEADERS_PATH}/glibconfig_arm64.h"
+printf "#ifdef __x86_64__\n#include \"glibconfig_x86_64.h\"\n#else\n#include \"glibconfig_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/glibconfig.h"
 cp "${SOURCES_PATH}/glib/build/gobject/glib-enumtypes.h" "${HEADERS_PATH}/glib-2.0/gobject/glib-enumtypes.h"
+cp "${SOURCES_PATH}/glib/build/gio/gioenumtypes.h" "${HEADERS_PATH}/glib-2.0/gio/gioenumtypes.h"
 cd "${SOURCES_PATH}/glib/glib"
 cp "glib-object.h" "glib-unix.h" "glib.h" "${HEADERS_PATH}/glib-2.0/"
 cp "${SOURCES_PATH}/glib/glib/"*.h "${HEADERS_PATH}/glib-2.0/glib/"
@@ -75,6 +109,8 @@ cp "${SOURCES_PATH}/glib/glib/deprecated/"*.h "${HEADERS_PATH}/glib-2.0/glib/dep
 cp "${SOURCES_PATH}/glib/gio/"*.h "${HEADERS_PATH}/glib-2.0/gio/"
 cp "${SOURCES_PATH}/glib/gmodule/gmodule.h" "${HEADERS_PATH}/glib-2.0/"
 cp "${SOURCES_PATH}/glib/gobject/"*.h "${HEADERS_PATH}/glib-2.0/gobject/"
+generate_pkgconfig_file "glib-2.0" "${GLIB_VERSION}"
+generate_pkgconfig_file "gio-2.0" "${GLIB_VERSION}"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

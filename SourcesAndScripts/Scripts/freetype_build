@@ -23,26 +23,40 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 check_libpng
 
 cd "${SOURCES_PATH}"
 rm -rf "freetype"*
 get_src_and_verify_checksum "freetype-${FREETYPE_VERSION}.tar.gz" "${SHA256}" "https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/freetype-${FREETYPE_VERSION}.tar.gz" -C .
+cp -R "freetype-${FREETYPE_VERSION}" "freetype-${FREETYPE_VERSION}-arm64"
 ln -s "freetype-${FREETYPE_VERSION}" "freetype"
 cd "freetype"
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./autogen.sh
-./configure --with-harfbuzz=no --with-brotli=no --enable-shared
+./configure --with-harfbuzz=no --with-brotli=no --enable-shared --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/freetype-${FREETYPE_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./autogen.sh
+./configure --with-harfbuzz=no --with-brotli=no --enable-shared --host=aarch64-apple-darwin
 make
 mkdir "freetype-${FREETYPE_VERSION}-RELEASE"
-cp "objs/.libs/libfreetype.6.dylib" "freetype-${FREETYPE_VERSION}-RELEASE/libfreetype.6.dylib"
 cd "freetype-${FREETYPE_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/freetype-${FREETYPE_VERSION}-arm64/objs/.libs/libfreetype.6.dylib" "${SOURCES_PATH}/freetype-${FREETYPE_VERSION}/objs/.libs/libfreetype.6.dylib" -output "libfreetype.6.dylib"
 install_name_tool -id "@rpath/libfreetype.6.dylib" "libfreetype.6.dylib"
-edit_dylib_deps "libfreetype.6.dylib"
 rm -rf "${LIBS_PATH}/libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.dylib"
 cp -rf "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.6.dylib"
 ln -s "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.dylib"
+generate_pkgconfig_file "freetype2" "${FREETYPE_VERSION}"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

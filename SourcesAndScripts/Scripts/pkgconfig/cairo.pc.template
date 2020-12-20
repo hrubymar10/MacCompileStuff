@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers/cairo
+
+Name: cairo
+Description: Multi-platform 2D graphics library
+Version: VERSION
+Libs: -L${libdir} -lcairo
+Libs.private: -lz
+Cflags: -I${includedir}

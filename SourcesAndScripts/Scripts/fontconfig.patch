@@ -9,3 +9,33 @@
  do :
    as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
  ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+
+--- src/fcatomic.h	2016-12-02 04:22:19.000000000 +0100
++++ src/fcatomic.h	2020-12-19 23:17:58.000000000 +0100
+@@ -70,24 +70,16 @@
+ #elif !defined(FC_NO_MT) && defined(__APPLE__)
+ 
+ #include <libkern/OSAtomic.h>
+-#ifdef __MAC_OS_X_MIN_REQUIRED
+ #include <AvailabilityMacros.h>
+-#elif defined(__IPHONE_OS_MIN_REQUIRED)
+-#include <Availability.h>
+-#endif
+ 
+ typedef int fc_atomic_int_t;
+ #define fc_atomic_int_add(AI, V)	(OSAtomicAdd32Barrier ((V), &(AI)) - (V))
+ 
+ #define fc_atomic_ptr_get(P)		(OSMemoryBarrier (), (void *) *(P))
+-#if (MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 || __IPHONE_VERSION_MIN_REQUIRED >= 20100)
++#if (MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 || __IPHONE_OS_VERSION_MIN_REQUIRED >= 20100)
+ #define fc_atomic_ptr_cmpexch(P,O,N)	OSAtomicCompareAndSwapPtrBarrier ((void *) (O), (void *) (N), (void **) (P))
+ #else
+-#if __ppc64__ || __x86_64__
+-#define fc_atomic_ptr_cmpexch(P,O,N)	OSAtomicCompareAndSwap64Barrier ((int64_t) (O), (int64_t) (N), (int64_t*) (P))
+-#else
+-#define fc_atomic_ptr_cmpexch(P,O,N)	OSAtomicCompareAndSwap32Barrier ((int32_t) (O), (int32_t) (N), (int32_t*) (P))
+-#endif
++#error "Your macOS / iOS targets are too old"
+ #endif
+ 
+ #elif !defined(FC_NO_MT) && defined(HAVE_INTEL_ATOMIC_PRIMITIVES)

@@ -41,7 +41,7 @@ check_for_bad_references() {
   echo "==> Checking for bad references:"
   for DYLIB in *".dylib"; do
     if [[ -L "${DYLIB}" ]]; then continue; fi
-    BAD_REFERENCES="$(otool -L ${DYLIB} | grep "/usr/local/" | awk '{print $1;}')"
+    BAD_REFERENCES="$(otool -L ${DYLIB} | grep "/opt/homebrew" | awk '{print $1;}')"
     SAVEIFS="${IFS}"
     IFS=$'\n'
     BAD_REFERENCES=(${BAD_REFERENCES})

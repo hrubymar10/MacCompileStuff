@@ -6,8 +6,8 @@
 
 set -e
 
-OPENSSL_VERSION="1.1.1h"
-SHA256="5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9"
+OPENSSL_VERSION="1.1.1i"
+SHA256="e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242"
 
 starttimestamp=$(date +%s)
 
@@ -23,24 +23,36 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
-rm -rf openssl-*
+rm -rf openssl*
 get_src_and_verify_checksum "openssl-${OPENSSL_VERSION}.tar.gz" "${SHA256}" "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/openssl-${OPENSSL_VERSION}.tar.gz" -C .
+cp -R "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}-arm64"
 ln -s "openssl-${OPENSSL_VERSION}" "openssl"
 cd "openssl"
-# TODO: 'darwin64-x86_64-cc enable-ec_nistp_64_gcc_128' part is Intel specific
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
 perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
 make
+# Build arm64
+cd "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+perl ./Configure no-ssl3 no-ssl3-method no-zlib enable-rc5 darwin64-arm64-cc no-asm
+make
 mkdir "openssl-${OPENSSL_VERSION}-RELEASE"
-cp -rf "libcrypto.1.1.dylib" "openssl-${OPENSSL_VERSION}-RELEASE/libcrypto.1.1.dylib"
-cp -rf "libssl.1.1.dylib" "openssl-${OPENSSL_VERSION}-RELEASE/libssl.1.1.dylib"
 cd "openssl-${OPENSSL_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libcrypto.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}/libcrypto.1.1.dylib" -output "libcrypto.1.1.dylib"
+lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libssl.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}/libssl.1.1.dylib" -output "libssl.1.1.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-  edit_dylib_deps "${filename}"
+    install_name_tool -change "/usr/local/lib/libcrypto.1.1.dylib" "@loader_path/libcrypto.1.1.dylib" "${filename}"
 done
 rm -rf "${LIBS_PATH}/libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
 rm -rf "${LIBS_PATH}/libssl.1.1.dylib" "${LIBS_PATH}/libssl.dylib"
@@ -48,8 +60,12 @@ cp -rf "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.1.1.dylib"
 cp -rf "libssl.1.1.dylib" "${LIBS_PATH}/libssl.1.1.dylib"
 ln -s "libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
 ln -s "libssl.1.1.dylib" "${LIBS_PATH}/libssl.dylib"
-rm -rf "${HEADERS_PATH}/openssl"*
-cp -rf "${SOURCES_PATH}/openssl/include/openssl" "${HEADERS_PATH}/"
+rm -rf "${HEADERS_PATH}/openssl"
+mkdir -p "${HEADERS_PATH}/openssl"
+cp -rf "${SOURCES_PATH}/openssl/include/openssl/"*".h" "${HEADERS_PATH}/openssl/"
+mv "${HEADERS_PATH}/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_x86_64.h"
+cp "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/include/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_arm64.h"
+printf "#ifdef __x86_64__\n#include \"opensslconf_x86_64.h\"\n#else\n#include \"opensslconf_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/openssl/opensslconf.h"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

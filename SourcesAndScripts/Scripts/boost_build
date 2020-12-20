@@ -6,9 +6,9 @@
 
 set -e
 
-BOOST_VERSION_1="1.74.0"
-BOOST_VERSION_2="1_74_0"
-SHA256="afff36d392885120bcac079148c177d1f6f7730ec3d47233aa51b0afa4db94a5"
+BOOST_VERSION_1="1.75.0"
+BOOST_VERSION_2="1_75_0"
+SHA256="aeb26f80e80945e82ee93e5939baebdca47b9dee80a07d3144be1e1a6a66dd6a"
 
 starttimestamp=$(date +%s)
 
@@ -24,24 +24,49 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
+
+if ! [ is_apple_silicon_mac ]; then
+  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
 
 cd "${SOURCES_PATH}"
 rm -rf "boost"*
 get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.gz" "${SHA256}" "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
+cp -R "boost_${BOOST_VERSION_2}" "boost_${BOOST_VERSION_2}-arm64"
 ln -s "boost_${BOOST_VERSION_2}" "boost"
 cd "boost"
+# Build x86_64
 rm -rf "stage"
-./bootstrap.sh --with-libraries=chrono,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread --with-toolset=clang
-./b2 threading=multi --layout=tagged link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14
+source "${MY_PATH}/env"
+arch -x86_64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+#./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+arch -x86_64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+#./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+# Build arm64
+cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64"
+rm -rf "stage"
+patch -b -p0 < "${SCRIPTS_PATH}/boost.patch"
+source "${MY_PATH}/env"
+arch -arm64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
+#./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+arch -arm64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
+#./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
 cd "stage/lib"
 mkdir "boost_${BOOST_VERSION_2}-RELEASE"
-cp *".dylib" "boost_${BOOST_VERSION_2}-RELEASE"
+for filename in *.dylib ; do
+  lipo -create "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64/stage/lib/${filename}" "${SOURCES_PATH}/boost_${BOOST_VERSION_2}/stage/lib/${filename}" -output "boost_${BOOST_VERSION_2}-RELEASE/${filename}"
+done
 cd "boost_${BOOST_VERSION_2}-RELEASE"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-  edit_dylib_deps "${filename}"
 done
 rm -rf "${LIBS_PATH}/libboost"*
 cp -rf * "${LIBS_PATH}/"

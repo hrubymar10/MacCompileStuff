@@ -1,2 +1,4 @@
 SourcesAndScripts/Sources/*
 !SourcesAndScripts/Sources/.gitkeep
+SourcesAndScripts/Scripts/pkgconfig/*.pc
+**/*.log

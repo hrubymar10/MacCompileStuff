@@ -18,31 +18,44 @@ if [ -z "${MY_PATH}" ] ; then
   echo 'Error: Script path is for some reason not accessible' >&2
   exit 1  # fail
 fi
-cd "${MY_PATH}/../Sources"
 
 source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 check_pixman
 check_fontconfig
 check_freetype
 check_libpng
 check_libffi
+check_glib
 
+cd "${SOURCES_PATH}"
 rm -rf "cairo-"*
 get_src_and_verify_checksum "cairo-${CAIRO_VERSION}.tar.xz" "${SHA256}" "https://cairographics.org/releases/cairo-${CAIRO_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/cairo-${CAIRO_VERSION}.tar.xz" -C .
+cp -R "cairo-${CAIRO_VERSION}" "cairo-${CAIRO_VERSION}-arm64"
 ln -s "cairo-${CAIRO_VERSION}" "cairo"
 cd "cairo"
-./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64} -lglib-2.0"
+export CFLAGS="${CFLAGS_X86_64} -I${HEADERS_PATH}/glib-2.0"
+export CXXFLAGS="${CXXFLAGS_X86_64} -I${HEADERS_PATH}/glib-2.0"
+./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64} -lglib-2.0"
+export CFLAGS="${CFLAGS_ARM64} -I${HEADERS_PATH}/glib-2.0"
+export CXXFLAGS="${CXXFLAGS_ARM64} -I${HEADERS_PATH}/glib-2.0"
+./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no --host=aarch64-apple-darwin
 make
 mkdir "cairo-${CAIRO_VERSION}-RELEASE"
-cp "src/.libs/libcairo.2.dylib" "cairo-${CAIRO_VERSION}-RELEASE/libcairo.2.dylib"
 cd "cairo-${CAIRO_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64/src/.libs/libcairo.2.dylib" "${SOURCES_PATH}/cairo-${CAIRO_VERSION}/src/.libs/libcairo.2.dylib" -output "libcairo.2.dylib"
 install_name_tool -id "@rpath/libcairo.2.dylib" "libcairo.2.dylib"
-edit_dylib_deps "libcairo.2.dylib"
 rm -rf "${LIBS_PATH}/libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
 cp -rf "libcairo.2.dylib" "${LIBS_PATH}/libcairo.2.dylib"
 ln -s "libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
@@ -52,7 +65,8 @@ cp "${SOURCES_PATH}/cairo/cairo-version.h" "${HEADERS_PATH}/cairo/"
 cp "${SOURCES_PATH}/cairo/util/cairo-gobject/cairo-gobject.h" "${HEADERS_PATH}/cairo/"
 cp "${SOURCES_PATH}/cairo/util/cairo-script/cairo-script-interpreter.h" "${HEADERS_PATH}/cairo/"
 cd "${SOURCES_PATH}/cairo/src"
-cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${HEADERS_PATH}/cairo/"
+cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-quartz.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${HEADERS_PATH}/cairo/"
+generate_pkgconfig_file "cairo" "${CAIRO_VERSION}"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

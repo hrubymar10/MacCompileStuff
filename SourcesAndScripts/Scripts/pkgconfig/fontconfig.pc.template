@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/SourcesAndScripts/Sources/fontconfig
+PACKAGE=fontconfig
+
+Name: Fontconfig
+Description: Font configuration and customization library
+Version: VERSION
+Libs: -L${libdir} -lfontconfig
+Cflags: -I${includedir} 

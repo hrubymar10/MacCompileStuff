@@ -23,21 +23,33 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
 rm -rf "gettext"*
 get_src_and_verify_checksum "gettext-${GETTEXT_VERSION}.tar.xz" "${SHA256}" "https://ftp.gnu.org/pub/gnu/gettext/gettext-${GETTEXT_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/gettext-${GETTEXT_VERSION}.tar.xz" -C .
+cp -R "gettext-${GETTEXT_VERSION}" "gettext-${GETTEXT_VERSION}-arm64"
 ln -s "gettext-${GETTEXT_VERSION}" "gettext"
 cd "gettext"
-./configure --disable-dependency-tracking --enable-shared
-make
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+./configure --disable-dependency-tracking --enable-shared --disable-java --disable-csharp --disable-debug --disable-silent-rules --host=x86_64-apple-darwin
+make MAKEINFO=true
+# Build arm64
+cd "${SOURCES_PATH}/gettext-${GETTEXT_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./configure --disable-dependency-tracking --enable-shared --disable-java --disable-csharp --disable-debug --disable-silent-rules --host=aarch64-apple-darwin
+make MAKEINFO=true
 mkdir "gettext-${GETTEXT_VERSION}-RELEASE"
-cp "gettext-runtime/intl/.libs/libintl.8.dylib" "gettext-${GETTEXT_VERSION}-RELEASE/libintl.8.dylib"
 cd "gettext-${GETTEXT_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/gettext-${GETTEXT_VERSION}-arm64/gettext-runtime/intl/.libs/libintl.8.dylib" "${SOURCES_PATH}/gettext-${GETTEXT_VERSION}/gettext-runtime/intl/.libs/libintl.8.dylib" -output "libintl.8.dylib"
 install_name_tool -id "@rpath/libintl.8.dylib" "libintl.8.dylib"
-edit_dylib_deps "libintl.8.dylib"
 rm -rf "${LIBS_PATH}/libintl.8.dylib" "${LIBS_PATH}/libintl.dylib"
 cp "libintl.8.dylib" "${LIBS_PATH}/libintl.8.dylib"
 ln -s "libintl.8.dylib" "${LIBS_PATH}/libintl.dylib"

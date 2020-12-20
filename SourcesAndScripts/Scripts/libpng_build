@@ -23,21 +23,33 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
 rm -rf "libpng"*
 get_src_and_verify_checksum "libpng-${LIBPNG_VERSION}.tar.xz" "${SHA256}" "http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz?download" -O "libpng-${LIBPNG_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/libpng-${LIBPNG_VERSION}.tar.xz" -C .
+cp -R "libpng-${LIBPNG_VERSION}" "libpng-${LIBPNG_VERSION}-arm64"
 ln -s "libpng-${LIBPNG_VERSION}" "libpng"
 cd "libpng"
-./configure --disable-dependency-tracking --enable-shared
-make check
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
+make
 mkdir "libpng-${LIBPNG_VERSION}-RELEASE"
-cp ".libs/libpng16.16.dylib" "libpng-${LIBPNG_VERSION}-RELEASE/libpng16.16.dylib"
 cd "libpng-${LIBPNG_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-arm64/.libs/libpng16.16.dylib" "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}/.libs/libpng16.16.dylib" -output "libpng16.16.dylib"
 install_name_tool -id "@rpath/libpng16.16.dylib" "libpng16.16.dylib"
-edit_dylib_deps "libpng16.16.dylib"
 rm -rf "${LIBS_PATH}/libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
 cp "libpng16.16.dylib" "${LIBS_PATH}/libpng16.16.dylib"
 ln -s "libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"

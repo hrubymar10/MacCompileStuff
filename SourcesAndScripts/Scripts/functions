@@ -13,115 +13,93 @@ check_wget() {
   fi
 }
 
-check_xcode() {
-  if xcode-select --install 2>&1 | grep installed; then
-    echo "==> Xcode Command Line Tools are installed..."
-  else
-    echo "==> Xcode Command Line Tools aren't installed, installing..."
-    xcode-select --install
-  fi
-}
-
-# TODO: use pixman from MacCompileStuff
 check_pixman() {
-  if [ ! -f "/usr/local/lib/libpixman-1.0.dylib" ]; then
-    echo 'Error: pixman is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libpixman-1.0.dylib" ]; then
+    echo 'Error: pixman is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use fontconfig from MacCompileStuff
 check_fontconfig() {
-  if ! [ -x "$(command -v fc-cache)" ]; then
-    echo 'Error: fontconfig is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libfontconfig.dylib" ]; then
+    echo 'Error: fontconfig is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use freetype from MacCompileStuff
 check_freetype() {
-  if ! [ -x "$(command -v freetype-config)" ]; then
-    echo 'Error: freetype is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libfreetype.dylib" ]; then
+    echo 'Error: freetype is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use libpng from MacCompileStuff
 check_libpng() {
-  if ! [ -x "$(command -v libpng-config)" ]; then
-    echo 'Error: libpng is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libpng.dylib" ]; then
+    echo 'Error: libpng is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use libffi from MacCompileStuff
 check_libffi() {
-  if [ ! -f "/usr/local/Cellar/libffi/"*"/lib/libffi.dylib" ]; then
+  if ! [ -f "${LIBS_PATH}/libffi.dylib" ]; then
     echo 'Error: libffi is not installed or is not linked. Use Homebrew, install it and force link it. See https://brew.sh/' >&2
     exit 1
   fi
 }
 
-# TODO: use glib from MacCompileStuff
 check_glib() {
-  if ! [ -x "$(command -v gobject-query)" ]; then
-    echo 'Error: glib is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libglib-2.0.0.dylib" ]; then
+    echo 'Error: glib is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use gettext from MacCompileStuff
 check_gettext() {
-  if ! [ -x "$(command -v gettext)" ]; then
-    echo 'Error: gettext is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libintl.dylib" ]; then
+    echo 'Error: gettext is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use graphite2 from MacCompileStuff
 check_graphite2() {
-  if ! [ -x "$(command -v gr2fonttest)" ]; then
-    echo 'Error: graphite2 is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libgraphite2.dylib" ]; then
+    echo 'Error: graphite2 is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use cairo from MacCompileStuff
 check_cairo() {
-  if ! [ -x "$(command -v cairo-sphinx)" ]; then
-    echo 'Error: cairo is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libcairo.dylib" ]; then
+    echo 'Error: cairo is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use harfbuzz from MacCompileStuff
 check_harfbuzz() {
-  if ! [ -x "$(command -v hb-view)" ]; then
-    echo 'Error: harfbuzz is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libharfbuzz.dylib" ]; then
+    echo 'Error: harfbuzz is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use fribidi from MacCompileStuff
 check_fribidi() {
-  if [ ! -f "/usr/local/opt/fribidi/lib/libfribidi.0.dylib" ]; then
-    echo 'Error: fribidi is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libfribidi.dylib" ]; then
+    echo 'Error: fribidi is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use libogg from MacCompileStuff
 check_libogg() {
-  if [ ! -f "/usr/local/opt/libogg/lib/libogg.0.dylib" ]; then
-    echo 'Error: libogg is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libogg.dylib" ]; then
+    echo 'Error: libogg is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
 
-# TODO: use pcre from MacCompileStuff
 check_pcre() {
-  if [ ! -f "/usr/local/opt/pcre/lib/libpcre.1.dylib" ]; then
-    echo 'Error: pcre is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "${LIBS_PATH}/libpcre.dylib" ]; then
+    echo 'Error: pcre is not prepared. You must build all libraries in defined order.' >&2
     exit 1
   fi
 }
@@ -158,25 +136,6 @@ remove_rpath_if_exists() {
   fi
 }
 
-edit_dylib_deps() {
-  DYLIB=$1
-  DYLIB_DEPS=$(otool -L ${DYLIB} | awk '{print $1;}' | tail -n +2)
-  MCS_DYLIBS_PATH="${MY_PATH}/../../lib"
-
-  for DEP in ${DYLIB_DEPS}; do
-    DEP_BASE=$(basename ${DEP})
-    if [ "${DEP_BASE}" == "$(basename ${DYLIB})" ]; then
-      continue
-    fi
-    # Is this our redistributable file?
-    if [ -f $(dirname ${DYLIB})/${DEP_BASE} ]; then
-      install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-    elif [ -f "${MCS_DYLIBS_PATH}/${DEP_BASE}" ]; then
-      install_name_tool -change "${DEP}" "@loader_path/${DEP_BASE}" ${DYLIB}
-    fi
-  done
-}
-
 get_src_and_verify_checksum() {
   NAME=$1
   SHA256=$2
@@ -203,6 +162,33 @@ get_src_and_verify_checksum() {
     echo "==> SHA256 = ${SHA256}" >&2
     echo "==> actual = ${SHA256_TO_VERIFY}" >&2
     exit 1
+  fi
+}
+
+generate_pkgconfig_file() {
+  NAME=$1
+  VERSION=$2
+
+  if ! [ -f "${PKG_CONFIG_PATH}/${NAME}.pc.template" ]; then
+    echo "Error: pkgconfig template for ${NAME} doesn't exist" >&2
+    exit 1
+  fi
+
+  rm -rf "${PKG_CONFIG_PATH}/${NAME}.pc"
+  cp "${PKG_CONFIG_PATH}/${NAME}.pc.template" "${PKG_CONFIG_PATH}/${NAME}.pc"
+  sed -i '' "s:prefix=PATH:prefix=${ROOT_PATH}:" "${PKG_CONFIG_PATH}/${NAME}.pc"
+  sed -i '' "s/Version: VERSION/Version: ${VERSION}/" "${PKG_CONFIG_PATH}/${NAME}.pc"
+}
+
+is_apple_silicon_mac() {
+  if [ "$(uname -s)" = Darwin ]; then
+    if [[ "$(/usr/sbin/sysctl -n machdep.cpu.brand_string)" == *"Apple"* ]]; then
+      true
+    else
+      false
+    fi
+  else
+    false
   fi
 }
 

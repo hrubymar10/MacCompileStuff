@@ -23,26 +23,41 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
 rm -rf "libogg"*
 get_src_and_verify_checksum "libogg-${LIBOGG_VERSION}.tar.gz" "${SHA256}" "https://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/libogg-${LIBOGG_VERSION}.tar.gz" -C .
+cp -R "libogg-${LIBOGG_VERSION}" "libogg-${LIBOGG_VERSION}-arm64"
 ln -s "libogg-${LIBOGG_VERSION}" "libogg"
 cd "libogg"
-./configure --disable-dependency-tracking --enable-shared
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
 mkdir "libogg-${LIBOGG_VERSION}-RELEASE"
-cp "src/.libs/libogg.0.dylib" "libogg-${LIBOGG_VERSION}-RELEASE/libogg.0.dylib"
 cd "libogg-${LIBOGG_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-arm64/src/.libs/libogg.0.dylib" "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}/src/.libs/libogg.0.dylib" -output "libogg.0.dylib"
 install_name_tool -id "@rpath/libogg.0.dylib" "libogg.0.dylib"
-edit_dylib_deps "libogg.0.dylib"
 rm -rf "${LIBS_PATH}/libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
 cp "libogg.0.dylib" "${LIBS_PATH}/libogg.0.dylib"
 ln -s "libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
 rm -rf "${HEADERS_PATH}/ogg"
 mkdir "${HEADERS_PATH}/ogg"
 cp -rf "${SOURCES_PATH}/libogg/include/ogg/"*.h "${HEADERS_PATH}/ogg/"
+cd "${SOURCES_PATH}/libogg"
+# Patch os_types.h for OS X cross-build compatibility
+patch -b -p0 < "${SCRIPTS_PATH}/libogg.patch"
 echo "==> DONE ..."
 echo

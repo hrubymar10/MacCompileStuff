@@ -1,0 +1,10 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/SourcesAndScripts/Sources/fribidi/lib
+
+Name: GNU FriBidi
+Description: Unicode Bidirectional Algorithm Library
+Version: VERSION
+Libs: -L${libdir} -lfribidi
+Cflags: -I${includedir}

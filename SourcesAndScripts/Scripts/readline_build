@@ -31,26 +31,43 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 
 cd "${SOURCES_PATH}"
 rm -rf "readline"*
 get_src_and_verify_checksum "readline-${READLINE_VERSION}.tar.gz" "${SHA256}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/readline-${READLINE_VERSION}.tar.gz" -C .
+cp -R "readline-${READLINE_VERSION}" "readline-${READLINE_VERSION}-arm64"
 ln -s "readline-${READLINE_VERSION}" "readline"
 cd "readline"
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
 for i in $(seq 1 ${NUM_OF_PATHES}); do
   PATCH=`printf "%03d\n" ${i}`
   get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
   patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
 done
-./configure --enable-shared
+./configure --enable-shared --host=x86_64-apple-darwin
+make shared
+# Build arm64
+cd "${SOURCES_PATH}/readline-${READLINE_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+for i in $(seq 1 ${NUM_OF_PATHES}); do
+  PATCH=`printf "%03d\n" ${i}`
+  get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
+  patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
+done
+./configure --enable-shared --host=aarch64-apple-darwin
 make shared
 mkdir "readline-${READLINE_VERSION}-RELEASE"
-cp -rf "shlib/libreadline.${READLINE_VERSION}.dylib" "readline-${READLINE_VERSION}-RELEASE/libreadline.${READLINE_VERSION}.dylib"
 cd "readline-${READLINE_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/readline-${READLINE_VERSION}-arm64/shlib/libreadline.${READLINE_VERSION}.dylib" "${SOURCES_PATH}/readline-${READLINE_VERSION}/shlib/libreadline.${READLINE_VERSION}.dylib" -output "libreadline.${READLINE_VERSION}.dylib"
 install_name_tool -id "@rpath/libreadline.${READLINE_VERSION}.dylib" "libreadline.${READLINE_VERSION}.dylib"
-edit_dylib_deps "libreadline.${READLINE_VERSION}.dylib"
 rm -rf "${LIBS_PATH}/libreadline"*
 cp -rf "libreadline.${READLINE_VERSION}.dylib" "${LIBS_PATH}/libreadline.${READLINE_VERSION}.dylib"
 ln -s "libreadline.${READLINE_VERSION}.dylib" "${LIBS_PATH}/libreadline.dylib"

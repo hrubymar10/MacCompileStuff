@@ -25,9 +25,54 @@ export LIBS_PATH="${ROOT_PATH}/lib"
 export SCRIPTS_PATH="${ROOT_PATH}/SourcesAndScripts/Scripts"
 export SOURCES_PATH="${ROOT_PATH}/SourcesAndScripts/Sources"
 
-export PKG_CONFIG_PATH='/usr/local/opt/libffi/lib/pkgconfig'
+export CC="clang"
+export CXX="clang++"
+
+export FONTCONFIG_CFLAGS="-I${SOURCES_PATH}/fontconfig"
+export FONTCONFIG_LIBS="-L${LIBS_PATH} -lfontconfig"
+export FREETYPE_CFLAGS="-I${SOURCES_PATH}/freetype/include"
+export FREETYPE_LIBS="-L${LIBS_PATH} -lfreetype"
+export FT2_CFLAGS="-I${SOURCES_PATH}/freetype/include"
+export FT2_LIBS="-L${LIBS_PATH} -lfreetype"
+export glib_CFLAGS="-I${HEADERS_PATH} -I${HEADERS_PATH}/glib-2.0"
+export glib_LIBS="-L${LIBS_PATH} -lglib-2.0"
+export GOBJECT_CFLAGS="-I${HEADERS_PATH}/glib-2.0"
+export GOBJECT_LIBS="-L${LIBS_PATH} -lgobject-2.0"
+export HARFBUZZ_CFLAGS="-I${SOURCES_PATH}/harfbuzz/src"
+export HARFBUZZ_LIBS="-L${LIBS_PATH} -lharfbuzz"
+export LIBFFI_CFLAGS="-I${HEADERS_PATH}/libffi"
+export LIBFFI_LIBS="-L${LIBS_PATH} -lffi"
+export LIBPNG_CFLAGS="-I${SOURCES_PATH}/libpng"
+export LIBPNG_LIBS="-L${LIBS_PATH} -lpng"
+export pixman_CFLAGS="-I${HEADERS_PATH}/pixman"
+export pixman_LIBS="-L${LIBS_PATH} -lpixman"
+export png_REQUIRES="libpng"
+export png_CFLAGS="-I${SOURCES_PATH}/libpng"
+export png_LIBS="-L${LIBS_PATH} -lpng"
+export PNG_CFLAGS="-I${SOURCES_PATH}/libpng"
+export PNG_LIBS="-L${LIBS_PATH} -lpng"
+export OGG_CFLAGS="-I${SOURCES_PATH}/libogg/include"
+export OGG_LIBS="-L${LIBS_PATH} -logg"
+export PCRE_CFLAGS="-I${SOURCES_PATH}/pcre"
+export PCRE_LIBS="-L${LIBS_PATH} -lpcre"
+export SDL_CFLAGS="-I${HEADERS_PATH}/SDL2"
+export SDL_LIBS="-L${LIBS_PATH} -lSDL2"
+
+export LIBRARY_PATH="${LIBS_PATH}"
+export LD_LIBRARY_PATH="${LIBS_PATH}"
+
+export PKG_CONFIG_PATH="${SCRIPTS_PATH}/pkgconfig"
+
+export SDKPATH="$(xcodebuild -sdk macosx -version Path)"
 export MACOSX_DEPLOYMENT_TARGET='10.11'
 export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET='10.11'
-export LDFLAGS='-mmacosx-version-min=10.11'
-export CFLAGS='-stdlib=libc++ -mmacosx-version-min=10.11'
-export CXXFLAGS='-stdlib=libc++ -mmacosx-version-min=10.11'
+export LDFLAGS="-isysroot ${SDKPATH} -mmacosx-version-min=10.11 -L${LIBS_PATH}"
+export CFLAGS="-isysroot ${SDKPATH} -stdlib=libc++ -mmacosx-version-min=10.11 -I${HEADERS_PATH}"
+export CXXFLAGS="-isysroot ${SDKPATH} -stdlib=libc++ -mmacosx-version-min=10.11 -I${HEADERS_PATH}"
+
+export LDFLAGS_X86_64="-arch x86_64 --target=x86_64-apple-macos10.11 ${LDFLAGS}"
+export CFLAGS_X86_64="-arch x86_64 --target=x86_64-apple-macos10.11 ${CFLAGS}"
+export CXXFLAGS_X86_64="-arch x86_64 --target=x86_64-apple-macos10.11 ${CXXFLAGS}"
+export LDFLAGS_ARM64="-arch arm64 --target=arm64-apple-macos10.11 ${LDFLAGS}"
+export CFLAGS_ARM64="-arch arm64 --target=arm64-apple-macos10.11 ${CFLAGS}"
+export CXXFLAGS_ARM64="-arch arm64 --target=arm64-apple-macos10.11 ${CXXFLAGS}"

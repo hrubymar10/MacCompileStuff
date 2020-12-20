@@ -23,25 +23,38 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 check_cmake
 
 cd "${SOURCES_PATH}"
 rm -rf "graphite2"*
 get_src_and_verify_checksum "graphite2-${GRAPHITE2_VERSION}.tgz" "${SHA256}" "https://github.com/silnrsi/graphite/releases/download/${GRAPHITE2_VERSION}/graphite2-${GRAPHITE2_VERSION}.tgz"
 tar xf "${SOURCES_PATH}/archives/graphite2-${GRAPHITE2_VERSION}.tgz" -C .
+cp -R "graphite2-${GRAPHITE2_VERSION}" "graphite2-${GRAPHITE2_VERSION}-arm64"
 ln -s "graphite2-${GRAPHITE2_VERSION}" "graphite2"
 cd "graphite2"
-cmake .
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+cmake . -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_SYSTEM_NAME="Darwin" -DCMAKE_SYSTEM_PROCESSOR="x86_64"
+make
+# Build arm64
+cd "${SOURCES_PATH}/graphite2-${GRAPHITE2_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+cmake . -DCMAKE_OSX_ARCHITECTURES="arm64" -DCMAKE_SYSTEM_NAME="Darwin" -DCMAKE_SYSTEM_PROCESSOR="arm64"
 make
 mkdir "graphite2-${GRAPHITE2_VERSION}-RELEASE"
-cp "src/libgraphite2.3.2.1.dylib" "graphite2-${GRAPHITE2_VERSION}-RELEASE/libgraphite2.3.dylib"
 cd "graphite2-${GRAPHITE2_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/graphite2-${GRAPHITE2_VERSION}-arm64/src/libgraphite2.3.2.1.dylib" "${SOURCES_PATH}/graphite2-${GRAPHITE2_VERSION}/src/libgraphite2.3.2.1.dylib" -output "libgraphite2.3.dylib"
 install_name_tool -id "@rpath/libgraphite2.3.dylib" "libgraphite2.3.dylib"
-edit_dylib_deps "libgraphite2.3.dylib"
 rm -rf "${LIBS_PATH}/libgraphite2.3.dylib" "${LIBS_PATH}/libgraphite2.dylib"
 cp -rf "libgraphite2.3.dylib" "${LIBS_PATH}/libgraphite2.3.dylib"
 ln -s "libgraphite2.3.dylib" "${LIBS_PATH}/libgraphite2.dylib"
+generate_pkgconfig_file "graphite2" "${GRAPHITE2_VERSION}"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

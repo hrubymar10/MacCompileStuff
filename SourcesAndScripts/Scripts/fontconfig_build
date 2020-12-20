@@ -23,29 +23,43 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
-check_xcode
 check_freetype
 
 cd "${SOURCES_PATH}"
 rm -rf "fontconfig"*
 get_src_and_verify_checksum "fontconfig-${FONTCONFIG_VERSION}.tar.gz" "${SHA256}" "https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/fontconfig-${FONTCONFIG_VERSION}.tar.gz" -C .
+cp -R "fontconfig-${FONTCONFIG_VERSION}" "fontconfig-${FONTCONFIG_VERSION}-arm64"
 ln -s "fontconfig-${FONTCONFIG_VERSION}" "fontconfig"
 cd "fontconfig"
-patch -b < "${SCRIPTS_PATH}/fontconfig.patch"
-./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts"
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+patch -b -p0 < "${SCRIPTS_PATH}/fontconfig.patch"
+./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts" --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/fontconfig-${FONTCONFIG_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+patch -b -p0 < "${SCRIPTS_PATH}/fontconfig.patch"
+./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts" --host=aarch64-apple-darwin
 make
 mkdir "fontconfig-${FONTCONFIG_VERSION}-RELEASE"
-cp "src/.libs/libfontconfig.1.dylib" "fontconfig-${FONTCONFIG_VERSION}-RELEASE/libfontconfig.1.dylib"
 cd "fontconfig-${FONTCONFIG_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/fontconfig-${FONTCONFIG_VERSION}-arm64/src/.libs/libfontconfig.1.dylib" "${SOURCES_PATH}/fontconfig-${FONTCONFIG_VERSION}/src/.libs/libfontconfig.1.dylib" -output "libfontconfig.1.dylib"
 install_name_tool -id "@rpath/libfontconfig.1.dylib" "libfontconfig.1.dylib"
-edit_dylib_deps "libfontconfig.1.dylib"
 rm -rf "${LIBS_PATH}/libfontconfig.1.dylib" "${LIBS_PATH}/libfontconfig.dylib"
 cp -rf "libfontconfig.1.dylib" "${LIBS_PATH}/libfontconfig.1.dylib"
 ln -s "libfontconfig.1.dylib" "${LIBS_PATH}/libfontconfig.dylib"
 rm -rf "${HEADERS_PATH}/fontconfig"
 mkdir "${HEADERS_PATH}/fontconfig"
 cp -rf "${SOURCES_PATH}/fontconfig/fontconfig/fontconfig.h" "${HEADERS_PATH}/fontconfig/fontconfig.h"
+generate_pkgconfig_file "fontconfig" "${FONTCONFIG_VERSION}"
 echo "==> DONE ..."
 echo
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
