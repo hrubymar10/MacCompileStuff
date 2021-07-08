@@ -27,23 +27,6 @@
 
 G_BEGIN_DECLS
 
-/**
- * PANGO_TYPE_FONT_MAP:
- *
- * The #GObject type for #PangoFontMap.
- */
-/**
- * PANGO_FONT_MAP:
- * @object: a #GObject.
- *
- * Casts a #GObject to a #PangoFontMap.
- */
-/**
- * PANGO_IS_FONT_MAP:
- * @object: a #GObject.
- *
- * Returns: %TRUE if @object is a #PangoFontMap.
- */
 #define PANGO_TYPE_FONT_MAP              (pango_font_map_get_type ())
 #define PANGO_FONT_MAP(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), PANGO_TYPE_FONT_MAP, PangoFontMap))
 #define PANGO_IS_FONT_MAP(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), PANGO_TYPE_FONT_MAP))
@@ -57,17 +40,11 @@ typedef struct _PangoContext PangoContext;
 /**
  * PangoFontMap:
  *
- * The #PangoFontMap represents the set of fonts available for a
- * particular rendering system. This is a virtual object with
- * implementations being specific to particular rendering systems.  To
- * create an implementation of a #PangoFontMap, the rendering-system
- * specific code should allocate a larger structure that contains a nested
- * #PangoFontMap, fill in the <structfield>klass</structfield> member of the nested #PangoFontMap with a
- * pointer to a appropriate #PangoFontMapClass, then call
- * pango_font_map_init() on the structure.
+ * A `PangoFontMap` represents the set of fonts available for a
+ * particular rendering system.
  *
- * The #PangoFontMap structure contains one member which the implementation
- * fills in.
+ * This is a virtual object with implementations being specific to
+ * particular rendering systems.
  */
 struct _PangoFontMap
 {
@@ -76,7 +53,7 @@ struct _PangoFontMap
 
 /**
  * PangoFontMapClass:
- * @parent_class: parent #GObjectClass.
+ * @parent_class: parent `GObjectClass`
  * @load_font: a function to load a font with a given description. See
  * pango_font_map_load_font().
  * @list_families: A function to list available font families. See
@@ -89,8 +66,8 @@ struct _PangoFontMap
  * See pango_font_map_get_serial().
  * @changed: See pango_font_map_changed()
  *
- * The #PangoFontMapClass structure holds the virtual functions for
- * a particular #PangoFontMap implementation.
+ * The `PangoFontMapClass` structure holds the virtual functions for
+ * a particular `PangoFontMap` implementation.
  */
 struct _PangoFontMapClass
 {

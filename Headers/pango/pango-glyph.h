@@ -36,8 +36,10 @@ typedef struct _PangoGlyphString PangoGlyphString;
 /**
  * PangoGlyphUnit:
  *
- * The #PangoGlyphUnit type is used to store dimensions within
- * Pango. Dimensions are stored in 1/%PANGO_SCALE of a device unit.
+ * The `PangoGlyphUnit` type is used to store dimensions within
+ * Pango.
+ *
+ * Dimensions are stored in 1/%PANGO_SCALE of a device unit.
  * (A device unit might be a pixel for screen display, or
  * a point on a printer.) %PANGO_SCALE is currently 1024, and
  * may change in the future (unlikely though), but you should not
@@ -54,7 +56,7 @@ typedef gint32 PangoGlyphUnit;
  * @x_offset: horizontal offset from nominal character position.
  * @y_offset: vertical offset from nominal character position.
  *
- * The #PangoGlyphGeometry structure contains width and positioning
+ * The `PangoGlyphGeometry` structure contains width and positioning
  * information for a single glyph.
  */
 struct _PangoGlyphGeometry
@@ -68,15 +70,17 @@ struct _PangoGlyphGeometry
  */
 /**
  * PangoGlyphVisAttr:
- * @is_cluster_start: set for the first logical glyph in each cluster. (Clusters
- * are stored in visual order, within the cluster, glyphs
- * are always ordered in logical order, since visual
- * order is meaningless; that is, in Arabic text, accent glyphs
- * follow the glyphs for the base character.)
+ * @is_cluster_start: set for the first logical glyph in each cluster.
+ *   (Clusters are stored in visual order, within the cluster, glyphs
+ *   are always ordered in logical order, since visual order is meaningless;
+ *   that is, in Arabic text, accent glyphs follow the glyphs for the
+ *   base character.)
  *
- * The PangoGlyphVisAttr is used to communicate information between
- * the shaping phase and the rendering phase.  More attributes may be
- * added in the future.
+ * A `PangoGlyphVisAttr` structure communicates information between
+ * the shaping and rendering phases.
+ *
+ * Currently, it contains only cluster start information. yMore attributes
+ * may be added in the future.
  */
 struct _PangoGlyphVisAttr
 {
@@ -91,9 +95,8 @@ struct _PangoGlyphVisAttr
  * @geometry: the positional information about the glyph.
  * @attr: the visual attributes of the glyph.
  *
- * The #PangoGlyphInfo structure represents a single glyph together with
+ * A `PangoGlyphInfo` structure represents a single glyph with
  * positioning information and visual attributes.
- * It contains the following fields.
  */
 struct _PangoGlyphInfo
 {
@@ -102,21 +105,19 @@ struct _PangoGlyphInfo
   PangoGlyphVisAttr  attr;
 };
 
-/* A string of glyphs with positional information and visual attributes -
- * ready for drawing
- */
 /**
  * PangoGlyphString:
  * @num_glyphs: number of the glyphs in this glyph string.
  * @glyphs: (array length=num_glyphs): array of glyph information
- *          for the glyph string.
+ *   for the glyph string.
  * @log_clusters: logical cluster info, indexed by the byte index
- *                within the text corresponding to the glyph string.
+ *   within the text corresponding to the glyph string.
  *
- * The #PangoGlyphString structure is used to store strings
- * of glyphs with geometry and visual attribute information.
- * The storage for the glyph information is owned
- * by the structure which simplifies memory management.
+ * A `PangoGlyphString` is used to store strings of glyphs with geometry
+ * and visual attribute information.
+ *
+ * The storage for the glyph information is owned by the structure
+ * which simplifies memory management.
  */
 struct _PangoGlyphString {
   gint num_glyphs;
@@ -128,11 +129,6 @@ struct _PangoGlyphString {
   gint space;
 };
 
-/**
- * PANGO_TYPE_GLYPH_STRING:
- *
- * The #GObject type for #PangoGlyphString.
- */
 #define PANGO_TYPE_GLYPH_STRING (pango_glyph_string_get_type ())
 
 PANGO_AVAILABLE_IN_ALL
@@ -206,12 +202,13 @@ void pango_shape_full (const char          *item_text,
  * PangoShapeFlags:
  * @PANGO_SHAPE_NONE: Default value.
  * @PANGO_SHAPE_ROUND_POSITIONS: Round glyph positions
- *     and widths to whole device units. This option should
- *     be set if the target renderer can't do subpixel
- *     positioning of glyphs.
+ *   and widths to whole device units. This option should
+ *   be set if the target renderer can't do subpixel
+ *   positioning of glyphs.
  *
  * Flags influencing the shaping process.
- * These can be passed to pango_shape_with_flags().
+ *
+ * `PangoShapeFlags` can be passed to [func@Pango.shape_with_flags].
  */
 typedef enum {
   PANGO_SHAPE_NONE            = 0,

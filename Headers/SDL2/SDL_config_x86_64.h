@@ -104,6 +104,10 @@
 #define HAVE_WCSSTR 1
 #define HAVE_WCSCMP 1
 #define HAVE_WCSNCMP 1
+#define HAVE_WCSCASECMP 1
+/* #undef HAVE__WCSICMP */
+#define HAVE_WCSNCASECMP 1
+/* #undef HAVE__WCSNICMP */
 #define HAVE_STRLEN 1
 #define HAVE_STRLCPY 1
 #define HAVE_STRLCAT 1
@@ -177,6 +181,8 @@
 #define HAVE_SQRTF 1
 #define HAVE_TAN 1
 #define HAVE_TANF 1
+#define HAVE_TRUNC 1
+#define HAVE_TRUNCF 1
 /* #undef HAVE_FOPEN64 */
 #define HAVE_FSEEKO 1
 /* #undef HAVE_FSEEKO64 */
@@ -194,6 +200,7 @@
 /* #undef HAVE_PTHREAD_SET_NAME_NP */
 /* #undef HAVE_SEM_TIMEDWAIT */
 /* #undef HAVE_GETAUXVAL */
+/* #undef HAVE_ELF_AUX_INFO */
 #define HAVE_POLL 1
 #define HAVE__EXIT 1
 
@@ -205,19 +212,26 @@
 
 /* #undef HAVE_ALTIVEC_H */
 /* #undef HAVE_DBUS_DBUS_H */
-/* #undef HAVE_FCITX_FRONTEND_H */
+/* #undef HAVE_FCITX */
+/* #undef HAVE_SYS_INOTIFY_H */
+/* #undef HAVE_INOTIFY_INIT */
+/* #undef HAVE_INOTIFY_INIT1 */
+/* #undef HAVE_INOTIFY */
 /* #undef HAVE_IBUS_IBUS_H */
 #define HAVE_IMMINTRIN_H 1
-/* #undef HAVE_LIBSAMPLERATE_H */
 /* #undef HAVE_LIBUDEV_H */
+/* #undef HAVE_LIBSAMPLERATE_H */
 
 /* #undef HAVE_DDRAW_H */
 /* #undef HAVE_DINPUT_H */
 /* #undef HAVE_DSOUND_H */
 /* #undef HAVE_DXGI_H */
 /* #undef HAVE_XINPUT_H */
+
 /* #undef HAVE_MMDEVICEAPI_H */
 /* #undef HAVE_AUDIOCLIENT_H */
+/* #undef HAVE_SENSORSAPI_H */
+
 /* #undef HAVE_XINPUT_GAMEPAD_EX */
 /* #undef HAVE_XINPUT_STATE_EX */
 
@@ -277,20 +291,23 @@
 
 /* Enable various input drivers */
 /* #undef SDL_INPUT_LINUXEV */
+/* #undef SDL_INPUT_FBSDKBIO */
 /* #undef SDL_INPUT_LINUXKD */
-/* #undef SDL_INPUT_TSLIB */
 /* #undef SDL_JOYSTICK_HAIKU */
 /* #undef SDL_JOYSTICK_DINPUT */
 /* #undef SDL_JOYSTICK_XINPUT */
 /* #undef SDL_JOYSTICK_DUMMY */
 #define SDL_JOYSTICK_IOKIT 1
+#define SDL_JOYSTICK_MFI 1
 /* #undef SDL_JOYSTICK_LINUX */
 /* #undef SDL_JOYSTICK_ANDROID */
 /* #undef SDL_JOYSTICK_WINMM */
 /* #undef SDL_JOYSTICK_USBHID */
 /* #undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H */
-/* #undef SDL_JOYSTICK_HIDAPI */
+#define SDL_JOYSTICK_HIDAPI 1
+/* #undef SDL_JOYSTICK_RAWINPUT */
 /* #undef SDL_JOYSTICK_EMSCRIPTEN */
+#define SDL_JOYSTICK_VIRTUAL 1
 /* #undef SDL_HAPTIC_DUMMY */
 /* #undef SDL_HAPTIC_ANDROID */
 /* #undef SDL_HAPTIC_LINUX */
@@ -300,6 +317,8 @@
 
 /* Enable various sensor drivers */
 /* #undef SDL_SENSOR_ANDROID */
+/* #undef SDL_SENSOR_COREMOTION */
+/* #undef SDL_SENSOR_WINDOWS */
 #define SDL_SENSOR_DUMMY 1
 
 /* Enable various shared object loading systems */

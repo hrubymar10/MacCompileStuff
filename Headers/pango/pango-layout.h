@@ -36,10 +36,10 @@ typedef struct _PangoLayoutLine  PangoLayoutLine;
 /**
  * PangoLayoutRun:
  *
- * The #PangoLayoutRun structure represents a single run within
- * a #PangoLayoutLine; it is simply an alternate name for
- * #PangoGlyphItem.
- * See the #PangoGlyphItem docs for details on the fields.
+ * A `PangoLayoutRun` represents a single run within a `PangoLayoutLine`.
+ *
+ * It is simply an alternate name for [struct@Pango.GlyphItem].
+ * See the [struct@Pango.GlyphItem] docs for details on the fields.
  */
 typedef PangoGlyphItem PangoLayoutRun;
 
@@ -49,9 +49,11 @@ typedef PangoGlyphItem PangoLayoutRun;
  * @PANGO_ALIGN_CENTER: Center the line within the available space
  * @PANGO_ALIGN_RIGHT: Put all available space on the left
  *
- * A #PangoAlignment describes how to align the lines of a #PangoLayout within the
- * available space. If the #PangoLayout is set to justify
- * using pango_layout_set_justify(), this only has effect for partial lines.
+ * `PangoAlignment` describes how to align the lines of a `PangoLayout`
+ * within the available space.
+ *
+ * If the `PangoLayout` is set to justify using [method@Pango.Layout.set_justify],
+ * this only has effect for partial lines.
  */
 typedef enum {
   PANGO_ALIGN_LEFT,
@@ -63,10 +65,16 @@ typedef enum {
  * PangoWrapMode:
  * @PANGO_WRAP_WORD: wrap lines at word boundaries.
  * @PANGO_WRAP_CHAR: wrap lines at character boundaries.
- * @PANGO_WRAP_WORD_CHAR: wrap lines at word boundaries, but fall back to character boundaries if there is not
- * enough space for a full word.
+ * @PANGO_WRAP_WORD_CHAR: wrap lines at word boundaries, but fall back to
+ *   character boundaries if there is not enough space for a full word.
  *
- * A #PangoWrapMode describes how to wrap the lines of a #PangoLayout to the desired width.
+ * `PangoWrapMode` describes how to wrap the lines of a `PangoLayout`
+ * to the desired width.
+ *
+ * For @PANGO_WRAP_WORD, Pango uses break opportunities that are determined
+ * by the Unicode line breaking algorithm. For @PANGO_WRAP_CHAR, Pango allows
+ * breaking at grapheme boundaries that are determined by the Unicode text
+ * segmentation algorithm.
  */
 typedef enum {
   PANGO_WRAP_WORD,
@@ -81,9 +89,10 @@ typedef enum {
  * @PANGO_ELLIPSIZE_MIDDLE: Omit characters in the middle of the text
  * @PANGO_ELLIPSIZE_END: Omit characters at the end of the text
  *
- * The #PangoEllipsizeMode type describes what sort of (if any)
- * ellipsization should be applied to a line of text. In
- * the ellipsization process characters are removed from the
+ * `PangoEllipsizeMode` describes what sort of ellipsization
+ * should be applied to text.
+ *
+ * In the ellipsization process characters are removed from the
  * text in order to make it fit to a given width and replaced
  * with an ellipsis.
  */
@@ -96,22 +105,20 @@ typedef enum {
 
 /**
  * PangoLayoutLine:
- * @layout: (allow-none): the layout this line belongs to, might be %NULL
+ * @layout: (nullable): the layout this line belongs to, might be %NULL
  * @start_index: start of line as byte index into layout->text
  * @length: length of line in bytes
- * @runs: (allow-none) (element-type Pango.LayoutRun): list of runs in the
- *        line, from left to right
+ * @runs: (nullable) (element-type Pango.LayoutRun): list of runs in the
+ *   line, from left to right
  * @is_paragraph_start: #TRUE if this is the first line of the paragraph
  * @resolved_dir: #Resolved PangoDirection of line
  *
- * The #PangoLayoutLine structure represents one of the lines resulting
- * from laying out a paragraph via #PangoLayout. #PangoLayoutLine
- * structures are obtained by calling pango_layout_get_line() and
- * are only valid until the text, attributes, or settings of the
- * parent #PangoLayout are modified.
+ * A `PangoLayoutLine` represents one of the lines resulting from laying
+ * out a paragraph via `PangoLayout`.
  *
- * Routines for rendering PangoLayout objects are provided in
- * code specific to each rendering system.
+ * `PangoLayoutLine` structures are obtained by calling
+ * [method@Pango.Layout.get_line] and are only valid until the text,
+ * attributes, or settings of the parent `PangoLayout` are modified.
  */
 struct _PangoLayoutLine
 {

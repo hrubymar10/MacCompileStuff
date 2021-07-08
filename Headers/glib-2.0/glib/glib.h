@@ -82,6 +82,7 @@
 #include <glib/gstrfuncs.h>
 #include <glib/gstringchunk.h>
 #include <glib/gstring.h>
+#include <glib/gstrvbuilder.h>
 #include <glib/gtestutils.h>
 #include <glib/gthread.h>
 #include <glib/gthreadpool.h>
@@ -111,6 +112,7 @@
 #include <glib/deprecated/gthread.h>
 
 #include <glib/glib-autocleanups.h>
+#include <glib/glib-typeof.h>
 
 #undef __GLIB_H_INSIDE__
 

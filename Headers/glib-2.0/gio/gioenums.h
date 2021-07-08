@@ -1206,6 +1206,8 @@ typedef enum
  * message bus. This means that the Hello() method will be invoked as part of the connection setup.
  * @G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING: If set, processing of D-Bus messages is
  * delayed until g_dbus_connection_start_message_processing() is called.
+ * @G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER: When authenticating
+ * as a server, require the UID of the peer to be the same as the UID of the server. (Since: 2.68)
  *
  * Flags used when creating a new #GDBusConnection.
  *
@@ -1217,7 +1219,8 @@ typedef enum {
   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER = (1<<1),
   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<2),
   G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION = (1<<3),
-  G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING = (1<<4)
+  G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING = (1<<4),
+  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GLIB_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<5)
 } GDBusConnectionFlags;
 
 /**
@@ -1368,6 +1371,8 @@ typedef enum
  * details).
  * @G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS: Allow the anonymous
  * authentication method.
+ * @G_DBUS_SERVER_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER: Require the UID of the
+ * peer to be the same as the UID of the server when authenticating. (Since: 2.68)
  *
  * Flags used when creating a #GDBusServer.
  *
@@ -1377,7 +1382,8 @@ typedef enum
 {
   G_DBUS_SERVER_FLAGS_NONE = 0,
   G_DBUS_SERVER_FLAGS_RUN_IN_THREAD = (1<<0),
-  G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<1)
+  G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<1),
+  G_DBUS_SERVER_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GLIB_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<2)
 } GDBusServerFlags;
 
 /**
@@ -1697,6 +1703,12 @@ typedef enum {
  *    wrong many times, and the user may not have many chances left.
  * @G_TLS_PASSWORD_FINAL_TRY: Hint to the user that this is the last try to get
  *    this password right.
+ * @G_TLS_PASSWORD_PKCS11_USER: For PKCS #11, the user PIN is required.
+ *    Since: 2.70.
+ * @G_TLS_PASSWORD_PKCS11_SECURITY_OFFICER: For PKCS #11, the security officer
+ *    PIN is required. Since: 2.70.
+ * @G_TLS_PASSWORD_PKCS11_CONTEXT_SPECIFIC: For PKCS #11, the context-specific
+ *    PIN is required. Since: 2.70.
  *
  * Various flags for the password.
  *
@@ -1708,7 +1720,10 @@ typedef enum _GTlsPasswordFlags
   G_TLS_PASSWORD_NONE = 0,
   G_TLS_PASSWORD_RETRY = 1 << 1,
   G_TLS_PASSWORD_MANY_TRIES = 1 << 2,
-  G_TLS_PASSWORD_FINAL_TRY = 1 << 3
+  G_TLS_PASSWORD_FINAL_TRY = 1 << 3,
+  G_TLS_PASSWORD_PKCS11_USER = 1 << 4,
+  G_TLS_PASSWORD_PKCS11_SECURITY_OFFICER = 1 << 5,
+  G_TLS_PASSWORD_PKCS11_CONTEXT_SPECIFIC = 1 << 6
 } GTlsPasswordFlags;
 
 /**
@@ -1809,6 +1824,40 @@ typedef enum {
 typedef enum {
   G_TLS_CERTIFICATE_REQUEST_NONE = 0
 } GTlsCertificateRequestFlags;
+
+/**
+ * GTlsProtocolVersion:
+ * @G_TLS_PROTOCOL_VERSION_UNKNOWN: No protocol version or unknown protocol version
+ * @G_TLS_PROTOCOL_VERSION_SSL_3_0: SSL 3.0, which is insecure and should not be used
+ * @G_TLS_PROTOCOL_VERSION_TLS_1_0: TLS 1.0, which is insecure and should not be used
+ * @G_TLS_PROTOCOL_VERSION_TLS_1_1: TLS 1.1, which is insecure and should not be used
+ * @G_TLS_PROTOCOL_VERSION_TLS_1_2: TLS 1.2, defined by [RFC 5246](https://datatracker.ietf.org/doc/html/rfc5246)
+ * @G_TLS_PROTOCOL_VERSION_TLS_1_3: TLS 1.3, defined by [RFC 8446](https://datatracker.ietf.org/doc/html/rfc8446)
+ * @G_TLS_PROTOCOL_VERSION_DTLS_1_0: DTLS 1.0, which is insecure and should not be used
+ * @G_TLS_PROTOCOL_VERSION_DTLS_1_2: DTLS 1.2, defined by [RFC 6347](https://datatracker.ietf.org/doc/html/rfc6347)
+ *
+ * The TLS or DTLS protocol version used by a #GTlsConnection or
+ * #GDtlsConnection. The integer values of these versions are sequential
+ * to ensure newer known protocol versions compare greater than older
+ * known versions. Any known DTLS protocol version will compare greater
+ * than any SSL or TLS protocol version. The protocol version may be
+ * %G_TLS_PROTOCOL_VERSION_UNKNOWN if the TLS backend supports a newer
+ * protocol version that GLib does not yet know about. This means that
+ * it's possible for an unknown DTLS protocol version to compare less
+ * than the TLS protocol versions.
+ *
+ * Since: 2.70
+ */
+typedef enum {
+  G_TLS_PROTOCOL_VERSION_UNKNOWN = 0,
+  G_TLS_PROTOCOL_VERSION_SSL_3_0 = 1,
+  G_TLS_PROTOCOL_VERSION_TLS_1_0 = 2,
+  G_TLS_PROTOCOL_VERSION_TLS_1_1 = 3,
+  G_TLS_PROTOCOL_VERSION_TLS_1_2 = 4,
+  G_TLS_PROTOCOL_VERSION_TLS_1_3 = 5,
+  G_TLS_PROTOCOL_VERSION_DTLS_1_0 = 201,
+  G_TLS_PROTOCOL_VERSION_DTLS_1_2 = 202,
+} GTlsProtocolVersion;
 
 /**
  * GIOModuleScopeFlags:

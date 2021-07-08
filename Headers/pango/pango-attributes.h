@@ -37,7 +37,7 @@ typedef struct _PangoColor PangoColor;
  * @green: value of green component
  * @blue: value of blue component
  *
- * The #PangoColor structure is used to
+ * The `PangoColor` structure is used to
  * represent a color in an uncalibrated RGB color-space.
  */
 struct _PangoColor
@@ -50,7 +50,7 @@ struct _PangoColor
 /**
  * PANGO_TYPE_COLOR:
  *
- * The #GObject type for #PangoColor.
+ * The `GObject` type for `PangoColor`.
  */
 #define PANGO_TYPE_COLOR pango_color_get_type ()
 PANGO_AVAILABLE_IN_ALL
@@ -93,33 +93,36 @@ typedef struct _PangoAttrFontFeatures PangoAttrFontFeatures;
 /**
  * PANGO_TYPE_ATTR_LIST:
  *
- * The #GObject type for #PangoAttrList.
+ * The `GObject` type for `PangoAttrList`.
  */
 #define PANGO_TYPE_ATTR_LIST pango_attr_list_get_type ()
+
 /**
  * PangoAttrIterator:
  *
- * The #PangoAttrIterator structure is used to represent an
- * iterator through a #PangoAttrList. A new iterator is created
- * with pango_attr_list_get_iterator(). Once the iterator
- * is created, it can be advanced through the style changes
- * in the text using pango_attr_iterator_next(). At each
- * style change, the range of the current style segment and the
- * attributes currently in effect can be queried.
+ * A `PangoAttrIterator` is used to iterate through a `PangoAttrList`.
+ *
+ * A new iterator is created with [method@Pango.AttrList.get_iterator].
+ * Once the iterator is created, it can be advanced through the style
+ * changes in the text using [method@Pango.AttrIterator.next]. At each
+ * style change, the range of the current style segment and the attributes
+ * currently in effect can be queried.
  */
+
 /**
  * PangoAttrList:
  *
- * The #PangoAttrList structure represents a list of attributes
- * that apply to a section of text. The attributes are, in general,
- * allowed to overlap in an arbitrary fashion, however, if the
- * attributes are manipulated only through pango_attr_list_change(),
- * the overlap between properties will meet stricter criteria.
+ * A `PangoAttrList` represents a list of attributes that apply to a section
+ * of text.
  *
- * Since the #PangoAttrList structure is stored as a linear list,
- * it is not suitable for storing attributes for large amounts
- * of text. In general, you should not use a single #PangoAttrList
- * for more than one paragraph of text.
+ * The attributes in a `PangoAttrList` are, in general, allowed to overlap in
+ * an arbitrary fashion. However, if the attributes are manipulated only through
+ * [method@Pango.AttrList.change], the overlap between properties will meet
+ * stricter criteria.
+ *
+ * Since the `PangoAttrList` structure is stored as a linear list, it is not
+ * suitable for storing attributes for large amounts of text. In general, you
+ * should not use a single `PangoAttrList` for more than one paragraph of text.
  */
 typedef struct _PangoAttrList     PangoAttrList;
 typedef struct _PangoAttrIterator PangoAttrIterator;
@@ -127,43 +130,43 @@ typedef struct _PangoAttrIterator PangoAttrIterator;
 /**
  * PangoAttrType:
  * @PANGO_ATTR_INVALID: does not happen
- * @PANGO_ATTR_LANGUAGE: language (#PangoAttrLanguage)
- * @PANGO_ATTR_FAMILY: font family name list (#PangoAttrString)
- * @PANGO_ATTR_STYLE: font slant style (#PangoAttrInt)
- * @PANGO_ATTR_WEIGHT: font weight (#PangoAttrInt)
- * @PANGO_ATTR_VARIANT: font variant (normal or small caps) (#PangoAttrInt)
- * @PANGO_ATTR_STRETCH: font stretch (#PangoAttrInt)
- * @PANGO_ATTR_SIZE: font size in points scaled by %PANGO_SCALE (#PangoAttrInt)
- * @PANGO_ATTR_FONT_DESC: font description (#PangoAttrFontDesc)
- * @PANGO_ATTR_FOREGROUND: foreground color (#PangoAttrColor)
- * @PANGO_ATTR_BACKGROUND: background color (#PangoAttrColor)
- * @PANGO_ATTR_UNDERLINE: whether the text has an underline (#PangoAttrInt)
- * @PANGO_ATTR_STRIKETHROUGH: whether the text is struck-through (#PangoAttrInt)
- * @PANGO_ATTR_RISE: baseline displacement (#PangoAttrInt)
- * @PANGO_ATTR_SHAPE: shape (#PangoAttrShape)
- * @PANGO_ATTR_SCALE: font size scale factor (#PangoAttrFloat)
- * @PANGO_ATTR_FALLBACK: whether fallback is enabled (#PangoAttrInt)
- * @PANGO_ATTR_LETTER_SPACING: letter spacing (#PangoAttrInt)
- * @PANGO_ATTR_UNDERLINE_COLOR: underline color (#PangoAttrColor)
- * @PANGO_ATTR_STRIKETHROUGH_COLOR: strikethrough color (#PangoAttrColor)
- * @PANGO_ATTR_ABSOLUTE_SIZE: font size in pixels scaled by %PANGO_SCALE (#PangoAttrInt)
- * @PANGO_ATTR_GRAVITY: base text gravity (#PangoAttrInt)
- * @PANGO_ATTR_GRAVITY_HINT: gravity hint (#PangoAttrInt)
- * @PANGO_ATTR_FONT_FEATURES: OpenType font features (#PangoAttrString). Since 1.38
- * @PANGO_ATTR_FOREGROUND_ALPHA: foreground alpha (#PangoAttrInt). Since 1.38
- * @PANGO_ATTR_BACKGROUND_ALPHA: background alpha (#PangoAttrInt). Since 1.38
- * @PANGO_ATTR_ALLOW_BREAKS: whether breaks are allowed (#PangoAttrInt). Since 1.44
- * @PANGO_ATTR_SHOW: how to render invisible characters (#PangoAttrInt). Since 1.44
- * @PANGO_ATTR_INSERT_HYPHENS: whether to insert hyphens at intra-word line breaks (#PangoAttrInt). Since 1.44
- * @PANGO_ATTR_OVERLINE: whether the text has an overline (#PangoAttrInt). Since 1.46
- * @PANGO_ATTR_OVERLINE_COLOR: overline color (#PangoAttrColor). Since 1.46
+ * @PANGO_ATTR_LANGUAGE: language ([struct@Pango.AttrLanguage])
+ * @PANGO_ATTR_FAMILY: font family name list ([struct@Pango.AttrString])
+ * @PANGO_ATTR_STYLE: font slant style ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_WEIGHT: font weight ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_VARIANT: font variant (normal or small caps) ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_STRETCH: font stretch ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_SIZE: font size in points scaled by %PANGO_SCALE ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_FONT_DESC: font description ([struct@Pango.AttrFontDesc])
+ * @PANGO_ATTR_FOREGROUND: foreground color ([struct@Pango.AttrColor])
+ * @PANGO_ATTR_BACKGROUND: background color ([struct@Pango.AttrColor])
+ * @PANGO_ATTR_UNDERLINE: whether the text has an underline ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_STRIKETHROUGH: whether the text is struck-through ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_RISE: baseline displacement ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_SHAPE: shape ([struct@Pango.AttrShape])
+ * @PANGO_ATTR_SCALE: font size scale factor ([struct@Pango.AttrFloat])
+ * @PANGO_ATTR_FALLBACK: whether fallback is enabled ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_LETTER_SPACING: letter spacing ([struct@PangoAttrInt])
+ * @PANGO_ATTR_UNDERLINE_COLOR: underline color ([struct@Pango.AttrColor])
+ * @PANGO_ATTR_STRIKETHROUGH_COLOR: strikethrough color ([struct@Pango.AttrColor])
+ * @PANGO_ATTR_ABSOLUTE_SIZE: font size in pixels scaled by %PANGO_SCALE ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_GRAVITY: base text gravity ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_GRAVITY_HINT: gravity hint ([struct@Pango.AttrInt])
+ * @PANGO_ATTR_FONT_FEATURES: OpenType font features ([struct@Pango.AttrString]). Since 1.38
+ * @PANGO_ATTR_FOREGROUND_ALPHA: foreground alpha ([struct@Pango.AttrInt]). Since 1.38
+ * @PANGO_ATTR_BACKGROUND_ALPHA: background alpha ([struct@Pango.AttrInt]). Since 1.38
+ * @PANGO_ATTR_ALLOW_BREAKS: whether breaks are allowed ([struct@Pango.AttrInt]). Since 1.44
+ * @PANGO_ATTR_SHOW: how to render invisible characters ([struct@Pango.AttrInt]). Since 1.44
+ * @PANGO_ATTR_INSERT_HYPHENS: whether to insert hyphens at intra-word line breaks ([struct@Pango.AttrInt]). Since 1.44
+ * @PANGO_ATTR_OVERLINE: whether the text has an overline ([struct@Pango.AttrInt]). Since 1.46
+ * @PANGO_ATTR_OVERLINE_COLOR: overline color ([struct@Pango.AttrColor]). Since 1.46
  *
- * The #PangoAttrType
- * distinguishes between different types of attributes. Along with the
- * predefined values, it is possible to allocate additional values
- * for custom attributes using pango_attr_type_register(). The predefined
- * values are given below. The type of structure used to store the
- * attribute is listed in parentheses after the description.
+ * The `PangoAttrType` distinguishes between different types of attributes.
+ *
+ * Along with the predefined values, it is possible to allocate additional
+ * values for custom attributes using [func@AttrType.register]. The predefined
+ * values are given below. The type of structure used to store the attribute is
+ * listed in parentheses after the description.
  */
 typedef enum
 {
@@ -206,29 +209,31 @@ typedef enum
  * @PANGO_UNDERLINE_SINGLE: a single underline should be drawn
  * @PANGO_UNDERLINE_DOUBLE: a double underline should be drawn
  * @PANGO_UNDERLINE_LOW: a single underline should be drawn at a
- *     position beneath the ink extents of the text being
- *     underlined. This should be used only for underlining
- *     single characters, such as for keyboard accelerators.
- *     %PANGO_UNDERLINE_SINGLE should be used for extended
- *     portions of text.
- * @PANGO_UNDERLINE_ERROR: a wavy underline should be drawn below.
- *     This underline is typically used to indicate an error such
- *     as a possible mispelling; in some cases a contrasting color
- *     may automatically be used. This type of underlining is
- *     available since Pango 1.4.
+ *   position beneath the ink extents of the text being
+ *   underlined. This should be used only for underlining
+ *   single characters, such as for keyboard accelerators.
+ *   %PANGO_UNDERLINE_SINGLE should be used for extended
+ *   portions of text.
+ * @PANGO_UNDERLINE_ERROR: an underline indicating an error should
+ *   be drawn below. The exact style of rendering is up to the
+ *   `PangoRenderer` in use, but typical styles include wavy
+ *   or dotted lines.
+ *   This underline is typically used to indicate an error such
+ *   as a possible mispelling; in some cases a contrasting color
+ *   may automatically be used. This type of underlining is
+ *   available since Pango 1.4.
  * @PANGO_UNDERLINE_SINGLE_LINE: Like @PANGO_UNDERLINE_SINGLE, but
- *     drawn continuously across multiple runs. This type
- *     of underlining is available since Pango 1.46.
+ *   drawn continuously across multiple runs. This type
+ *   of underlining is available since Pango 1.46.
  * @PANGO_UNDERLINE_DOUBLE_LINE: Like @PANGO_UNDERLINE_DOUBLE, but
- *     drawn continuously across multiple runs. This type
- *     of underlining is available since Pango 1.46.
+ *   drawn continuously across multiple runs. This type
+ *   of underlining is available since Pango 1.46.
  * @PANGO_UNDERLINE_ERROR_LINE: Like @PANGO_UNDERLINE_ERROR, but
- *     drawn continuously across multiple runs. This type
- *     of underlining is available since Pango 1.46.
+ *   drawn continuously across multiple runs. This type
+ *   of underlining is available since Pango 1.46.
  *
- * The #PangoUnderline enumeration is used to specify
- * whether text should be underlined, and if so, the type
- * of underlining.
+ * The `PangoUnderline` enumeration is used to specify whether text
+ * should be underlined, and if so, the type of underlining.
  */
 typedef enum {
   PANGO_UNDERLINE_NONE,
@@ -246,11 +251,10 @@ typedef enum {
  * PangoOverline:
  * @PANGO_OVERLINE_NONE: no overline should be drawn
  * @PANGO_OVERLINE_SINGLE: Draw a single line above the ink
- *     extents of the text being underlined.
+ *   extents of the text being underlined.
  *
- * The #PangoOverline enumeration is used to specify
- * whether text should be overlined, and if so, the type
- * of line.
+ * The `PangoOverline` enumeration is used to specify whether text
+ * should be overlined, and if so, the type of line.
  *
  * Since: 1.46
  */
@@ -262,21 +266,22 @@ typedef enum {
 /**
  * PANGO_ATTR_INDEX_FROM_TEXT_BEGINNING:
  *
- * This value can be used to set the start_index member of a #PangoAttribute
- * such that the attribute covers from the beginning of the text.
+ * Value for @start_index in `PangoAttribute` that indicates
+ * the beginning of the text.
  *
  * Since: 1.24
  */
+#define PANGO_ATTR_INDEX_FROM_TEXT_BEGINNING ((guint)0)
+
 /**
- * PANGO_ATTR_INDEX_TO_TEXT_END:
+ * PANGO_ATTR_INDEX_TO_TEXT_END: (value 4294967295)
  *
- * This value can be used to set the end_index member of a #PangoAttribute
- * such that the attribute covers to the end of the text.
+ * Value for @end_index in `PangoAttribute` that indicates
+ * the end of the text.
  *
  * Since: 1.24
  */
-#define PANGO_ATTR_INDEX_FROM_TEXT_BEGINNING	0
-#define PANGO_ATTR_INDEX_TO_TEXT_END		G_MAXUINT
+#define PANGO_ATTR_INDEX_TO_TEXT_END ((guint)(G_MAXUINT + 0))
 
 /**
  * PangoAttribute:
@@ -285,12 +290,14 @@ typedef enum {
  * @end_index: end index of the range (in bytes). The character at this index
  * is not included in the range.
  *
- * The #PangoAttribute structure represents the common portions of all
- * attributes. Particular types of attributes include this structure
- * as their initial portion. The common portion of the attribute holds
- * the range to which the value in the type-specific part of the attribute
- * applies and should be initialized using pango_attribute_init().
- * By default an attribute will have an all-inclusive range of [0,%G_MAXUINT].
+ * The `PangoAttribute` structure represents the common portions of all
+ * attributes.
+ *
+ * Particular types of attributes include this structure as their initial
+ * portion. The common portion of the attribute holds the range to which
+ * the value in the type-specific part of the attribute applies and should
+ * be initialized using [method@Pango.Attribute.init]. By default, an attribute
+ * will have an all-inclusive range of [0,%G_MAXUINT].
  */
 struct _PangoAttribute
 {
@@ -307,8 +314,8 @@ struct _PangoAttribute
  * Type of a function filtering a list of attributes.
  *
  * Return value: %TRUE if the attribute should be selected for
- * filtering, %FALSE otherwise.
- **/
+ *   filtering, %FALSE otherwise.
+ */
 typedef gboolean (*PangoAttrFilterFunc) (PangoAttribute *attribute,
 					 gpointer        user_data);
 
@@ -325,14 +332,18 @@ typedef gpointer (*PangoAttrDataCopyFunc) (gconstpointer user_data);
 /**
  * PangoAttrClass:
  * @type: the type ID for this attribute
- * @copy: function to duplicate an attribute of this type (see pango_attribute_copy())
- * @destroy: function to free an attribute of this type (see pango_attribute_destroy())
- * @equal: function to check two attributes of this type for equality (see pango_attribute_equal())
+ * @copy: function to duplicate an attribute of this type
+ *   (see [method@Pango.Attribute.copy])
+ * @destroy: function to free an attribute of this type
+ *   (see [method@Pango.Attribute.destroy])
+ * @equal: function to check two attributes of this type for equality
+ *   (see [method@Pango.Attribute.equal])
  *
- * The #PangoAttrClass structure stores the type and operations for
- * a particular type of attribute. The functions in this structure should
- * not be called directly. Instead, one should use the wrapper functions
- * provided for #PangoAttribute.
+ * The `PangoAttrClass` structure stores the type and operations for
+ * a particular type of attribute.
+ *
+ * The functions in this structure should not be called directly. Instead,
+ * one should use the wrapper functions provided for `PangoAttribute`.
  */
 struct _PangoAttrClass
 {
@@ -348,7 +359,7 @@ struct _PangoAttrClass
  * @attr: the common portion of the attribute
  * @value: the string which is the value of the attribute
  *
- * The #PangoAttrString structure is used to represent attributes with
+ * The `PangoAttrString` structure is used to represent attributes with
  * a string value.
  */
 struct _PangoAttrString
@@ -359,9 +370,9 @@ struct _PangoAttrString
 /**
  * PangoAttrLanguage:
  * @attr: the common portion of the attribute
- * @value: the #PangoLanguage which is the value of the attribute
+ * @value: the `PangoLanguage` which is the value of the attribute
  *
- * The #PangoAttrLanguage structure is used to represent attributes that
+ * The `PangoAttrLanguage` structure is used to represent attributes that
  * are languages.
  */
 struct _PangoAttrLanguage
@@ -374,7 +385,7 @@ struct _PangoAttrLanguage
  * @attr: the common portion of the attribute
  * @value: the value of the attribute
  *
- * The #PangoAttrInt structure is used to represent attributes with
+ * The `PangoAttrInt` structure is used to represent attributes with
  * an integer or enumeration value.
  */
 struct _PangoAttrInt
@@ -387,7 +398,7 @@ struct _PangoAttrInt
  * @attr: the common portion of the attribute
  * @value: the value of the attribute
  *
- * The #PangoAttrFloat structure is used to represent attributes with
+ * The `PangoAttrFloat` structure is used to represent attributes with
  * a float or double value.
  */
 struct _PangoAttrFloat
@@ -398,9 +409,9 @@ struct _PangoAttrFloat
 /**
  * PangoAttrColor:
  * @attr: the common portion of the attribute
- * @color: the #PangoColor which is the value of the attribute
+ * @color: the `PangoColor` which is the value of the attribute
  *
- * The #PangoAttrColor structure is used to represent attributes that
+ * The `PangoAttrColor` structure is used to represent attributes that
  * are colors.
  */
 struct _PangoAttrColor
@@ -413,13 +424,13 @@ struct _PangoAttrColor
  * PangoAttrSize:
  * @attr: the common portion of the attribute
  * @size: size of font, in units of 1/%PANGO_SCALE of a point (for
- * %PANGO_ATTR_SIZE) or of a device uni (for %PANGO_ATTR_ABSOLUTE_SIZE)
+ *   %PANGO_ATTR_SIZE) or of a device unit (for %PANGO_ATTR_ABSOLUTE_SIZE)
  * @absolute: whether the font size is in device units or points.
- * This field is only present for compatibility with Pango-1.8.0
- * (%PANGO_ATTR_ABSOLUTE_SIZE was added in 1.8.1); and always will
- * be %FALSE for %PANGO_ATTR_SIZE and %TRUE for %PANGO_ATTR_ABSOLUTE_SIZE.
+ *   This field is only present for compatibility with Pango-1.8.0
+ *   (%PANGO_ATTR_ABSOLUTE_SIZE was added in 1.8.1); and always will
+ *   be %FALSE for %PANGO_ATTR_SIZE and %TRUE for %PANGO_ATTR_ABSOLUTE_SIZE.
  *
- * The #PangoAttrSize structure is used to represent attributes which
+ * The `PangoAttrSize` structure is used to represent attributes which
  * set font size.
  */
 struct _PangoAttrSize
@@ -434,11 +445,11 @@ struct _PangoAttrSize
  * @attr: the common portion of the attribute
  * @ink_rect: the ink rectangle to restrict to
  * @logical_rect: the logical rectangle to restrict to
- * @data: user data set (see pango_attr_shape_new_with_data())
+ * @data: user data set (see [func@Pango.AttrShape.new_with_data])
  * @copy_func: copy function for the user data
  * @destroy_func: destroy function for the user data
  *
- * The #PangoAttrShape structure is used to represent attributes which
+ * The `PangoAttrShape` structure is used to represent attributes which
  * impose shape restrictions.
  */
 struct _PangoAttrShape
@@ -457,7 +468,7 @@ struct _PangoAttrShape
  * @attr: the common portion of the attribute
  * @desc: the font description which is the value of this attribute
  *
- * The #PangoAttrFontDesc structure is used to store an attribute that
+ * The `PangoAttrFontDesc` structure is used to store an attribute that
  * sets all aspects of the font description at once.
  */
 struct _PangoAttrFontDesc
@@ -471,7 +482,7 @@ struct _PangoAttrFontDesc
  * @attr: the common portion of the attribute
  * @features: the featues, as a string in CSS syntax
  *
- * The #PangoAttrFontFeatures structure is used to represent OpenType
+ * The `PangoAttrFontFeatures` structure is used to represent OpenType
  * font features as an attribute.
  *
  * Since: 1.38
@@ -585,7 +596,7 @@ PangoAttribute *pango_attr_overline_color_new   (guint16       red,
  * @PANGO_SHOW_SPACES: Render spaces, tabs and newlines visibly
  * @PANGO_SHOW_LINE_BREAKS: Render line breaks visibly
  * @PANGO_SHOW_IGNORABLES: Render default-ignorable Unicode
- *      characters visibly
+ *   characters visibly
  *
  * These flags affect how Pango treats characters that are normally
  * not visible in the output.
