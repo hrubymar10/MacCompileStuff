@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 #
 # readline_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-READLINE_VERSION="8.0"
-PATCH_PREFIX="readline80"
-NUM_OF_PATHES="4"
-SHA256="e339f51971478d369f8a053a330a190781acb9864cf4c541060f12078948e461"
+READLINE_VERSION="8.1"
+PATCH_PREFIX="readline81"
+NUM_OF_PATHES="1"
+SHA256="f8ceb4ee131e3232226a17f51b164afc46cd0b9e6cef344be87c65962cb82b02"
 SHA256_PATCHES=(
-  "d8e5e98933cf5756f862243c0601cb69d3667bb33f2c7b751fe4e40b2c3fd069"
-  "36b0febff1e560091ae7476026921f31b6d1dd4c918dcb7b741aa2dad1aec8f7"
-  "94ddb2210b71eb5389c7756865d60e343666dfb722c85892f8226b26bb3eeaef"
-  "b1aa3d2a40eee2dea9708229740742e649c32bb8db13535ea78f8ac15377394c"
+  "682a465a68633650565c43d59f0b8cdf149c13a874682d3c20cb4af6709b9144"
 )
 
 starttimestamp=$(date +%s)
@@ -44,11 +41,13 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-for i in $(seq 1 ${NUM_OF_PATHES}); do
-  PATCH=`printf "%03d\n" ${i}`
-  get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
-  patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
-done
+if [ "${NUM_OF_PATHES}" -gt 0 ]; then
+  for i in $(seq 1 ${NUM_OF_PATHES}); do
+    PATCH=`printf "%03d\n" ${i}`
+    get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
+    patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
+  done
+fi
 ./configure --enable-shared --host=x86_64-apple-darwin
 make shared
 # Build arm64
@@ -57,11 +56,13 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-for i in $(seq 1 ${NUM_OF_PATHES}); do
-  PATCH=`printf "%03d\n" ${i}`
-  get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
-  patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
-done
+if [ "${NUM_OF_PATHES}" -gt 0 ]; then
+  for i in $(seq 1 ${NUM_OF_PATHES}); do
+    PATCH=`printf "%03d\n" ${i}`
+    get_src_and_verify_checksum "${PATCH_PREFIX}-${PATCH}" "${SHA256_PATCHES[$((${i}-1))]}" "https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}-patches/${PATCH_PREFIX}-${PATCH}"
+    patch -b < "${SOURCES_PATH}/archives/${PATCH_PREFIX}-${PATCH}"
+  done
+fi
 ./configure --enable-shared --host=aarch64-apple-darwin
 make shared
 mkdir "readline-${READLINE_VERSION}-RELEASE"
@@ -71,11 +72,12 @@ install_name_tool -id "@rpath/libreadline.${READLINE_VERSION}.dylib" "libreadlin
 rm -rf "${LIBS_PATH}/libreadline"*
 cp -rf "libreadline.${READLINE_VERSION}.dylib" "${LIBS_PATH}/libreadline.${READLINE_VERSION}.dylib"
 ln -s "libreadline.${READLINE_VERSION}.dylib" "${LIBS_PATH}/libreadline.dylib"
+ln -s "libreadline.${READLINE_VERSION}.dylib" "${LIBS_PATH}/libreadline.8.0.dylib"
 rm -rf "${HEADERS_PATH}/readline"
 mkdir "${HEADERS_PATH}/readline"
 cd "${SOURCES_PATH}/readline"
 cp -rf "chardefs.h" "history.h" "keymaps.h" "readline.h" "rlconf.h" "rlstdc.h" "rltypedefs.h" "tilde.h" "${HEADERS_PATH}/readline/"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
