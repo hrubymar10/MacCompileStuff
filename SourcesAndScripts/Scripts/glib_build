@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # glib_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-GLIB_VERSION="2.66.4"
-GLIB_VERSION_SHORT="2.66"
-SHA256="97df8670e32f9fd4f7392b0980e661dd625012015d58350da1e58e343f4af984"
+GLIB_VERSION="2.69.0"
+GLIB_VERSION_SHORT="2.69"
+SHA256="1cdb3fd8610f3c57b6622e5cd68e0a3210561d80b0eceb971eb51fb8b63dbfae"
 
 starttimestamp=$(date +%s)
 
@@ -80,7 +80,7 @@ lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gthread/libgthrea
 lipo -create "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64/build/gio/libgio-2.0.0.dylib" "${SOURCES_PATH}/glib-${GLIB_VERSION}/build/gio/libgio-2.0.0.dylib" -output "libgio-2.0.0.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-    remove_rpath_if_exists "${filename}" "@loader_path/../glib"
+  remove_rpath_if_exists "${filename}" "@loader_path/../glib"
   remove_rpath_if_exists "${filename}" "@loader_path/../gmodule"
   remove_rpath_if_exists "${filename}" "@loader_path/../gobject"
   remove_rpath_if_exists "${filename}" "${LIBS_PATH}"
@@ -112,6 +112,6 @@ cp "${SOURCES_PATH}/glib/gobject/"*.h "${HEADERS_PATH}/glib-2.0/gobject/"
 generate_pkgconfig_file "glib-2.0" "${GLIB_VERSION}"
 generate_pkgconfig_file "gio-2.0" "${GLIB_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
