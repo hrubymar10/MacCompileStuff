@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # pango_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-PANGO_VERSION="1.48.0"
+PANGO_VERSION="1.48.7"
 PANGO_VERSION_SHORT="1.48"
-SHA256="391f26f3341c2d7053e0fb26a956bd42360dadd825efe7088b1e9340a65e74e6"
+SHA256="28a82f6a6cab60aa3b75a90f04197ead2d311fa8fe8b7bfdf8666e2781d506dc"
 
 starttimestamp=$(date +%s)
 
@@ -90,6 +90,6 @@ cp "${SOURCES_PATH}/pango/build/pango/pango-features.h" "${HEADERS_PATH}/pango/"
 cd "${SOURCES_PATH}/pango/pango"
 cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${HEADERS_PATH}/pango/"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
