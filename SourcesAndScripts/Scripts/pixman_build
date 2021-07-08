@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # pixman_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -57,6 +57,6 @@ rm -rf "${HEADERS_PATH}/pixman"
 mkdir -p "${HEADERS_PATH}/pixman"
 cp "${SOURCES_PATH}/pixman/pixman/pixman.h" "${SOURCES_PATH}/pixman/pixman/pixman-version.h" "${HEADERS_PATH}/pixman/"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

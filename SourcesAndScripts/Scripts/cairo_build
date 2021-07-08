@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # cairo_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -68,6 +68,6 @@ cd "${SOURCES_PATH}/cairo/src"
 cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-quartz.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${HEADERS_PATH}/cairo/"
 generate_pkgconfig_file "cairo" "${CAIRO_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

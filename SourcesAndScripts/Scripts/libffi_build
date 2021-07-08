@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libffi_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -64,6 +64,6 @@ printf "#ifdef __x86_64__\n#include \"ffi_x86_64.h\"\n#else\n#include \"ffi_arm6
 printf "#ifdef __x86_64__\n#include \"ffitarget_x86_64.h\"\n#else\n#include \"ffitarget_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/libffi/ffitarget.h"
 generate_pkgconfig_file "libffi" "${LIBFFI_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

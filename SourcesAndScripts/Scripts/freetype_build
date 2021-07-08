@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # freetype_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -58,6 +58,6 @@ cp -rf "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.6.dylib"
 ln -s "libfreetype.6.dylib" "${LIBS_PATH}/libfreetype.dylib"
 generate_pkgconfig_file "freetype2" "${FREETYPE_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

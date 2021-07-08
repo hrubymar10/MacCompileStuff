@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # functions
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e

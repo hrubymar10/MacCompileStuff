@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libpng_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -54,6 +54,6 @@ rm -rf "${LIBS_PATH}/libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
 cp "libpng16.16.dylib" "${LIBS_PATH}/libpng16.16.dylib"
 ln -s "libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

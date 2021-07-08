@@ -47,6 +47,6 @@ for SCRIPT in "${SCRIPTS[@]}"; do
 done
 
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

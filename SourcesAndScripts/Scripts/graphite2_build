@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # graphite2_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -56,6 +56,6 @@ cp -rf "libgraphite2.3.dylib" "${LIBS_PATH}/libgraphite2.3.dylib"
 ln -s "libgraphite2.3.dylib" "${LIBS_PATH}/libgraphite2.dylib"
 generate_pkgconfig_file "graphite2" "${GRAPHITE2_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

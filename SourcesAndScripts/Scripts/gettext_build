@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # gettext_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
@@ -56,6 +56,6 @@ ln -s "libintl.8.dylib" "${LIBS_PATH}/libintl.dylib"
 rm -rf "${HEADERS_PATH}/libintl.h"
 cp "${SOURCES_PATH}/gettext/gettext-runtime/intl/libintl.h" "${HEADERS_PATH}/libintl.h"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""

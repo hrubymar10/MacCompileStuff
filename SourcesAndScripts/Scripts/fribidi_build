@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # fribidi_build
-# Martin Hrubý (hrubymar10), 2020
+# Martin Hrubý (hrubymar10), 2020-2021
 #
 
 set -e
@@ -55,6 +55,6 @@ cp -rf "libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.0.dylib"
 ln -s "libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.dylib"
 generate_pkgconfig_file "fribidi" "${FRIBIDI_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
