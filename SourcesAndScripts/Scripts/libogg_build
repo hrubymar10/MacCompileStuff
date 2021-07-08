@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # libogg_build
-# Martin Hrubý (hrubymar10), 2019-2020
+# Martin Hrubý (hrubymar10), 2019-2021
 #
 
 set -e
 
-LIBOGG_VERSION="1.3.4"
-SHA256="fe5670640bd49e828d64d2879c31cb4dde9758681bb664f9bdbf159a01b0c76e"
+LIBOGG_VERSION="1.3.5"
+SHA256="0eb4b4b9420a0f51db142ba3f9c64b333f826532dc0f48c6410ae51f4799b664"
 
 starttimestamp=$(date +%s)
 
@@ -57,7 +57,5 @@ rm -rf "${HEADERS_PATH}/ogg"
 mkdir "${HEADERS_PATH}/ogg"
 cp -rf "${SOURCES_PATH}/libogg/include/ogg/"*.h "${HEADERS_PATH}/ogg/"
 cd "${SOURCES_PATH}/libogg"
-# Patch os_types.h for OS X cross-build compatibility
-patch -b -p0 < "${SCRIPTS_PATH}/libogg.patch"
 echo "==> DONE ..."
-echo
+echo ""
