@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # boost_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-BOOST_VERSION_1="1.75.0"
-BOOST_VERSION_2="1_75_0"
-SHA256="aeb26f80e80945e82ee93e5939baebdca47b9dee80a07d3144be1e1a6a66dd6a"
+BOOST_VERSION_1="1.76.0"
+BOOST_VERSION_2="1_76_0"
+SHA256="f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41"
 
 starttimestamp=$(date +%s)
 
@@ -32,8 +32,8 @@ fi
 
 cd "${SOURCES_PATH}"
 rm -rf "boost"*
-get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.gz" "${SHA256}" "https://dl.bintray.com/boostorg/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.gz"
-tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.gz" -C .
+get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.bz2" "${SHA256}" "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.bz2"
+tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.bz2" -C .
 cp -R "boost_${BOOST_VERSION_2}" "boost_${BOOST_VERSION_2}-arm64"
 ln -s "boost_${BOOST_VERSION_2}" "boost"
 cd "boost"
@@ -50,7 +50,6 @@ arch -x86_64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagg
 # Build arm64
 cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64"
 rm -rf "stage"
-patch -b -p0 < "${SCRIPTS_PATH}/boost.patch"
 source "${MY_PATH}/env"
 arch -arm64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
 #./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
@@ -73,6 +72,6 @@ cp -rf * "${LIBS_PATH}/"
 rm -rf "${HEADERS_PATH}/boost"
 cp -rf "${SOURCES_PATH}/boost/boost" "${HEADERS_PATH}/"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
