@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # pcre_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-PCRE_VERSION="8.44"
-SHA256="19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d"
+PCRE_VERSION="8.45"
+SHA256="4dae6fdcd2bb0bb6c37b5f97c33c2be954da743985369cddac3546e3218bffb8"
 
 starttimestamp=$(date +%s)
 
@@ -58,6 +58,6 @@ cp -rf "libpcre.1.dylib" "${LIBS_PATH}/libpcre.1.dylib"
 ln -s "libpcre.1.dylib" "${LIBS_PATH}/libpcre.dylib"
 generate_pkgconfig_file "libpcre" "${PCRE_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
