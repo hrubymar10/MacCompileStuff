@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # openssl_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-OPENSSL_VERSION="1.1.1i"
-SHA256="e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242"
+OPENSSL_VERSION="1.1.1k"
+SHA256="892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5"
 
 starttimestamp=$(date +%s)
 
@@ -67,6 +67,6 @@ mv "${HEADERS_PATH}/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_
 cp "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/include/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_arm64.h"
 printf "#ifdef __x86_64__\n#include \"opensslconf_x86_64.h\"\n#else\n#include \"opensslconf_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/openssl/opensslconf.h"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
