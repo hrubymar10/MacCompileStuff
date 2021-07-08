@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # SDL2_build
-# Martin Hrubý (hrubymar10), 2019-2020
+# Martin Hrubý (hrubymar10), 2019-2021
 #
 
 set -e
 
-SDL2_VERSION="2.0.12"
-SDL2_SHA256="349268f695c02efbc9b9148a70b85e58cefbbf704abd3e91be654db7f1e2c863"
+SDL2_VERSION="2.0.14"
+SDL2_SHA256="d8215b571a581be1332d2106f8036fcb03d12a70bae01e20f424976d275432bc"
 SDL2_image_VERSION="2.0.5"
 SDL2_image_SHA256="bdd5f6e026682f7d7e1be0b6051b209da2f402a2dd8bd1c4bd9c25ad263108d0"
 SDL2_mixer_VERSION="2.0.4"
@@ -49,7 +49,6 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-patch -b -p0 < "${SCRIPTS_PATH}/SDL2.patch"
 ./configure --without-x --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make update-revision
 make
@@ -61,7 +60,6 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-patch -b -p0 < "${SCRIPTS_PATH}/SDL2.patch"
 ./configure --without-x --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make update-revision
 make
@@ -190,6 +188,6 @@ ln -s "libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h"
 
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
