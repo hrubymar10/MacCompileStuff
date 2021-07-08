@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # harfbuzz_build
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2021
 #
 
 set -e
 
-HARFBUZZ_VERSION="2.7.2"
-SHA256="b8c048d7c2964a12f2c80deb6634dfc836b603dd12bf0d0a3df1627698e220ce"
+HARFBUZZ_VERSION="2.8.1"
+SHA256="4124f663ec4bf4e294d9cf230668370b4249a48ff34deaf0f06e8fc82d891300"
 
 starttimestamp=$(date +%s)
 
@@ -80,6 +80,6 @@ mkdir "${HEADERS_PATH}/harfbuzz"
 cp "${SOURCES_PATH}/harfbuzz/src/"*".h" "${HEADERS_PATH}/harfbuzz/"
 generate_pkgconfig_file "harfbuzz" "${HARFBUZZ_VERSION}"
 echo "==> DONE ..."
-echo
+echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
-echo
+echo ""
