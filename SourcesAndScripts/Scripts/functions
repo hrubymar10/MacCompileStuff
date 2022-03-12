@@ -48,6 +48,13 @@ check_libffi() {
   fi
 }
 
+check_libwebp() {
+  if ! [ -f "${LIBS_PATH}/libwebp.dylib" ]; then
+    echo 'Error: libwebp is not prepared. You must build all libraries in defined order.' >&2
+    exit 1
+  fi
+}
+
 check_glib() {
   if ! [ -f "${LIBS_PATH}/libglib-2.0.0.dylib" ]; then
     echo 'Error: glib is not prepared. You must build all libraries in defined order.' >&2

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# libwebp_build
+# Martin Hrubý (hrubymar10), 2022
+#
+
+set -e
+
+LIBWEBP_VERSION="1.2.2"
+SHA256="51e9297aadb7d9eb99129fe0050f53a11fcce38a0848fb2b0389e385ad93695e"
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
+fi
+
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+
+check_wget
+check_libpng
+
+cd "${SOURCES_PATH}"
+rm -rf "libwebp"*
+get_src_and_verify_checksum "libwebp-${LIBWEBP_VERSION}.tar.gz" "${SHA256}" "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_VERSION}.tar.gz"
+tar xf "${SOURCES_PATH}/archives/libwebp-${LIBWEBP_VERSION}.tar.gz" -C .
+cp -R "libwebp-${LIBWEBP_VERSION}" "libwebp-${LIBWEBP_VERSION}-arm64"
+ln -s "libwebp-${LIBWEBP_VERSION}" "libwebp"
+cd "libwebp"
+# Build x86_64
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+./autogen.sh
+./configure --disable-dependency-tracking --disable-jpeg --disable-gif --with-pngincludedir="${SOURCES_PATH}/libpng" --with-pnglibdir="${LIBS_PATH}" --host=x86_64-apple-darwin
+make
+# Build arm64
+cd "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+./autogen.sh
+./configure --disable-dependency-tracking --disable-jpeg --disable-gif --with-pngincludedir="${SOURCES_PATH}/libpng" --with-pnglibdir="${LIBS_PATH}" --host=aarch64-apple-darwin
+make
+mkdir "libwebp-${LIBWEBP_VERSION}-RELEASE"
+cd "libwebp-${LIBWEBP_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64/src/.libs/libwebp.7.dylib" "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}/src/.libs/libwebp.7.dylib" -output "libwebp.7.dylib"
+for filename in * ; do
+  install_name_tool -id "@rpath/${filename}" "${filename}"
+  install_name_tool -change "/usr/local/lib/libwebp.7.dylib" "@loader_path/libwebp.7.dylib" "${filename}"
+done
+rm -rf "${LIBS_PATH}/libwebp.7.dylib" "${LIBS_PATH}/libwebp.dylib"
+cp -rf "libwebp.7.dylib" "${LIBS_PATH}/libwebp.7.dylib"
+ln -s "libwebp.7.dylib" "${LIBS_PATH}/libwebp.dylib"
+rm -rf "${HEADERS_PATH}/webp"
+mkdir "${HEADERS_PATH}/webp"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/mux.h" "${HEADERS_PATH}/webp/"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/decode.h" "${HEADERS_PATH}/webp/"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/demux.h" "${HEADERS_PATH}/webp/"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/encode.h" "${HEADERS_PATH}/webp/"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/mux_types.h" "${HEADERS_PATH}/webp/"
+cp -rf "${SOURCES_PATH}/libwebp/src/webp/types.h" "${HEADERS_PATH}/webp/"
+echo "==> DONE ..."
+echo ""

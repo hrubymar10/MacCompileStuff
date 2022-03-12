@@ -32,6 +32,7 @@ source "${MY_PATH}/functions"
 
 check_wget
 check_freetype
+check_libwebp
 
 cd "${SOURCES_PATH}"
 rm -rf "SDL2"
@@ -87,7 +88,7 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-./configure --disable-dependency-tracking --enable-shared --disable-webp --enable-imageio --host=x86_64-apple-darwin
+./configure --disable-dependency-tracking --enable-shared --enable-webp-shared=no --enable-imageio --host=x86_64-apple-darwin
 make
 # Build arm64
 cd "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_image_VERSION}-arm64"
@@ -95,7 +96,7 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-./configure --disable-dependency-tracking --enable-shared --disable-webp --enable-imageio --host=aarch64-apple-darwin
+./configure --disable-dependency-tracking --enable-shared --enable-webp-shared=no --enable-imageio --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_image.dylib" "${LIBS_PATH}/libSDL2_image.dylib"
 lipo -create "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_image_VERSION}-arm64/.libs/libSDL2_image-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_image_VERSION}/.libs/libSDL2_image-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_image-2.0.0.dylib"
