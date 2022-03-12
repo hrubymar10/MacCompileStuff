@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Build_All
-# Martin Hrubý (hrubymar10), 2018-2020
+# Martin Hrubý (hrubymar10), 2018-2022
 #
 
 set -e

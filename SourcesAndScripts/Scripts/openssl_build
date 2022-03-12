@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # openssl_build
-# Martin Hrubý (hrubymar10), 2018-2021
+# Martin Hrubý (hrubymar10), 2018-2022
 #
 
 set -e
@@ -52,7 +52,7 @@ lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libcrypto.1.1.dyl
 lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libssl.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}/libssl.1.1.dylib" -output "libssl.1.1.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-    install_name_tool -change "/usr/local/lib/libcrypto.1.1.dylib" "@loader_path/libcrypto.1.1.dylib" "${filename}"
+  install_name_tool -change "/usr/local/lib/libcrypto.1.1.dylib" "@loader_path/libcrypto.1.1.dylib" "${filename}"
 done
 rm -rf "${LIBS_PATH}/libcrypto.1.1.dylib" "${LIBS_PATH}/libcrypto.dylib"
 rm -rf "${LIBS_PATH}/libssl.1.1.dylib" "${LIBS_PATH}/libssl.dylib"

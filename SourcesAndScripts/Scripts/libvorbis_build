@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libvorbis_build
-# Martin Hrubý (hrubymar10), 2019-2021
+# Martin Hrubý (hrubymar10), 2019-2022
 #
 
 set -e
@@ -53,7 +53,7 @@ lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/lib
 lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/libvorbisfile.dylib" "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}/lib/.libs/libvorbisfile.dylib" -output "libvorbisfile.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
-    install_name_tool -change "/usr/local/lib/libvorbis.0.dylib" "@loader_path/libvorbis.0.dylib" "${filename}"
+  install_name_tool -change "/usr/local/lib/libvorbis.0.dylib" "@loader_path/libvorbis.0.dylib" "${filename}"
 done
 rm -rf "${LIBS_PATH}/libvorbis.0.dylib" "${LIBS_PATH}/libvorbis.dylib" "${LIBS_PATH}/libvorbisfile.dylib"
 cp -rf "libvorbis.0.dylib" "${LIBS_PATH}/libvorbis.0.dylib"

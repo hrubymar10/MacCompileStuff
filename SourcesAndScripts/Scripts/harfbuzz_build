@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # harfbuzz_build
-# Martin Hrubý (hrubymar10), 2018-2021
+# Martin Hrubý (hrubymar10), 2018-2022
 #
 
 set -e
