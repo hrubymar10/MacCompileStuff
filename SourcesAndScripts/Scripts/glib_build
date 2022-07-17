@@ -6,9 +6,12 @@
 
 set -e
 
-GLIB_VERSION="2.69.0"
-GLIB_VERSION_SHORT="2.69"
-SHA256="1cdb3fd8610f3c57b6622e5cd68e0a3210561d80b0eceb971eb51fb8b63dbfae"
+GLIB_VERSION="2.72.2"
+GLIB_VERSION_SHORT="2.72"
+SHA256="78d599a133dba7fe2036dfa8db8fb6131ab9642783fc9578b07a20995252d2de"
+# GLIB_VERSION="2.73.2"
+# GLIB_VERSION_SHORT="2.73"
+# SHA256="5f3ee36e34f4aaab393c3e3dc46fb01b32f7ead6c88d41d7f20d88a49cdef1d9"
 
 starttimestamp=$(date +%s)
 
@@ -50,7 +53,7 @@ export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir -p "build/glib"
 #meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release --cross-file="${SCRIPTS_PATH}/cross_file_x86_64.txt" . "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
 cd "build/glib"
 ln -s "${LIBS_PATH}/libpcre.1.dylib"
 ln -s "${LIBS_PATH}/libintl.8.dylib"
@@ -65,7 +68,7 @@ export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 mkdir -p "build/glib"
 #meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release --cross-file="${SCRIPTS_PATH}/cross_file_arm64.txt" . "build"
-arch -arm64 /opt/homebrew/bin/meson -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
+arch -arm64 /opt/homebrew/bin/meson --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false -Diconv=auto --default-library=shared --buildtype=release . "build"
 cd "build/glib"
 ln -s "${LIBS_PATH}/libpcre.1.dylib"
 ln -s "${LIBS_PATH}/libintl.8.dylib"
