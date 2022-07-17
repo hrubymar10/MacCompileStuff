@@ -138,7 +138,7 @@ remove_rpath_if_exists() {
   PATHS=$(otool -l "${DYLIB}" | grep "RPATH" -A2 | grep "path" | awk '{print $2;}')
 
   if [[ ${PATHS} == *"${PATH_TO_REMOVE}"* ]]; then
-    ACTUAL_PATH=$(otool -l "${DYLIB}" | grep "RPATH" -A2 | grep "path" | awk '{print $2;}' | grep "${PATH_TO_REMOVE}")
+    ACTUAL_PATH=$(otool -l "${DYLIB}" | grep "RPATH" -A2 | grep "path" | awk '{print $2;}' | grep "${PATH_TO_REMOVE}" | head -1)
     install_name_tool -delete_rpath "${ACTUAL_PATH}" ${DYLIB}
   fi
 }
@@ -183,8 +183,8 @@ generate_pkgconfig_file() {
 
   rm -rf "${PKG_CONFIG_PATH}/${NAME}.pc"
   cp "${PKG_CONFIG_PATH}/${NAME}.pc.template" "${PKG_CONFIG_PATH}/${NAME}.pc"
-  sed -i '' "s:prefix=PATH:prefix=${ROOT_PATH}:" "${PKG_CONFIG_PATH}/${NAME}.pc"
-  sed -i '' "s/Version: VERSION/Version: ${VERSION}/" "${PKG_CONFIG_PATH}/${NAME}.pc"
+  /usr/bin/sed -i '' "s:prefix=PATH:prefix=${ROOT_PATH}:" "${PKG_CONFIG_PATH}/${NAME}.pc"
+  /usr/bin/sed -i '' "s/Version: VERSION/Version: ${VERSION}/" "${PKG_CONFIG_PATH}/${NAME}.pc"
 }
 
 is_apple_silicon_mac() {
