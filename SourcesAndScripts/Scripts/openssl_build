@@ -6,8 +6,8 @@
 
 set -e
 
-OPENSSL_VERSION="1.1.1k"
-SHA256="892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5"
+OPENSSL_VERSION="1.1.1q"
+SHA256="d7939ce614029cdff0b6c20f0e2e5703158a489a72b2507b8bd51bf8c8fd10ca"
 
 starttimestamp=$(date +%s)
 
@@ -36,6 +36,7 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
+patch -b -p0 < "${SCRIPTS_PATH}/openssl.patch"
 perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
 make
 # Build arm64
@@ -44,7 +45,8 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-perl ./Configure no-ssl3 no-ssl3-method no-zlib enable-rc5 darwin64-arm64-cc no-asm
+patch -b -p0 < "${SCRIPTS_PATH}/openssl.patch"
+perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-arm64-cc enable-ec_nistp_64_gcc_128
 make
 mkdir "openssl-${OPENSSL_VERSION}-RELEASE"
 cd "openssl-${OPENSSL_VERSION}-RELEASE"
