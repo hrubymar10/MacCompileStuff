@@ -29,7 +29,7 @@ check_freetype
 
 cd "${SOURCES_PATH}"
 rm -rf "pcre"*
-get_src_and_verify_checksum "pcre-${PCRE_VERSION}.tar.bz2" "${SHA256}" "https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.bz2"
+get_src_and_verify_checksum "pcre-${PCRE_VERSION}.tar.bz2" "${SHA256}" "https://downloads.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2"
 tar xf "${SOURCES_PATH}/archives/pcre-${PCRE_VERSION}.tar.bz2" -C .
 cp -R "pcre-${PCRE_VERSION}" "pcre-${PCRE_VERSION}-arm64"
 ln -s "pcre-${PCRE_VERSION}" "pcre"
