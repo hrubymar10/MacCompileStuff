@@ -134,7 +134,7 @@ public:
         No-throw guarantee.
     */
     BOOST_JSON_DECL
-    ~value();
+    ~value() noexcept;
 
     /** Default constructor.
 
@@ -2354,10 +2354,42 @@ public:
 
         @param ec Set to the error, if any occurred.
     */
-#ifdef BOOST_JSON_DOCS
+/** @{ */
     template<class T>
-    T to_number(error_code& ec) const noexcept;
+#ifdef BOOST_JSON_DOCS
+    T
+#else
+    typename std::enable_if<
+        std::is_arithmetic<T>::value &&
+        ! std::is_same<T, bool>::value,
+            T>::type
 #endif
+    to_number(error_code& ec) const noexcept
+    {
+        error e;
+        auto result = to_number<T>(e);
+        BOOST_STATIC_CONSTEXPR source_location loc = BOOST_JSON_SOURCE_POS;
+        BOOST_JSON_ASSIGN_ERROR_CODE(ec, e, &loc);
+        return result;
+    }
+
+    template<class T>
+#ifdef BOOST_JSON_DOCS
+    T
+#else
+    typename std::enable_if<
+        std::is_arithmetic<T>::value &&
+        ! std::is_same<T, bool>::value,
+            T>::type
+#endif
+    to_number(std::error_code& ec) const noexcept
+    {
+        error_code jec;
+        auto result = to_number<T>(jec);
+        ec = jec;
+        return result;
+    }
+/** @} */
 
     /** Return the stored number cast to an arithmetic type.
 
@@ -2409,137 +2441,9 @@ public:
         error_code ec;
         auto result = to_number<T>(ec);
         if(ec)
-            detail::throw_system_error(ec,
-                BOOST_JSON_SOURCE_POS);
+            detail::throw_system_error(ec, BOOST_JSON_SOURCE_POS);
         return result;
     }
-
-#ifndef BOOST_JSON_DOCS
-    template<class T>
-    auto
-    to_number(error_code& ec) const noexcept ->
-        typename std::enable_if<
-            std::is_signed<T>::value &&
-            ! std::is_floating_point<T>::value,
-                T>::type
-    {
-        if(sca_.k == json::kind::int64)
-        {
-            auto const i = sca_.i;
-            if( i >= (std::numeric_limits<T>::min)() &&
-                i <= (std::numeric_limits<T>::max)())
-            {
-                ec = {};
-                return static_cast<T>(i);
-            }
-            ec = error::not_exact;
-        }
-        else if(sca_.k == json::kind::uint64)
-        {
-            auto const u = sca_.u;
-            if(u <= static_cast<std::uint64_t>((
-                std::numeric_limits<T>::max)()))
-            {
-                ec = {};
-                return static_cast<T>(u);
-            }
-            ec = error::not_exact;
-        }
-        else if(sca_.k == json::kind::double_)
-        {
-            auto const d = sca_.d;
-            if( d >= static_cast<double>(
-                    (detail::to_number_limit<T>::min)()) &&
-                d <= static_cast<double>(
-                    (detail::to_number_limit<T>::max)()) &&
-                static_cast<T>(d) == d)
-            {
-                ec = {};
-                return static_cast<T>(d);
-            }
-            ec = error::not_exact;
-        }
-        else
-        {
-            ec = error::not_number;
-        }
-        return T{};
-    }
-
-    template<class T>
-    auto
-    to_number(error_code& ec) const noexcept ->
-        typename std::enable_if<
-            std::is_unsigned<T>::value &&
-            ! std::is_same<T, bool>::value,
-                T>::type
-    {
-        if(sca_.k == json::kind::int64)
-        {
-            auto const i = sca_.i;
-            if( i >= 0 && static_cast<std::uint64_t>(i) <=
-                (std::numeric_limits<T>::max)())
-            {
-                ec = {};
-                return static_cast<T>(i);
-            }
-            ec = error::not_exact;
-        }
-        else if(sca_.k == json::kind::uint64)
-        {
-            auto const u = sca_.u;
-            if(u <= (std::numeric_limits<T>::max)())
-            {
-                ec = {};
-                return static_cast<T>(u);
-            }
-            ec = error::not_exact;
-        }
-        else if(sca_.k == json::kind::double_)
-        {
-            auto const d = sca_.d;
-            if( d >= 0 &&
-                d <= (detail::to_number_limit<T>::max)() &&
-                static_cast<T>(d) == d)
-            {
-                ec = {};
-                return static_cast<T>(d);
-            }
-            ec = error::not_exact;
-        }
-        else
-        {
-            ec = error::not_number;
-        }
-        return T{};
-    }
-
-    template<class T>
-    auto
-    to_number(error_code& ec) const noexcept ->
-        typename std::enable_if<
-            std::is_floating_point<
-                T>::value, T>::type
-    {
-        if(sca_.k == json::kind::int64)
-        {
-            ec = {};
-            return static_cast<T>(sca_.i);
-        }
-        if(sca_.k == json::kind::uint64)
-        {
-            ec = {};
-            return static_cast<T>(sca_.u);
-        }
-        if(sca_.k == json::kind::double_)
-        {
-            ec = {};
-            return static_cast<T>(sca_.d);
-        }
-        ec = error::not_number;
-        return {};
-    }
-#endif
 
     //------------------------------------------------------
     //
@@ -3304,6 +3208,76 @@ public:
         return as_array().at(pos);
     }
 
+    /** Access an element via JSON Pointer.
+
+        This function is used to access a (potentially nested)
+        element of the value using a JSON Pointer string.
+
+        @par Complexity
+        Linear in the sizes of `ptr` and underlying array, object, or string.
+
+        @par Exception Safety
+        Strong guarantee.
+
+        @param ptr JSON Pointer string.
+
+        @return reference to the element identified by `ptr`.
+
+        @throw system_error if an error occurs.
+
+        @see
+        <a href="https://datatracker.ietf.org/doc/html/rfc6901">
+            RFC 6901 - JavaScript Object Notation (JSON) Pointer</a>
+    */
+/** @{ */
+    BOOST_JSON_DECL
+    value const&
+    at_pointer(string_view ptr) const;
+
+    BOOST_JSON_DECL
+    value&
+    at_pointer(string_view ptr);
+/** @} */
+
+    /** Access an element via JSON Pointer.
+
+        This function is used to access a (potentially nested)
+        element of the value using a JSON Pointer string.
+
+        @par Complexity
+        Linear in the sizes of `ptr` and underlying array, object, or string.
+
+        @par Exception Safety
+        No-throw guarantee.
+
+        @param ptr JSON Pointer string.
+
+        @param ec Set to the error, if any occurred.
+
+        @return pointer to the element identified by `ptr`.
+
+        @see
+        <a href="https://datatracker.ietf.org/doc/html/rfc6901">
+            RFC 6901 - JavaScript Object Notation (JSON) Pointer</a>
+    */
+/** @{ */
+    BOOST_JSON_DECL
+    value const*
+    find_pointer(string_view ptr, error_code& ec) const noexcept;
+
+    BOOST_JSON_DECL
+    value*
+    find_pointer(string_view ptr, error_code& ec) noexcept;
+
+    BOOST_JSON_DECL
+    value const*
+    find_pointer(string_view ptr, std::error_code& ec) const noexcept;
+
+    BOOST_JSON_DECL
+    value*
+    find_pointer(string_view ptr, std::error_code& ec) noexcept;
+/** @} */
+
     /** Return `true` if two values are equal.
 
         Two values are equal when they are the
@@ -3373,6 +3347,131 @@ private:
     BOOST_JSON_DECL
     bool
     equal(value const& other) const noexcept;
+
+    template<class T>
+    auto
+    to_number(error& e) const noexcept ->
+        typename std::enable_if<
+            std::is_signed<T>::value &&
+            ! std::is_floating_point<T>::value,
+                T>::type
+    {
+        if(sca_.k == json::kind::int64)
+        {
+            auto const i = sca_.i;
+            if( i >= (std::numeric_limits<T>::min)() &&
+                i <= (std::numeric_limits<T>::max)())
+            {
+                e = {};
+                return static_cast<T>(i);
+            }
+            e = error::not_exact;
+        }
+        else if(sca_.k == json::kind::uint64)
+        {
+            auto const u = sca_.u;
+            if(u <= static_cast<std::uint64_t>((
+                std::numeric_limits<T>::max)()))
+            {
+                e = {};
+                return static_cast<T>(u);
+            }
+            e = error::not_exact;
+        }
+        else if(sca_.k == json::kind::double_)
+        {
+            auto const d = sca_.d;
+            if( d >= static_cast<double>(
+                    (detail::to_number_limit<T>::min)()) &&
+                d <= static_cast<double>(
+                    (detail::to_number_limit<T>::max)()) &&
+                static_cast<T>(d) == d)
+            {
+                e = {};
+                return static_cast<T>(d);
+            }
+            e = error::not_exact;
+        }
+        else
+        {
+            e = error::not_number;
+        }
+        return T{};
+    }
+
+    template<class T>
+    auto
+    to_number(error& e) const noexcept ->
+        typename std::enable_if<
+            std::is_unsigned<T>::value &&
+            ! std::is_same<T, bool>::value,
+                T>::type
+    {
+        if(sca_.k == json::kind::int64)
+        {
+            auto const i = sca_.i;
+            if( i >= 0 && static_cast<std::uint64_t>(i) <=
+                (std::numeric_limits<T>::max)())
+            {
+                e = {};
+                return static_cast<T>(i);
+            }
+            e = error::not_exact;
+        }
+        else if(sca_.k == json::kind::uint64)
+        {
+            auto const u = sca_.u;
+            if(u <= (std::numeric_limits<T>::max)())
+            {
+                e = {};
+                return static_cast<T>(u);
+            }
+            e = error::not_exact;
+        }
+        else if(sca_.k == json::kind::double_)
+        {
+            auto const d = sca_.d;
+            if( d >= 0 &&
+                d <= (detail::to_number_limit<T>::max)() &&
+                static_cast<T>(d) == d)
+            {
+                e = {};
+                return static_cast<T>(d);
+            }
+            e = error::not_exact;
+        }
+        else
+        {
+            e = error::not_number;
+        }
+        return T{};
+    }
+
+    template<class T>
+    auto
+    to_number(error& e) const noexcept ->
+        typename std::enable_if<
+            std::is_floating_point<
+                T>::value, T>::type
+    {
+        if(sca_.k == json::kind::int64)
+        {
+            e = {};
+            return static_cast<T>(sca_.i);
+        }
+        if(sca_.k == json::kind::uint64)
+        {
+            e = {};
+            return static_cast<T>(sca_.u);
+        }
+        if(sca_.k == json::kind::double_)
+        {
+            e = {};
+            return static_cast<T>(sca_.d);
+        }
+        e = error::not_number;
+        return {};
+    }
 };
 
 // Make sure things are as big as we think they should be
@@ -3416,7 +3515,7 @@ public:
         The value is destroyed and all internally
         allocated memory is freed.
     */
-    ~key_value_pair()
+    ~key_value_pair() noexcept
     {
         auto const& sp = value_.storage();
         if(sp.is_not_shared_and_deallocate_is_trivial())
@@ -3555,7 +3654,7 @@ public:
                 BOOST_JSON_SOURCE_POS);
         auto s = reinterpret_cast<
             char*>(value_.storage()->
-                allocate(key.size() + 1));
+                allocate(key.size() + 1, alignof(char)));
         std::memcpy(s, key.data(), key.size());
         s[key.size()] = 0;
         key_ = s;
@@ -3908,6 +4007,19 @@ struct tuple_element<1, ::boost::json::key_value_pair const>
 } // std
 
 #endif
+
+// std::hash specialization
+#ifndef BOOST_JSON_DOCS
+namespace std {
+template <>
+struct hash< ::boost::json::value > {
+    BOOST_JSON_DECL
+    std::size_t
+    operator()(::boost::json::value const& jv) const noexcept;
+};
+} // std
+#endif
+
 
 #ifdef __clang__
 # pragma clang diagnostic pop

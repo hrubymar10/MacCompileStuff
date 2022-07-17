@@ -104,7 +104,7 @@ struct alignas(key_value_pair)
     {
         if(p->capacity == 0)
             return;
-        if(p->is_small())
+        if(! p->is_small())
             sp->deallocate(p,
                 sizeof(table) + p->capacity * (
                     sizeof(key_value_pair) +
@@ -379,7 +379,7 @@ insert_or_assign(
         std::pair<iterator, bool>
 {
     reserve(size() + 1);
-    auto const result = find_impl(key);
+    auto const result = detail::find_in_object(*this, key);
     if(result.first)
     {
         value(std::forward<M>(m),
@@ -401,7 +401,7 @@ emplace(
         std::pair<iterator, bool>
 {
     reserve(size() + 1);
-    auto const result = find_impl(key);
+    auto const result = detail::find_in_object(*this, key);
     if(result.first)
         return { result.first, false };
     key_value_pair kv(key,

@@ -58,10 +58,13 @@ BOOST_MATH_INSTRUMENT_LAMBERT_W_SMALL_Z_SERIES_ITERATIONS  // Show evaluation of
 #include <boost/math/tools/series.hpp> // series functor.
 //#include <boost/math/tools/polynomial.hpp>  // polynomial.
 #include <boost/math/tools/rational.hpp>  // evaluate_polynomial.
-#include <boost/type_traits/is_integral.hpp>
 #include <boost/math/tools/precision.hpp> // boost::math::tools::max_value().
 #include <boost/math/tools/big_constant.hpp>
 #include <boost/math/tools/cxx03_warn.hpp>
+
+#ifndef BOOST_MATH_STANDALONE
+#include <boost/lexical_cast.hpp>
+#endif
 
 #include <limits>
 #include <cmath>
@@ -180,7 +183,12 @@ inline double must_reduce_to_double(const T& z, const std::true_type&)
 template <typename T>
 inline double must_reduce_to_double(const T& z, const std::false_type&)
 { // try a lexical_cast and hope for the best:
+#ifndef BOOST_MATH_STANDALONE
    return boost::lexical_cast<double>(z);
+#else
+   static_assert(sizeof(T) == 0, "Unsupported in standalone mode: don't know how to cast your number type to a double.");
+   return 0.0;
+#endif
 }
 
 //! \brief Schroeder method, fifth-order update formula,
@@ -1620,7 +1628,7 @@ inline T lambert_w0_imp(T z, const Policy& pol, const std::integral_constant<int
    BOOST_MATH_STD_USING // Aid ADL of std functions.
 
    // Detect unusual case of 32-bit double with a wider/64-bit long double
-   BOOST_STATIC_ASSERT_MSG(std::numeric_limits<double>::digits >= 53,
+   static_assert(std::numeric_limits<double>::digits >= 53,
    "Our double precision coefficients will be truncated, "
    "please file a bug report with details of your platform's floating point types "
    "- or possibly edit the coefficients to have "
@@ -1744,7 +1752,7 @@ T lambert_wm1_imp(const T z, const Policy&  pol)
   // Integral types should be promoted to double by user Lambert w functions.
   // If integral type provided to user function lambert_w0 or lambert_wm1,
   // then should already have been promoted to double.
-  BOOST_STATIC_ASSERT_MSG(!boost::is_integral<T>::value,
+  static_assert(!std::is_integral<T>::value,
     "Must be floating-point or fixed type (not integer type), for example: lambert_wm1(1.), not lambert_wm1(1)!");
 
   BOOST_MATH_STD_USING // Aid argument dependent lookup (ADL) of abs.

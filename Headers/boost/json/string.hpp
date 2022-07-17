@@ -153,7 +153,7 @@ public:
         @par Exception Safety
         No-throw guarantee.
     */
-    ~string()
+    ~string() noexcept
     {
         impl_.destroy(sp_);
     }
@@ -1133,6 +1133,25 @@ public:
     {
         return {data(), size()};
     }
+
+#if ! defined(BOOST_NO_CXX17_HDR_STRING_VIEW)
+    /** Convert to a `std::string_view` referring to the string.
+
+        Returns a string view to the underlying character string. The size of
+        the view does not include the null terminator.
+
+        This overload is not defined when `BOOST_NO_CXX17_HDR_STRING_VIEW`
+        is defined.
+
+        @par Complexity
+
+        Constant.
+    */
+    operator std::string_view() const noexcept
+    {
+        return {data(), size()};
+    }
+#endif
 
     //------------------------------------------------------
     //
@@ -2899,7 +2918,7 @@ struct hash< ::boost::json::string >
     operator()(::boost::json::string const& js) const noexcept
     {
         return ::boost::json::detail::digest(
-            js.data(), js.size(), salt_);
+            js.begin(), js.end(), salt_);
     }
 
 private:
