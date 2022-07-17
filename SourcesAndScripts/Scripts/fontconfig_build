@@ -6,8 +6,8 @@
 
 set -e
 
-FONTCONFIG_VERSION="2.13.1"
-SHA256="9f0d852b39d75fc655f9f53850eb32555394f36104a044bb2b2fc9e66dbbfa7f"
+FONTCONFIG_VERSION="2.14.0"
+SHA256="dcbeb84c9c74bbfdb133d535fe1c7bedc9f2221a8daf3914b984c44c520e9bac"
 
 starttimestamp=$(date +%s)
 
@@ -27,8 +27,8 @@ check_freetype
 
 cd "${SOURCES_PATH}"
 rm -rf "fontconfig"*
-get_src_and_verify_checksum "fontconfig-${FONTCONFIG_VERSION}.tar.gz" "${SHA256}" "https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.gz"
-tar xf "${SOURCES_PATH}/archives/fontconfig-${FONTCONFIG_VERSION}.tar.gz" -C .
+get_src_and_verify_checksum "fontconfig-${FONTCONFIG_VERSION}.tar.xz" "${SHA256}" "https://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VERSION}.tar.xz"
+tar xf "${SOURCES_PATH}/archives/fontconfig-${FONTCONFIG_VERSION}.tar.xz" -C .
 cp -R "fontconfig-${FONTCONFIG_VERSION}" "fontconfig-${FONTCONFIG_VERSION}-arm64"
 ln -s "fontconfig-${FONTCONFIG_VERSION}" "fontconfig"
 cd "fontconfig"
@@ -37,7 +37,6 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-patch -b -p0 < "${SCRIPTS_PATH}/fontconfig.patch"
 ./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts" --host=x86_64-apple-darwin
 make
 # Build arm64
@@ -46,7 +45,6 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-patch -b -p0 < "${SCRIPTS_PATH}/fontconfig.patch"
 ./configure --disable-docs --disable-dependency-tracking --disable-silent-rules --enable-shared --with-add-fonts="/System/Library/Fonts","/Library/Fonts","~/Library/Fonts" --host=aarch64-apple-darwin
 make
 mkdir "fontconfig-${FONTCONFIG_VERSION}-RELEASE"
