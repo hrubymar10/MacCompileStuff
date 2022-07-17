@@ -22,6 +22,7 @@
 #ifndef __PANGO_FONTMAP_H__
 #define __PANGO_FONTMAP_H__
 
+#include <pango/pango-types.h>
 #include <pango/pango-font.h>
 #include <pango/pango-fontset.h>
 
@@ -35,7 +36,6 @@ G_BEGIN_DECLS
 #define PANGO_FONT_MAP_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), PANGO_TYPE_FONT_MAP, PangoFontMapClass))
 
 typedef struct _PangoFontMapClass PangoFontMapClass;
-typedef struct _PangoContext PangoContext;
 
 /**
  * PangoFontMap:
@@ -123,6 +123,9 @@ void          pango_font_map_changed       (PangoFontMap                 *fontma
 PANGO_AVAILABLE_IN_1_46
 PangoFontFamily *pango_font_map_get_family (PangoFontMap                 *fontmap,
                                             const char                   *name);
+
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoFontMap, g_object_unref)
 
 G_END_DECLS
 

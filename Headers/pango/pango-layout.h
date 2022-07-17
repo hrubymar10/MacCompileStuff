@@ -54,6 +54,9 @@ typedef PangoGlyphItem PangoLayoutRun;
  *
  * If the `PangoLayout` is set to justify using [method@Pango.Layout.set_justify],
  * this only has effect for partial lines.
+ *
+ * See [method@Pango.Layout.set_auto_dir] for how text direction affects
+ * the interpretation of `PangoAlignment values.
  */
 typedef enum {
   PANGO_ALIGN_LEFT,
@@ -220,9 +223,14 @@ PANGO_AVAILABLE_IN_1_44
 float          pango_layout_get_line_spacing     (PangoLayout                *layout);
 PANGO_AVAILABLE_IN_ALL
 void           pango_layout_set_justify          (PangoLayout                *layout,
-						  gboolean                    justify);
+                                                  gboolean                    justify);
 PANGO_AVAILABLE_IN_ALL
 gboolean       pango_layout_get_justify          (PangoLayout                *layout);
+PANGO_AVAILABLE_IN_1_50
+void           pango_layout_set_justify_last_line (PangoLayout                *layout,
+                                                   gboolean                    justify);
+PANGO_AVAILABLE_IN_1_50
+gboolean       pango_layout_get_justify_last_line (PangoLayout                *layout);
 PANGO_AVAILABLE_IN_1_4
 void           pango_layout_set_auto_dir         (PangoLayout                *layout,
 						  gboolean                    auto_dir);
@@ -290,6 +298,13 @@ void     pango_layout_get_cursor_pos       (PangoLayout    *layout,
 					    int             index_,
 					    PangoRectangle *strong_pos,
 					    PangoRectangle *weak_pos);
+
+PANGO_AVAILABLE_IN_1_50
+void     pango_layout_get_caret_pos        (PangoLayout    *layout,
+                                            int             index_,
+                                            PangoRectangle *strong_pos,
+                                            PangoRectangle *weak_pos);
+
 PANGO_AVAILABLE_IN_ALL
 void     pango_layout_move_cursor_visually (PangoLayout    *layout,
 					    gboolean        strong,
@@ -346,6 +361,15 @@ PANGO_AVAILABLE_IN_1_10
 PangoLayoutLine *pango_layout_line_ref   (PangoLayoutLine *line);
 PANGO_AVAILABLE_IN_ALL
 void             pango_layout_line_unref (PangoLayoutLine *line);
+
+PANGO_AVAILABLE_IN_1_50
+int      pango_layout_line_get_start_index (PangoLayoutLine *line);
+PANGO_AVAILABLE_IN_1_50
+int      pango_layout_line_get_length      (PangoLayoutLine *line);
+PANGO_AVAILABLE_IN_1_50
+gboolean pango_layout_line_is_paragraph_start (PangoLayoutLine *line);
+PANGO_AVAILABLE_IN_1_50
+PangoDirection pango_layout_line_get_resolved_direction (PangoLayoutLine *line);
 
 PANGO_AVAILABLE_IN_ALL
 gboolean pango_layout_line_x_to_index   (PangoLayoutLine  *line,
@@ -442,6 +466,8 @@ void pango_layout_iter_get_layout_extents  (PangoLayoutIter *iter,
 					    PangoRectangle  *logical_rect);
 PANGO_AVAILABLE_IN_ALL
 int  pango_layout_iter_get_baseline        (PangoLayoutIter *iter);
+PANGO_AVAILABLE_IN_1_50
+int  pango_layout_iter_get_run_baseline    (PangoLayoutIter *iter);
 
 G_END_DECLS
 

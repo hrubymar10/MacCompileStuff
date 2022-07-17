@@ -10,7 +10,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
  *
  * You should have received a copy of the GNU Library General Public
@@ -72,6 +72,10 @@ G_BEGIN_DECLS
  *   This flag is particularly useful when selecting text word-by-word. This flag
  *   implements Unicode's [Word Boundaries](http://www.unicode.org/reports/tr29/)
  *   semantics. (Since: 1.22)
+ * @break_inserts_hyphen: when breaking lines before this char, insert a hyphen.
+ *   Since: 1.50
+ * @break_removes_preceding: when breaking lines before this char, remove the
+ *   preceding char. Since 1.50
  *
  * The `PangoLogAttr` structure stores information about the attributes of a
  * single character.
@@ -91,48 +95,47 @@ struct _PangoLogAttr
   guint backspace_deletes_character : 1;
   guint is_expandable_space         : 1;
   guint is_word_boundary            : 1;
+  guint break_inserts_hyphen        : 1;
+  guint break_removes_preceding     : 1;
 };
 
 PANGO_DEPRECATED_IN_1_44
-void pango_break (const gchar   *text,
-		  int            length,
-		  PangoAnalysis *analysis,
-		  PangoLogAttr  *attrs,
-		  int            attrs_len);
+void                    pango_break             (const char    *text,
+                                                 int            length,
+                                                 PangoAnalysis *analysis,
+                                                 PangoLogAttr  *attrs,
+                                                 int            attrs_len);
 
 PANGO_AVAILABLE_IN_ALL
-void pango_find_paragraph_boundary (const gchar *text,
-				    gint         length,
-				    gint        *paragraph_delimiter_index,
-				    gint        *next_paragraph_start);
+void                    pango_get_log_attrs     (const char    *text,
+                                                 int            length,
+                                                 int            level,
+                                                 PangoLanguage *language,
+                                                 PangoLogAttr  *attrs,
+                                                 int            attrs_len);
 
 PANGO_AVAILABLE_IN_ALL
-void pango_get_log_attrs (const char    *text,
-			  int            length,
-			  int            level,
-			  PangoLanguage *language,
-			  PangoLogAttr  *log_attrs,
-			  int            attrs_len);
-
-/* This is the default break algorithm, used if no language
- * engine overrides it. Normally you should use pango_break()
- * instead; this function is mostly useful for chaining up
- * from a language engine override.
- */
-PANGO_AVAILABLE_IN_ALL
-void pango_default_break (const gchar   *text,
-			  int            length,
-			  PangoAnalysis *analysis,
-			  PangoLogAttr  *attrs,
-			  int            attrs_len);
+void                    pango_default_break     (const char    *text,
+                                                 int            length,
+                                                 PangoAnalysis *analysis,
+                                                 PangoLogAttr  *attrs,
+                                                 int            attrs_len);
 
 PANGO_AVAILABLE_IN_1_44
-void pango_tailor_break  (const char    *text,
-                          int            length,
-			  PangoAnalysis *analysis,
-                          int            offset,
-			  PangoLogAttr  *log_attrs,
-			  int            log_attrs_len);
+void                    pango_tailor_break      (const char    *text,
+                                                 int            length,
+                                                 PangoAnalysis *analysis,
+                                                 int            offset,
+                                                 PangoLogAttr  *attrs,
+                                                 int            attrs_len);
+
+PANGO_AVAILABLE_IN_1_50
+void                    pango_attr_break        (const char    *text,
+                                                 int            length,
+                                                 PangoAttrList *attr_list,
+                                                 int            offset,
+                                                 PangoLogAttr  *attrs,
+                                                 int            attrs_len);
 
 G_END_DECLS
 
