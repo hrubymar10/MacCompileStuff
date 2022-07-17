@@ -6,8 +6,8 @@
 
 set -e
 
-LIBFFI_VERSION="3.3"
-SHA256="72fba7922703ddfa7a028d513ac15a85c8d54c8d67f55fa5a4802885dc652056"
+LIBFFI_VERSION="3.4.2"
+SHA256="540fb721619a6aba3bdeef7d940d8e9e0e6d2c193595bc243241b77ff9e93620"
 
 starttimestamp=$(date +%s)
 
@@ -26,7 +26,7 @@ check_wget
 
 cd "${SOURCES_PATH}"
 rm -rf "libffi"*
-get_src_and_verify_checksum "libffi-${LIBFFI_VERSION}.tar.gz" "${SHA256}" "https://sourceware.org/pub/libffi/libffi-${LIBFFI_VERSION}.tar.gz"
+get_src_and_verify_checksum "libffi-${LIBFFI_VERSION}.tar.gz" "${SHA256}" "https://github.com/libffi/libffi/releases/download/v${LIBFFI_VERSION}/libffi-${LIBFFI_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/libffi-${LIBFFI_VERSION}.tar.gz" -C .
 cp -R "libffi-${LIBFFI_VERSION}" "libffi-${LIBFFI_VERSION}-arm64"
 ln -s "libffi-${LIBFFI_VERSION}" "libffi"
@@ -49,11 +49,12 @@ export CXXFLAGS="${CXXFLAGS_ARM64}"
 make
 mkdir "libffi-${LIBFFI_VERSION}-RELEASE"
 cd "libffi-${LIBFFI_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/.libs/libffi.7.dylib" "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}/x86_64-apple-darwin/.libs/libffi.7.dylib" -output "libffi.7.dylib"
-install_name_tool -id "@rpath/libffi.7.dylib" "libffi.7.dylib"
-rm -rf "${LIBS_PATH}/libffi.7.dylib" "${LIBS_PATH}/libffi.dylib"
-cp -rf "libffi.7.dylib" "${LIBS_PATH}/libffi.7.dylib"
-ln -s "libffi.7.dylib" "${LIBS_PATH}/libffi.dylib"
+lipo -create "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/.libs/libffi.8.dylib" "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}/x86_64-apple-darwin/.libs/libffi.8.dylib" -output "libffi.8.dylib"
+install_name_tool -id "@rpath/libffi.8.dylib" "libffi.8.dylib"
+rm -rf "${LIBS_PATH}/libffi.8.dylib" "${LIBS_PATH}/libffi.dylib"
+cp -rf "libffi.8.dylib" "${LIBS_PATH}/libffi.8.dylib"
+ln -s "libffi.8.dylib" "${LIBS_PATH}/libffi.7.dylib"
+ln -s "libffi.8.dylib" "${LIBS_PATH}/libffi.dylib"
 rm -rf "${HEADERS_PATH}/libffi"
 mkdir -p "${HEADERS_PATH}/libffi"
 cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/include/ffi.h" "${HEADERS_PATH}/libffi/ffi_arm64.h"
