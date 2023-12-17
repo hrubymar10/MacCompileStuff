@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # pixman_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-PIXMAN_VERSION="0.40.0"
-SHA256="6d200dec3740d9ec4ec8d1180e25779c00bc749f94278c8b9021f5534db223fc"
+PIXMAN_VERSION="0.42.2"
+SHA256="ea1480efada2fd948bc75366f7c349e1c96d3297d09a3fe62626e38e234a625e"
 
 starttimestamp=$(date +%s)
 
@@ -29,33 +29,41 @@ rm -rf "pixman"*
 get_src_and_verify_checksum "pixman-${PIXMAN_VERSION}.tar.gz" "${SHA256}" "https://cairographics.org/releases/pixman-${PIXMAN_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/pixman-${PIXMAN_VERSION}.tar.gz" -C .
 cp -R "pixman-${PIXMAN_VERSION}" "pixman-${PIXMAN_VERSION}-arm64"
-ln -s "pixman-${PIXMAN_VERSION}" "pixman"
-cd "pixman"
+mv "pixman-${PIXMAN_VERSION}" "pixman-${PIXMAN_VERSION}-x86_64"
+ln -s "pixman-${PIXMAN_VERSION}-x86_64" "pixman"
+
 # Build x86_64
+cd "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
+patch -b -p0 < "${SCRIPTS_PATH}/pixman.patch"
 ./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
+patch -b -p0 < "${SCRIPTS_PATH}/pixman.patch"
 ./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=aarch64-apple-darwin
 make
+
 mkdir "pixman-${PIXMAN_VERSION}-RELEASE"
 cd "pixman-${PIXMAN_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64/pixman/.libs/libpixman-1.0.40.0.dylib" "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}/pixman/.libs/libpixman-1.0.40.0.dylib" -output "libpixman-1.0.dylib"
+lipo -create "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64/pixman/.libs/libpixman-1.0.42.2.dylib" "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-x86_64/pixman/.libs/libpixman-1.0.42.2.dylib" -output "libpixman-1.0.dylib"
 install_name_tool -id "@rpath/libpixman-1.0.dylib" "libpixman-1.0.dylib"
-rm -rf "${LIBS_PATH}/libpixman-1.0.dylib" "${LIBS_PATH}/libpixman.dylib"
+rm -rf "${LIBS_PATH}/libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.dylib" "${LIBS_PATH}/libpixman.dylib"
 cp -rf "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.0.dylib"
+ln -s "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.dylib"
 ln -s "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman.dylib"
 rm -rf "${HEADERS_PATH}/pixman"
 mkdir -p "${HEADERS_PATH}/pixman"
 cp "${SOURCES_PATH}/pixman/pixman/pixman.h" "${SOURCES_PATH}/pixman/pixman/pixman-version.h" "${HEADERS_PATH}/pixman/"
+generate_pkgconfig_file "pixman-1" "${PIXMAN_VERSION}"
 echo "==> DONE ..."
 echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
