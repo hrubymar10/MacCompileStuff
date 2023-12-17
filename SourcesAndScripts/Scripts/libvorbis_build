@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libvorbis_build
-# Martin Hrubý (hrubymar10), 2019-2022
+# Martin Hrubý (hrubymar10), 2019-2023
 #
 
 set -e
@@ -30,27 +30,33 @@ rm -rf "libvorbis"*
 get_src_and_verify_checksum "libvorbis-${LIBVORBIS_VERSION}.tar.xz" "${SHA256}" "http://downloads.xiph.org/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/libvorbis-${LIBVORBIS_VERSION}.tar.xz" -C .
 cp -R "libvorbis-${LIBVORBIS_VERSION}" "libvorbis-${LIBVORBIS_VERSION}-arm64"
-ln -s "libvorbis-${LIBVORBIS_VERSION}" "libvorbis"
-cd "libvorbis"
+mv "libvorbis-${LIBVORBIS_VERSION}" "libvorbis-${LIBVORBIS_VERSION}-x86_64"
+ln -s "libvorbis-${LIBVORBIS_VERSION}-x86_64" "libvorbis"
+
 # Build x86_64
+cd "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
+patch -b -p0 < "${SCRIPTS_PATH}/libvorbis.patch"
 ./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
+patch -b -p0 < "${SCRIPTS_PATH}/libvorbis.patch"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
+
 mkdir "libvorbis-${LIBVORBIS_VERSION}-RELEASE"
 cd "libvorbis-${LIBVORBIS_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/libvorbis.0.dylib" "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}/lib/.libs/libvorbis.0.dylib" -output "libvorbis.0.dylib"
-lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/libvorbisfile.dylib" "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}/lib/.libs/libvorbisfile.dylib" -output "libvorbisfile.dylib"
+lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/libvorbis.0.dylib" "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-x86_64/lib/.libs/libvorbis.0.dylib" -output "libvorbis.0.dylib"
+lipo -create "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-arm64/lib/.libs/libvorbisfile.dylib" "${SOURCES_PATH}/libvorbis-${LIBVORBIS_VERSION}-x86_64/lib/.libs/libvorbisfile.dylib" -output "libvorbisfile.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
   install_name_tool -change "/usr/local/lib/libvorbis.0.dylib" "@loader_path/libvorbis.0.dylib" "${filename}"
