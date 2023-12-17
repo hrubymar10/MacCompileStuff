@@ -1,0 +1,12 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: libwebp
+Description: Library for the WebP graphics format
+Version: VERSION
+Requires.private: libsharpyuv
+Libs: -L${libdir} -lwebp
+Libs.private:   
+Cflags: -I${includedir}

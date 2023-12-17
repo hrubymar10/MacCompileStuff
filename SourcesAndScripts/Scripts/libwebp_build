@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # libwebp_build
-# Martin Hrubý (hrubymar10), 2022
+# Martin Hrubý (hrubymar10), 2022-2023
 #
 
 set -e
 
-LIBWEBP_VERSION="1.2.3"
-SHA256="f5d7ab2390b06b8a934a4fc35784291b3885b557780d099bd32f09241f9d83f9"
+LIBWEBP_VERSION="1.3.2"
+SHA256="2a499607df669e40258e53d0ade8035ba4ec0175244869d1025d460562aa09b4"
 
 starttimestamp=$(date +%s)
 
@@ -30,9 +30,11 @@ rm -rf "libwebp"*
 get_src_and_verify_checksum "libwebp-${LIBWEBP_VERSION}.tar.gz" "${SHA256}" "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/libwebp-${LIBWEBP_VERSION}.tar.gz" -C .
 cp -R "libwebp-${LIBWEBP_VERSION}" "libwebp-${LIBWEBP_VERSION}-arm64"
-ln -s "libwebp-${LIBWEBP_VERSION}" "libwebp"
-cd "libwebp"
+mv "libwebp-${LIBWEBP_VERSION}" "libwebp-${LIBWEBP_VERSION}-x86_64"
+ln -s "libwebp-${LIBWEBP_VERSION}-x86_64" "libwebp"
+
 # Build x86_64
+cd "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
@@ -40,6 +42,7 @@ export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./autogen.sh
 ./configure --disable-dependency-tracking --disable-jpeg --disable-gif --with-pngincludedir="${SOURCES_PATH}/libpng" --with-pnglibdir="${LIBS_PATH}" --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -49,16 +52,27 @@ export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./autogen.sh
 ./configure --disable-dependency-tracking --disable-jpeg --disable-gif --with-pngincludedir="${SOURCES_PATH}/libpng" --with-pnglibdir="${LIBS_PATH}" --host=aarch64-apple-darwin
 make
+
 mkdir "libwebp-${LIBWEBP_VERSION}-RELEASE"
 cd "libwebp-${LIBWEBP_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64/src/.libs/libwebp.7.dylib" "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}/src/.libs/libwebp.7.dylib" -output "libwebp.7.dylib"
+lipo -create "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64/src/.libs/libwebp.7.dylib" "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-x86_64/src/.libs/libwebp.7.dylib" -output "libwebp.7.dylib"
+lipo -create "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64/src/demux/.libs/libwebpdemux.2.dylib" "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-x86_64/src/demux/.libs/libwebpdemux.2.dylib" -output "libwebpdemux.2.dylib"
+lipo -create "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-arm64/sharpyuv/.libs/libsharpyuv.0.dylib" "${SOURCES_PATH}/libwebp-${LIBWEBP_VERSION}-x86_64/sharpyuv/.libs/libsharpyuv.0.dylib" -output "libsharpyuv.0.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
   install_name_tool -change "/usr/local/lib/libwebp.7.dylib" "@loader_path/libwebp.7.dylib" "${filename}"
+  install_name_tool -change "/usr/local/lib/libwebpdemux.2.dylib" "@loader_path/libwebpdemux.2.dylib" "${filename}"
+  install_name_tool -change "/usr/local/lib/libsharpyuv.0.dylib" "@loader_path/libsharpyuv.0.dylib" "${filename}"
 done
 rm -rf "${LIBS_PATH}/libwebp.7.dylib" "${LIBS_PATH}/libwebp.dylib"
 cp -rf "libwebp.7.dylib" "${LIBS_PATH}/libwebp.7.dylib"
 ln -s "libwebp.7.dylib" "${LIBS_PATH}/libwebp.dylib"
+rm -rf "${LIBS_PATH}/libwebpdemux.2.dylib" "${LIBS_PATH}/libwebpdemux.dylib"
+cp -rf "libwebpdemux.2.dylib" "${LIBS_PATH}/libwebpdemux.2.dylib"
+ln -s "libwebpdemux.2.dylib" "${LIBS_PATH}/libwebpdemux.dylib"
+rm -rf "${LIBS_PATH}/libsharpyuv.0.dylib" "${LIBS_PATH}/libsharpyuv.dylib"
+cp -rf "libsharpyuv.0.dylib" "${LIBS_PATH}/libsharpyuv.0.dylib"
+ln -s "libsharpyuv.0.dylib" "${LIBS_PATH}/libsharpyuv.dylib"
 rm -rf "${HEADERS_PATH}/webp"
 mkdir "${HEADERS_PATH}/webp"
 cp -rf "${SOURCES_PATH}/libwebp/src/webp/mux.h" "${HEADERS_PATH}/webp/"
@@ -67,5 +81,7 @@ cp -rf "${SOURCES_PATH}/libwebp/src/webp/demux.h" "${HEADERS_PATH}/webp/"
 cp -rf "${SOURCES_PATH}/libwebp/src/webp/encode.h" "${HEADERS_PATH}/webp/"
 cp -rf "${SOURCES_PATH}/libwebp/src/webp/mux_types.h" "${HEADERS_PATH}/webp/"
 cp -rf "${SOURCES_PATH}/libwebp/src/webp/types.h" "${HEADERS_PATH}/webp/"
+generate_pkgconfig_file "libwebp" "${LIBWEBP_VERSION}"
+generate_pkgconfig_file "libwebpdemux" "${LIBWEBP_VERSION}"
 echo "==> DONE ..."
 echo ""
