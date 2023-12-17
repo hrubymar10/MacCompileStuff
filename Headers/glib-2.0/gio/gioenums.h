@@ -2,6 +2,8 @@
  *
  * Copyright (C) 2006-2007 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,6 +28,7 @@
 #endif
 
 #include <glib-object.h>
+#include <gio/gio-visibility.h>
 
 G_BEGIN_DECLS
 
@@ -221,6 +224,9 @@ typedef enum {
  *   sizes.  Normally, the block-size is used, if available, as this is a
  *   more accurate representation of disk space used.
  *   Compare with `du --apparent-size`.
+ *   Since GLib 2.78. and similarly to `du` since GNU Coreutils 9.2, this will
+ *   ignore the sizes of file types other than regular files and links, as the
+ *   sizes of other file types are not specified in a standard way.
  * @G_FILE_MEASURE_NO_XDEV: Do not cross mount point boundaries.
  *   Compare with `du -x`.
  *
@@ -507,6 +513,7 @@ typedef enum {
  *     value, which has this more logical name. Since 2.44.
  * @G_IO_ERROR_NOT_CONNECTED: Transport endpoint is not connected. Since 2.44
  * @G_IO_ERROR_MESSAGE_TOO_LARGE: Message too large. Since 2.48.
+ * @G_IO_ERROR_NO_SUCH_DEVICE: No such device found. Since 2.74
  *
  * Error codes returned by GIO functions.
  *
@@ -575,7 +582,8 @@ typedef enum {
   G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_CONNECTION_CLOSED = G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_NOT_CONNECTED,
-  G_IO_ERROR_MESSAGE_TOO_LARGE
+  G_IO_ERROR_MESSAGE_TOO_LARGE,
+  G_IO_ERROR_NO_SUCH_DEVICE GIO_AVAILABLE_ENUMERATOR_IN_2_74,
 } GIOErrorEnum;
 
 
@@ -1037,7 +1045,7 @@ typedef enum
   G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START = (1<<2),
   G_DBUS_PROXY_FLAGS_GET_INVALIDATED_PROPERTIES = (1<<3),
   G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START_AT_CONSTRUCTION = (1<<4),
-  G_DBUS_PROXY_FLAGS_NO_MATCH_RULE GLIB_AVAILABLE_ENUMERATOR_IN_2_72 = (1<<5)
+  G_DBUS_PROXY_FLAGS_NO_MATCH_RULE GIO_AVAILABLE_ENUMERATOR_IN_2_72 = (1<<5)
 } GDBusProxyFlags;
 
 /**
@@ -1212,6 +1220,12 @@ typedef enum
  * delayed until g_dbus_connection_start_message_processing() is called.
  * @G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER: When authenticating
  * as a server, require the UID of the peer to be the same as the UID of the server. (Since: 2.68)
+ * @G_DBUS_CONNECTION_FLAGS_CROSS_NAMESPACE: When authenticating, try to use
+ *  protocols that work across a Linux user namespace boundary, even if this
+ *  reduces interoperability with older D-Bus implementations. This currently
+ *  affects client-side `EXTERNAL` authentication, for which this flag makes
+ *  connections to a server in another user namespace succeed, but causes
+ *  a deadlock when connecting to a GDBus server older than 2.73.3. Since: 2.74
  *
  * Flags used when creating a new #GDBusConnection.
  *
@@ -1224,7 +1238,8 @@ typedef enum {
   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<2),
   G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION = (1<<3),
   G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING = (1<<4),
-  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GLIB_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<5)
+  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GIO_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<5),
+  G_DBUS_CONNECTION_FLAGS_CROSS_NAMESPACE GIO_AVAILABLE_ENUMERATOR_IN_2_74 = (1<<6)
 } GDBusConnectionFlags;
 
 /**
@@ -1387,7 +1402,7 @@ typedef enum
   G_DBUS_SERVER_FLAGS_NONE = 0,
   G_DBUS_SERVER_FLAGS_RUN_IN_THREAD = (1<<0),
   G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<1),
-  G_DBUS_SERVER_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GLIB_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<2)
+  G_DBUS_SERVER_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER GIO_AVAILABLE_ENUMERATOR_IN_2_68 = (1<<2)
 } GDBusServerFlags;
 
 /**
@@ -1476,7 +1491,9 @@ typedef enum
 
 /**
  * GApplicationFlags:
- * @G_APPLICATION_FLAGS_NONE: Default
+ * @G_APPLICATION_FLAGS_NONE: Default. Deprecated in 2.74, use
+ *   %G_APPLICATION_DEFAULT_FLAGS instead
+ * @G_APPLICATION_DEFAULT_FLAGS: Default flags. Since: 2.74
  * @G_APPLICATION_IS_SERVICE: Run as a service. In this mode, registration
  *      fails if the service is already running, and the application
  *      will initially wait up to 10 seconds for an initial activation
@@ -1518,9 +1535,10 @@ typedef enum
  *
  * Since: 2.28
  **/
-typedef enum
+typedef enum /*< prefix=G_APPLICATION >*/
 {
-  G_APPLICATION_FLAGS_NONE,
+  G_APPLICATION_FLAGS_NONE GIO_DEPRECATED_ENUMERATOR_IN_2_74_FOR(G_APPLICATION_DEFAULT_FLAGS),
+  G_APPLICATION_DEFAULT_FLAGS GIO_AVAILABLE_ENUMERATOR_IN_2_74 = 0,
   G_APPLICATION_IS_SERVICE  =          (1 << 0),
   G_APPLICATION_IS_LAUNCHER =          (1 << 1),
 
@@ -1576,6 +1594,7 @@ typedef enum {
 
 /**
  * GTlsCertificateFlags:
+ * @G_TLS_CERTIFICATE_NO_FLAGS: No flags set. Since: 2.74
  * @G_TLS_CERTIFICATE_UNKNOWN_CA: The signing certificate authority is
  *   not known.
  * @G_TLS_CERTIFICATE_BAD_IDENTITY: The certificate does not match the
@@ -1607,6 +1626,7 @@ typedef enum {
  * Since: 2.28
  */
 typedef enum {
+  G_TLS_CERTIFICATE_NO_FLAGS GIO_AVAILABLE_ENUMERATOR_IN_2_74 = 0,
   G_TLS_CERTIFICATE_UNKNOWN_CA    = (1 << 0),
   G_TLS_CERTIFICATE_BAD_IDENTITY  = (1 << 1),
   G_TLS_CERTIFICATE_NOT_ACTIVATED = (1 << 2),
@@ -1642,18 +1662,22 @@ typedef enum {
  * @G_TLS_CHANNEL_BINDING_TLS_SERVER_END_POINT:
  *    [`tls-server-end-point`](https://tools.ietf.org/html/rfc5929#section-4)
  *    binding type
+ * @G_TLS_CHANNEL_BINDING_TLS_EXPORTER:
+ *    [`tls-exporter`](https://www.rfc-editor.org/rfc/rfc9266.html) binding
+ *    type. Since: 2.74
  *
  * The type of TLS channel binding data to retrieve from #GTlsConnection
- * or #GDtlsConnection, as documented by RFC 5929. The
+ * or #GDtlsConnection, as documented by RFC 5929 or RFC 9266. The
  * [`tls-unique-for-telnet`](https://tools.ietf.org/html/rfc5929#section-5)
  * binding type is not currently implemented.
  *
  * Since: 2.66
  */
-GLIB_AVAILABLE_TYPE_IN_2_66
+GIO_AVAILABLE_TYPE_IN_2_66
 typedef enum {
   G_TLS_CHANNEL_BINDING_TLS_UNIQUE,
-  G_TLS_CHANNEL_BINDING_TLS_SERVER_END_POINT
+  G_TLS_CHANNEL_BINDING_TLS_SERVER_END_POINT,
+  G_TLS_CHANNEL_BINDING_TLS_EXPORTER GIO_AVAILABLE_ENUMERATOR_IN_2_74,
 } GTlsChannelBindingType;
 
 /**
@@ -1680,7 +1704,7 @@ typedef enum {
  *
  * Since: 2.66
  */
-GLIB_AVAILABLE_TYPE_IN_2_66
+GIO_AVAILABLE_TYPE_IN_2_66
 typedef enum {
   G_TLS_CHANNEL_BINDING_ERROR_NOT_IMPLEMENTED,
   G_TLS_CHANNEL_BINDING_ERROR_INVALID_STATE,
@@ -1708,7 +1732,7 @@ typedef enum {
   G_TLS_REHANDSHAKE_NEVER,
   G_TLS_REHANDSHAKE_SAFELY,
   G_TLS_REHANDSHAKE_UNSAFELY
-} GTlsRehandshakeMode GLIB_DEPRECATED_TYPE_IN_2_60;
+} GTlsRehandshakeMode GIO_DEPRECATED_TYPE_IN_2_60;
 
 /**
  * GTlsPasswordFlags:

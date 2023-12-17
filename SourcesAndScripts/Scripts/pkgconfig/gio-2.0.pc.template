@@ -1,11 +1,13 @@
 prefix=PATH
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
-includedir=${prefix}/Headers/glib-2.0
+includedir=${prefix}/Headers
 
 Name: GIO
 Description: glib I/O library
 Version: VERSION
+Requires: glib-2.0, gobject-2.0
+Requires.private: zlib
 Libs: -L${libdir} -lgio-2.0
-Libs.private: -Wl,-framework,CoreFoundation -Wl,-framework,Carbon -Wl,-framework,Foundation -Wl,-framework,AppKit -lz -lintl -lresolv
-Cflags: -I${includedir}
+Libs.private: -lintl -framework Foundation -framework CoreFoundation -framework AppKit -lresolv
+Cflags: -I${includedir}/glib-2.0 -I${includedir}

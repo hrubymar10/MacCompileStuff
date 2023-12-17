@@ -1,11 +1,12 @@
 prefix=PATH
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
-includedir=${prefix}/Headers/glib-2.0
+includedir=${prefix}/Headers
 
 Name: GLib
 Description: C Utility Library
 Version: VERSION
+Requires.private: libpcre2-8 >= 10.32
 Libs: -L${libdir} -lglib-2.0 -lintl
-Libs.private: -Wl,-framework,CoreFoundation -Wl,-framework,Carbon -Wl,-framework,Foundation -Wl,-framework,AppKit -liconv -lm
-Cflags: -I${includedir}
+Libs.private: -liconv -lm -framework Foundation -framework CoreFoundation -framework AppKit -framework Carbon
+Cflags: -I${includedir}/glib-2.0 -I${includedir}

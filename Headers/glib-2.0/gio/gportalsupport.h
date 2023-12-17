@@ -2,6 +2,8 @@
  *
  * Copyright 2016 Red Hat, Inc.
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -17,6 +19,7 @@
  */
 
 #ifndef __G_PORTAL_SUPPORT_H__
+#define __G_PORTAL_SUPPORT_H__
 
 #include <glib.h>
 

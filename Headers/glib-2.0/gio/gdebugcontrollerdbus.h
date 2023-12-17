@@ -2,6 +2,8 @@
  *
  * Copyright © 2021 Endless OS Foundation, LLC
  *
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,7 +36,7 @@ G_BEGIN_DECLS
  * Since: 2.72
  */
 #define G_TYPE_DEBUG_CONTROLLER_DBUS (g_debug_controller_dbus_get_type ())
-GLIB_AVAILABLE_IN_2_72
+GIO_AVAILABLE_IN_2_72
 G_DECLARE_DERIVABLE_TYPE (GDebugControllerDBus, g_debug_controller_dbus, G, DEBUG_CONTROLLER_DBUS, GObject)
 
 /**
@@ -56,12 +58,12 @@ struct _GDebugControllerDBusClass
   gpointer padding[12];
 };
 
-GLIB_AVAILABLE_IN_2_72
+GIO_AVAILABLE_IN_2_72
 GDebugControllerDBus *g_debug_controller_dbus_new (GDBusConnection  *connection,
                                                    GCancellable     *cancellable,
                                                    GError          **error);
 
-GLIB_AVAILABLE_IN_2_72
+GIO_AVAILABLE_IN_2_72
 void g_debug_controller_dbus_stop (GDebugControllerDBus *self);
 
 G_END_DECLS
