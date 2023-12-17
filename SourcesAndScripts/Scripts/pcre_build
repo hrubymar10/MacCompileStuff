@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # pcre_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
@@ -32,26 +32,30 @@ rm -rf "pcre"*
 get_src_and_verify_checksum "pcre-${PCRE_VERSION}.tar.bz2" "${SHA256}" "https://downloads.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2"
 tar xf "${SOURCES_PATH}/archives/pcre-${PCRE_VERSION}.tar.bz2" -C .
 cp -R "pcre-${PCRE_VERSION}" "pcre-${PCRE_VERSION}-arm64"
-ln -s "pcre-${PCRE_VERSION}" "pcre"
-cd "pcre"
+mv "pcre-${PCRE_VERSION}" "pcre-${PCRE_VERSION}-x86_64"
+ln -s "pcre-${PCRE_VERSION}-x86_64" "pcre"
+
 # Build x86_64
+cd "${SOURCES_PATH}/pcre-${PCRE_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit --host=x86_64-apple-darwin
-make
+arch -x86_64 ./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit --host=x86_64-apple-darwin
+arch -x86_64 make
+
 # Build arm64
 cd "${SOURCES_PATH}/pcre-${PCRE_VERSION}-arm64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit --host=aarch64-apple-darwin
-make
+arch -arm64 ./configure --disable-dependency-tracking --enable-utf8 --enable-pcregrep-libz --enable-pcregrep-libbz2 --enable-jit --host=aarch64-apple-darwin
+arch -arm64 make
+
 mkdir "pcre-${PCRE_VERSION}-RELEASE"
 cd "pcre-${PCRE_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/pcre-${PCRE_VERSION}-arm64/.libs/libpcre.1.dylib" "${SOURCES_PATH}/pcre-${PCRE_VERSION}/.libs/libpcre.1.dylib" -output "libpcre.1.dylib"
+lipo -create "${SOURCES_PATH}/pcre-${PCRE_VERSION}-arm64/.libs/libpcre.1.dylib" "${SOURCES_PATH}/pcre-${PCRE_VERSION}-x86_64/.libs/libpcre.1.dylib" -output "libpcre.1.dylib"
 install_name_tool -id "@rpath/libpcre.1.dylib" "libpcre.1.dylib"
 rm -rf "${LIBS_PATH}/libpcre.1.dylib" "${LIBS_PATH}/libpcre.dylib"
 cp -rf "libpcre.1.dylib" "${LIBS_PATH}/libpcre.1.dylib"
