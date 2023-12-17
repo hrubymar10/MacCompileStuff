@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # functions
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
@@ -111,6 +111,13 @@ check_pcre() {
   fi
 }
 
+check_pcre2() {
+  if ! [ -f "${LIBS_PATH}/libpcre2-8.0.dylib" ]; then
+    echo 'Error: pcre2 is not prepared. You must build all libraries in defined order.' >&2
+    exit 1
+  fi
+}
+
 check_meson() {
   if ! [ -x "$(command -v meson)" ]; then
     echo 'Error: meson is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
@@ -128,6 +135,13 @@ check_ninja() {
 check_cmake() {
   if ! [ -x "$(command -v cmake)" ]; then
     echo 'Error: cmake is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+    exit 1
+  fi
+}
+
+check_gsed() {
+  if ! [ -x "$(command -v gsed)" ]; then
+    echo 'Error: gnu-sed (gsed) is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
     exit 1
   fi
 }

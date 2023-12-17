@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # env
-# Martin Hrubý (hrubymar10), 2020-2022
+# Martin Hrubý (hrubymar10), 2020-2023
 #
 
 set -e
@@ -19,6 +19,8 @@ if ! [ -d "${ROOT_PATH}/.git" ]; then
   echo "Error: ROOT_PATH '${ROOT_PATH}' doesn't contain .git directory." >&2
   exit 1
 fi
+
+export PATH=/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin
 
 export HEADERS_PATH="${ROOT_PATH}/Headers"
 export LIBS_PATH="${ROOT_PATH}/lib"
@@ -67,8 +69,8 @@ export SDKPATH="$(xcodebuild -sdk macosx -version Path)"
 export MACOSX_DEPLOYMENT_TARGET='10.12'
 export MIN_SUPPORTED_MACOSX_DEPLOYMENT_TARGET='10.12'
 export LDFLAGS="-isysroot ${SDKPATH} -mmacosx-version-min=10.12 -L${LIBS_PATH}"
-export CFLAGS="-isysroot ${SDKPATH} -stdlib=libc++ -mmacosx-version-min=10.12 -I${HEADERS_PATH}"
-export CXXFLAGS="-isysroot ${SDKPATH} -stdlib=libc++ -mmacosx-version-min=10.12 -I${HEADERS_PATH}"
+export CFLAGS="-isysroot ${SDKPATH} -mmacosx-version-min=10.12 -I${HEADERS_PATH}"
+export CXXFLAGS="-isysroot ${SDKPATH} -mmacosx-version-min=10.12 -I${HEADERS_PATH}"
 
 export LDFLAGS_X86_64="-arch x86_64 --target=x86_64-apple-macos10.12 ${LDFLAGS}"
 export CFLAGS_X86_64="-arch x86_64 --target=x86_64-apple-macos10.12 ${CFLAGS}"
