@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libogg_build
-# Martin Hrubý (hrubymar10), 2019-2022
+# Martin Hrubý (hrubymar10), 2019-2023
 #
 
 set -e
@@ -29,15 +29,18 @@ rm -rf "libogg"*
 get_src_and_verify_checksum "libogg-${LIBOGG_VERSION}.tar.gz" "${SHA256}" "https://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/libogg-${LIBOGG_VERSION}.tar.gz" -C .
 cp -R "libogg-${LIBOGG_VERSION}" "libogg-${LIBOGG_VERSION}-arm64"
-ln -s "libogg-${LIBOGG_VERSION}" "libogg"
-cd "libogg"
+mv "libogg-${LIBOGG_VERSION}" "libogg-${LIBOGG_VERSION}-x86_64"
+ln -s "libogg-${LIBOGG_VERSION}-x86_64" "libogg"
+
 # Build x86_64
+cd "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -46,9 +49,10 @@ export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
+
 mkdir "libogg-${LIBOGG_VERSION}-RELEASE"
 cd "libogg-${LIBOGG_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-arm64/src/.libs/libogg.0.dylib" "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}/src/.libs/libogg.0.dylib" -output "libogg.0.dylib"
+lipo -create "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-arm64/src/.libs/libogg.0.dylib" "${SOURCES_PATH}/libogg-${LIBOGG_VERSION}-x86_64/src/.libs/libogg.0.dylib" -output "libogg.0.dylib"
 install_name_tool -id "@rpath/libogg.0.dylib" "libogg.0.dylib"
 rm -rf "${LIBS_PATH}/libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
 cp "libogg.0.dylib" "${LIBS_PATH}/libogg.0.dylib"
