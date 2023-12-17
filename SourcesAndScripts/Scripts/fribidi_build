@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # fribidi_build
-# Martin Hrubý (hrubymar10), 2020-2022
+# Martin Hrubý (hrubymar10), 2020-2023
 #
 
 set -e
 
-FRIBIDI_VERSION="1.0.12"
-SHA256="0cd233f97fc8c67bb3ac27ce8440def5d3ffacf516765b91c2cc654498293495"
+FRIBIDI_VERSION="1.0.13"
+SHA256="7fa16c80c81bd622f7b198d31356da139cc318a63fc7761217af4130903f54a2"
 
 starttimestamp=$(date +%s)
 
@@ -29,15 +29,18 @@ rm -rf "fribidi"*
 get_src_and_verify_checksum "fribidi-${FRIBIDI_VERSION}.tar.xz" "${SHA256}" "https://github.com/fribidi/fribidi/releases/download/v${FRIBIDI_VERSION}/fribidi-${FRIBIDI_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/fribidi-${FRIBIDI_VERSION}.tar.xz" -C .
 cp -R "fribidi-${FRIBIDI_VERSION}" "fribidi-${FRIBIDI_VERSION}-arm64"
-ln -s "fribidi-${FRIBIDI_VERSION}" "fribidi"
-cd "fribidi"
+mv "fribidi-${FRIBIDI_VERSION}" "fribidi-${FRIBIDI_VERSION}-x86_64"
+ln -s "fribidi-${FRIBIDI_VERSION}-x86_64" "fribidi"
+
 # Build x86_64
+cd "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./configure --disable-debug --disable-dependency-tracking --disable-silent-rules --enable-shared --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -46,9 +49,10 @@ export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-debug --disable-dependency-tracking --disable-silent-rules --enable-shared --host=aarch64-apple-darwin
 make
+
 mkdir "fribidi-${FRIBIDI_VERSION}-RELEASE"
 cd "fribidi-${FRIBIDI_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}-arm64/lib/.libs/libfribidi.0.dylib" "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}/lib/.libs/libfribidi.0.dylib" -output "libfribidi.0.dylib"
+lipo -create "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}-arm64/lib/.libs/libfribidi.0.dylib" "${SOURCES_PATH}/fribidi-${FRIBIDI_VERSION}-x86_64/lib/.libs/libfribidi.0.dylib" -output "libfribidi.0.dylib"
 install_name_tool -id "@rpath/libfribidi.0.dylib" "libfribidi.0.dylib"
 rm -rf "${LIBS_PATH}/libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.dylib"
 cp -rf "libfribidi.0.dylib" "${LIBS_PATH}/libfribidi.0.dylib"
