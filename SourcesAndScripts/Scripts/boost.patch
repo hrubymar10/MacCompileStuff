@@ -1,0 +1,24 @@
+# From: https://github.com/Homebrew/homebrew-core/blob/e71cd916001a639f48e52bb78aa9e7981a820c88/Formula/b/boost.rb
+# 
+# fix for https://github.com/boostorg/process/issues/342
+# should eventually be in boost 1.84
+--- boost/process/detail/posix/handles.hpp	2023-10-30 16:28:46
++++ boost/process/detail/posix/handles.hpp	2023-10-30 16:29:26
+@@ -33,7 +33,7 @@
+     else
+         ec.clear();
+ 
+-    auto my_fd = ::dirfd(dir.get());
++    auto my_fd = dirfd(dir.get());
+ 
+     struct ::dirent * ent_p;
+ 
+@@ -117,7 +117,7 @@
+             return;
+         }
+ 
+-        auto my_fd = ::dirfd(dir);
++        auto my_fd = dirfd(dir);
+         struct ::dirent * ent_p;
+ 
+         while ((ent_p = readdir(dir)) != nullptr)

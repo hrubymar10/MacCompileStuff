@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # boost_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-BOOST_VERSION_1="1.79.0"
-BOOST_VERSION_2="1_79_0"
-SHA256="475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
+BOOST_VERSION_1="1.84.0"
+BOOST_VERSION_2="1_84_0"
+SHA256="cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454"
 
 starttimestamp=$(date +%s)
 
@@ -30,38 +30,40 @@ if ! [ is_apple_silicon_mac ]; then
   exit 1
 fi
 
+rm -rf "${HEADERS_PATH}/boost"
+
 cd "${SOURCES_PATH}"
 rm -rf "boost"*
 get_src_and_verify_checksum "boost_${BOOST_VERSION_2}.tar.bz2" "${SHA256}" "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION_1}/source/boost_${BOOST_VERSION_2}.tar.bz2"
 tar xf "${SOURCES_PATH}/archives/boost_${BOOST_VERSION_2}.tar.bz2" -C .
 cp -R "boost_${BOOST_VERSION_2}" "boost_${BOOST_VERSION_2}-arm64"
-ln -s "boost_${BOOST_VERSION_2}" "boost"
-cd "boost"
+mv "boost_${BOOST_VERSION_2}" "boost_${BOOST_VERSION_2}-x86_64"
+ln -s "boost_${BOOST_VERSION_2}-x86_64" "boost"
+
 # Build x86_64
+cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-x86_64"
 rm -rf "stage"
 source "${MY_PATH}/env"
 arch -x86_64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
-#./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
 export LDFLAGS="${LDFLAGS_X86_64}"
-export CFLAGS="${CFLAGS_X86_64}"
-export CXXFLAGS="${CXXFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64} -stdlib=libc++"
+export CXXFLAGS="${CXXFLAGS_X86_64} -stdlib=libc++"
 arch -x86_64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
-#./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+
 # Build arm64
 cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64"
 rm -rf "stage"
 source "${MY_PATH}/env"
 arch -arm64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
-#./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
 export LDFLAGS="${LDFLAGS_ARM64}"
-export CFLAGS="${CFLAGS_ARM64}"
-export CXXFLAGS="${CXXFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64} -stdlib=libc++"
+export CXXFLAGS="${CXXFLAGS_ARM64} -stdlib=libc++"
 arch -arm64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
-#./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagged-1.66 link=shared variant=release -sNO_LZMA=1 -sNO_ZSTD=1 cxxstd=14 abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
+
 cd "stage/lib"
 mkdir "boost_${BOOST_VERSION_2}-RELEASE"
 for filename in *.dylib ; do
-  lipo -create "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64/stage/lib/${filename}" "${SOURCES_PATH}/boost_${BOOST_VERSION_2}/stage/lib/${filename}" -output "boost_${BOOST_VERSION_2}-RELEASE/${filename}"
+  lipo -create "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64/stage/lib/${filename}" "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-x86_64/stage/lib/${filename}" -output "boost_${BOOST_VERSION_2}-RELEASE/${filename}"
 done
 cd "boost_${BOOST_VERSION_2}-RELEASE"
 for filename in * ; do

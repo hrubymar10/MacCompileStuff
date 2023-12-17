@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_CONFIG_HPP_INCLUDED
 #define BOOST_LEAF_CONFIG_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -114,6 +114,10 @@
 #   error BOOST_LEAF_CFG_GNUC_STMTEXPR must be 0 or 1.
 #endif
 
+#if BOOST_LEAF_CFG_STD_SYSTEM_ERROR && !BOOST_LEAF_CFG_STD_STRING
+#   error BOOST_LEAF_CFG_STD_SYSTEM_ERROR != 0 requires BOOST_LEAF_CFG_STD_STRING != 0
+#endif
+
 ////////////////////////////////////////
 
 // Configure BOOST_LEAF_NO_EXCEPTIONS, unless already #defined
@@ -193,27 +197,6 @@
 #       endif
 #   endif
 
-#endif
-
-#ifdef BOOST_NORETURN
-#   define BOOST_LEAF_NORETURN BOOST_NORETURN
-#else
-#   if defined(_MSC_VER)
-#       define BOOST_LEAF_NORETURN __declspec(noreturn)
-#   elif defined(__GNUC__)
-#       define BOOST_LEAF_NORETURN __attribute__ ((__noreturn__))
-#   elif defined(__has_attribute) && defined(__SUNPRO_CC) && (__SUNPRO_CC > 0x5130)
-#       if __has_attribute(noreturn)
-#           define BOOST_LEAF_NORETURN [[noreturn]]
-#       endif
-#   elif defined(__has_cpp_attribute)
-#       if __has_cpp_attribute(noreturn)
-#           define BOOST_LEAF_NORETURN [[noreturn]]
-#       endif
-#   endif
-#endif
-#if !defined(BOOST_LEAF_NORETURN)
-#  define BOOST_LEAF_NORETURN
 #endif
 
 ////////////////////////////////////////

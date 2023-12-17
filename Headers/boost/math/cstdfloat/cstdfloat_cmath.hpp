@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <memory>
 #include <boost/math/tools/assert.hpp>
+#include <boost/math/tools/nothrow.hpp>
 #include <boost/math/tools/throw_exception.hpp>
 
 #if defined(_WIN32) && defined(__GNUC__)
@@ -286,83 +287,83 @@ namespace boost {
 // Begin with some forward function declarations. Also implement patches
 // for compilers that have broken float128 exponential functions.
 
-extern "C" int quadmath_snprintf(char*, std::size_t, const char*, ...) throw();
+extern "C" int quadmath_snprintf(char*, std::size_t, const char*, ...) BOOST_MATH_NOTHROW;
 
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LDEXP(boost::math::cstdfloat::detail::float_internal128_t, int) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FREXP(boost::math::cstdfloat::detail::float_internal128_t, int*) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FABS(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FLOOR(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_CEIL(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SQRT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TRUNC(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_POW(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LOG(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LOG10(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SIN(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_COS(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TAN(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASIN(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOS(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATAN(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FMOD(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATAN2(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LGAMMA(boost::math::cstdfloat::detail::float_internal128_t) throw();
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LDEXP(boost::math::cstdfloat::detail::float_internal128_t, int) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FREXP(boost::math::cstdfloat::detail::float_internal128_t, int*) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FABS(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FLOOR(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_CEIL(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SQRT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TRUNC(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_POW(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LOG(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LOG10(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SIN(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_COS(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TAN(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASIN(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOS(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATAN(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_FMOD(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATAN2(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_LGAMMA(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
 
 //   begin more functions
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_REMAINDER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_REMQUO(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t, int*) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMA(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMAX(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMIN(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FDIM(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NAN(const char*) throw();
-//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_EXP2         (boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOG2(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOG1P(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_CBRT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_HYPOT(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ERF(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ERFC(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" long long int                                BOOST_CSTDFLOAT_FLOAT128_LLROUND(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" long int                                   BOOST_CSTDFLOAT_FLOAT128_LROUND(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ROUND(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEARBYINT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" long long int                                BOOST_CSTDFLOAT_FLOAT128_LLRINT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" long int                                   BOOST_CSTDFLOAT_FLOAT128_LRINT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_RINT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_MODF(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t*) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_SCALBLN(boost::math::cstdfloat::detail::float_internal128_t, long int) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_SCALBN(boost::math::cstdfloat::detail::float_internal128_t, int) throw();
-extern "C" int                                      BOOST_CSTDFLOAT_FLOAT128_ILOGB(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOGB(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEXTAFTER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEXTTOWARD   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_COPYSIGN(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_SIGNBIT(boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_FPCLASSIFY   (boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISFINITE      (boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_ISINF(boost::math::cstdfloat::detail::float_internal128_t) throw();
-extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_ISNAN(boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ISNORMAL   (boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISGREATER   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISGREATEREQUAL(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESS      (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESSEQUAL   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESSGREATER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
-//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISUNORDERED   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) throw();
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_REMAINDER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_REMQUO(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t, int*) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMA(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMAX(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FMIN(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_FDIM(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NAN(const char*) BOOST_MATH_NOTHROW;
+//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_EXP2         (boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOG2(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOG1P(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_CBRT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_HYPOT(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ERF(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ERFC(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" long long int                                BOOST_CSTDFLOAT_FLOAT128_LLROUND(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" long int                                   BOOST_CSTDFLOAT_FLOAT128_LROUND(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ROUND(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEARBYINT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" long long int                                BOOST_CSTDFLOAT_FLOAT128_LLRINT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" long int                                   BOOST_CSTDFLOAT_FLOAT128_LRINT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_RINT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_MODF(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t*) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_SCALBLN(boost::math::cstdfloat::detail::float_internal128_t, long int) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_SCALBN(boost::math::cstdfloat::detail::float_internal128_t, int) BOOST_MATH_NOTHROW;
+extern "C" int                                      BOOST_CSTDFLOAT_FLOAT128_ILOGB(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_LOGB(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEXTAFTER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_NEXTTOWARD   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_COPYSIGN(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_SIGNBIT(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_FPCLASSIFY   (boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISFINITE      (boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_ISINF(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+extern "C" int                                                  BOOST_CSTDFLOAT_FLOAT128_ISNAN(boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" boost::math::cstdfloat::detail::float_internal128_t  BOOST_CSTDFLOAT_FLOAT128_ISNORMAL   (boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISGREATER   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISGREATEREQUAL(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESS      (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESSEQUAL   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISLESSGREATER(boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
+//extern "C" int                                                BOOST_CSTDFLOAT_FLOAT128_ISUNORDERED   (boost::math::cstdfloat::detail::float_internal128_t, boost::math::cstdfloat::detail::float_internal128_t) BOOST_MATH_NOTHROW;
  //   end more functions
 
 #if !defined(BOOST_CSTDFLOAT_BROKEN_FLOAT128_MATH_FUNCTIONS)
 
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_EXP(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_EXPM1(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SINH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_COSH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TANH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASINH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOSH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATANH(boost::math::cstdfloat::detail::float_internal128_t x) throw();
-extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TGAMMA(boost::math::cstdfloat::detail::float_internal128_t x) throw();
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_EXP(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_EXPM1(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_SINH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_COSH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TANH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASINH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOSH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATANH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
+extern "C" boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TGAMMA(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW;
  
 #else // BOOST_CSTDFLOAT_BROKEN_FLOAT128_MATH_FUNCTIONS
 
@@ -512,13 +513,13 @@ inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT
    const float_type ex_minus = (float_type(1) / ex_plus);
    return (ex_plus - ex_minus) / (ex_plus + ex_minus);
 }
-inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASINH(boost::math::cstdfloat::detail::float_internal128_t x) throw()
+inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ASINH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW
 {
    // Patch the asinh() function since quadmath does not have it.
    typedef boost::math::cstdfloat::detail::float_internal128_t float_type;
    return ::BOOST_CSTDFLOAT_FLOAT128_LOG(x + ::BOOST_CSTDFLOAT_FLOAT128_SQRT((x * x) + float_type(1)));
 }
-inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOSH(boost::math::cstdfloat::detail::float_internal128_t x) throw()
+inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ACOSH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW
 {
    // Patch the acosh() function since quadmath does not have it.
    typedef boost::math::cstdfloat::detail::float_internal128_t float_type;
@@ -527,14 +528,14 @@ inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT
 
    return ::BOOST_CSTDFLOAT_FLOAT128_LOG(x + (zp * ::BOOST_CSTDFLOAT_FLOAT128_SQRT(zm / zp)));
 }
-inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATANH(boost::math::cstdfloat::detail::float_internal128_t x) throw()
+inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_ATANH(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW
 {
    // Patch the atanh() function since quadmath does not have it.
    typedef boost::math::cstdfloat::detail::float_internal128_t float_type;
    return (::BOOST_CSTDFLOAT_FLOAT128_LOG(float_type(1) + x)
       - ::BOOST_CSTDFLOAT_FLOAT128_LOG(float_type(1) - x)) / 2;
 }
-inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TGAMMA(boost::math::cstdfloat::detail::float_internal128_t x) throw()
+inline boost::math::cstdfloat::detail::float_internal128_t BOOST_CSTDFLOAT_FLOAT128_TGAMMA(boost::math::cstdfloat::detail::float_internal128_t x) BOOST_MATH_NOTHROW
 {
    // Patch the tgammaq() function for a subset of broken GCC compilers
    // like GCC 4.7, 4.8 on MinGW.
@@ -916,62 +917,6 @@ namespace std
    using boost::math::cstdfloat::detail::islessgreater;
    using boost::math::cstdfloat::detail::isunordered;
    //   end more functions
-
-   //
-   // Very basic iostream operator:
-   //
-   inline std::ostream& operator << (std::ostream& os, __float128 m_value)
-   {
-      std::streamsize digits = os.precision();
-      std::ios_base::fmtflags f = os.flags();
-      std::string s;
-
-      char buf[100];
-      std::unique_ptr<char[]> buf2;
-      std::string format = "%";
-      if (f & std::ios_base::showpos)
-         format += "+";
-      if (f & std::ios_base::showpoint)
-         format += "#";
-      format += ".*";
-      if (digits == 0)
-         digits = 36;
-      format += "Q";
-      if (f & std::ios_base::scientific)
-         format += "e";
-      else if (f & std::ios_base::fixed)
-         format += "f";
-      else
-         format += "g";
-
-      int v = quadmath_snprintf(buf, 100, format.c_str(), digits, m_value);
-
-      if ((v < 0) || (v >= 99))
-      {
-         int v_max = v;
-         buf2.reset(new char[v + 3]);
-         v = quadmath_snprintf(&buf2[0], v_max + 3, format.c_str(), digits, m_value);
-         if (v >= v_max + 3)
-         {
-            BOOST_MATH_THROW_EXCEPTION(std::runtime_error("Formatting of float128_type failed."));
-         }
-         s = &buf2[0];
-      }
-      else
-         s = buf;
-      std::streamsize ss = os.width();
-      if (ss > static_cast<std::streamsize>(s.size()))
-      {
-         char fill = os.fill();
-         if ((os.flags() & std::ios_base::left) == std::ios_base::left)
-            s.append(static_cast<std::string::size_type>(ss - s.size()), fill);
-         else
-            s.insert(static_cast<std::string::size_type>(0), static_cast<std::string::size_type>(ss - s.size()), fill);
-      }
-
-      return os << s;
-   }
-
 
 } // namespace std
 

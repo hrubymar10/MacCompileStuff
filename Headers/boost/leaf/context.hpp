@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_CONTEXT_HPP_INCLUDED
 #define BOOST_LEAF_CONTEXT_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -10,7 +10,7 @@
 #include <boost/leaf/error.hpp>
 
 #if !defined(BOOST_LEAF_NO_THREADS) && !defined(NDEBUG)
-# include <thread>
+#   include <thread>
 #endif
 
 namespace boost { namespace leaf {
@@ -72,7 +72,7 @@ namespace leaf_detail
         {
             auto e = base::check(tup, ei);
             return e && Pred::evaluate(*e);
-        };
+        }
 
         template <class Tup>
         BOOST_LEAF_CONSTEXPR static Pred get( Tup const & tup, error_info const & ei ) noexcept
@@ -91,7 +91,7 @@ namespace leaf_detail
         BOOST_LEAF_CONSTEXPR static bool check( Tup &, error_info const & ) noexcept
         {
             return true;
-        };
+        }
     };
 
     template <class E>
@@ -177,14 +177,14 @@ namespace leaf_detail
             BOOST_LEAF_ASSERT(err_id != 0);
             auto & sl = std::get<I-1>(tup);
             if( sl.has_value(err_id) )
-                load_slot(err_id, std::move(sl).value(err_id));
+                (void) load_slot<false>(err_id, std::move(sl).value(err_id));
             tuple_for_each<I-1,Tuple>::propagate_captured(tup, err_id);
         }
 
         template <class CharT, class Traits>
         static void print( std::basic_ostream<CharT, Traits> & os, void const * tup, int key_to_print )
         {
-            BOOST_LEAF_ASSERT(tup != 0);
+            BOOST_LEAF_ASSERT(tup != nullptr);
             tuple_for_each<I-1,Tuple>::print(os, tup, key_to_print);
             std::get<I-1>(*static_cast<Tuple const *>(tup)).print(os, key_to_print);
         }
@@ -329,7 +329,7 @@ public:
         tuple_for_each<std::tuple_size<Tup>::value,Tup>::activate(tup_);
 #if BOOST_LEAF_CFG_DIAGNOSTICS
         if( unexpected_requested<Tup>::value )
-            tls::uint32_increment<tls_tag_unexpected_enabled_counter>();
+            tls::uint_increment<tls_tag_unexpected_enabled_counter>();
 #endif
 #if !defined(BOOST_LEAF_NO_THREADS) && !defined(NDEBUG)
         thread_id_ = std::this_thread::get_id();
@@ -348,7 +348,7 @@ public:
 #endif
 #if BOOST_LEAF_CFG_DIAGNOSTICS
         if( unexpected_requested<Tup>::value )
-            tls::uint32_decrement<tls_tag_unexpected_enabled_counter>();
+            tls::uint_decrement<tls_tag_unexpected_enabled_counter>();
 #endif
         tuple_for_each<std::tuple_size<Tup>::value,Tup>::deactivate(tup_);
     }
@@ -368,6 +368,13 @@ public:
     void print( std::basic_ostream<CharT, Traits> & os ) const
     {
         leaf_detail::tuple_for_each<std::tuple_size<Tup>::value,Tup>::print(os, &tup_, 0);
+    }
+
+    template <class CharT, class Traits>
+    friend std::ostream & operator<<( std::basic_ostream<CharT, Traits> & os, context const & ctx )
+    {
+        ctx.print(os);
+        return os;
     }
 
     template <class R, class... H>

@@ -1,7 +1,7 @@
 #ifndef BOOST_LEAF_COMMON_HPP_INCLUDED
 #define BOOST_LEAF_COMMON_HPP_INCLUDED
 
-// Copyright 2018-2022 Emil Dotchevski and Reverge Studios, Inc.
+// Copyright 2018-2023 Emil Dotchevski and Reverge Studios, Inc.
 
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -10,10 +10,12 @@
 #include <boost/leaf/detail/demangle.hpp>
 
 #include <iosfwd>
+#include <cerrno>
+
 #if BOOST_LEAF_CFG_STD_STRING
 #   include <string>
 #endif
-#include <cerrno>
+
 #if BOOST_LEAF_CFG_WIN32
 #   include <windows.h>
 #   include <cstring>
@@ -50,10 +52,10 @@ struct BOOST_LEAF_SYMBOL_VISIBLE e_errno
 {
     int value;
 
-    explicit e_errno(int value=errno): value(value) { }
+    explicit e_errno(int val=errno): value(val) { }
 
     template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits> & operator<<(std::basic_ostream<CharT, Traits> & os, e_errno const & err)
+    friend std::ostream & operator<<(std::basic_ostream<CharT, Traits> & os, e_errno const & err)
     {
         return os << type<e_errno>() << ": " << err.value << ", \"" << std::strerror(err.value) << '"';
     }
@@ -69,31 +71,31 @@ namespace windows
     {
         unsigned value;
 
-        explicit e_LastError(unsigned value): value(value) { }
+        explicit e_LastError(unsigned val): value(val) { }
 
 #if BOOST_LEAF_CFG_WIN32
         e_LastError(): value(GetLastError()) { }
 
         template <class CharT, class Traits>
-        friend std::basic_ostream<CharT, Traits> & operator<<(std::basic_ostream<CharT, Traits> & os, e_LastError const & err)
+        friend std::ostream & operator<<(std::basic_ostream<CharT, Traits> & os, e_LastError const & err)
         {
             struct msg_buf
             {
                 LPVOID * p;
-                msg_buf(): p(0) { }
+                msg_buf(): p(nullptr) { }
                 ~msg_buf() noexcept { if(p) LocalFree(p); }
             };
             msg_buf mb;
             if( FormatMessageA(
                 FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
-                0,
+                nullptr,
                 err.value,
                 MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
                 (LPSTR)&mb.p,
                 0,
-                0) )
+                nullptr) )
             {
-                BOOST_LEAF_ASSERT(mb.p != 0);
+                BOOST_LEAF_ASSERT(mb.p != nullptr);
                 char * z = std::strchr((LPSTR)mb.p,0);
                 if( z[-1] == '\n' )
                     *--z = 0;

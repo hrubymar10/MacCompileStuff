@@ -1157,6 +1157,8 @@ pp_iterator_functor<ContextT>::handle_pp_directive(IteratorT &it)
                     seen_newline = true;
                     iter_ctx->first = it;
                 }
+                if (T_PP_ENDIF == id)
+                    must_emit_line_directive = true;
                 return true;
 
             default:                // #something else
@@ -1233,6 +1235,8 @@ pp_iterator_functor<ContextT>::handle_pp_directive(IteratorT &it)
                 // we skipped to the end of this line already
                 seen_newline = true;
                 iter_ctx->first = it;
+                if (T_PP_ENDIF == id)
+                    must_emit_line_directive = true;
                 return true;
             }
             break;
@@ -2423,10 +2427,9 @@ pp_iterator_functor<ContextT>::on_pragma(
     const_tree_iterator_t last = make_ref_transform_iterator(end, get_value);
 
     expanded.push_back(result_type(T_PP_PRAGMA, "#pragma", act_token.get_position()));
-    expanded.push_back(result_type(T_SPACE, " ", act_token.get_position()));
 
-    while (++first != last && IS_CATEGORY(*first, WhiteSpaceTokenType))
-        expanded.push_back(*first);   // skip whitespace
+    while (first != last && IS_CATEGORY(*first, WhiteSpaceTokenType))
+        expanded.push_back(*first++);   // skip whitespace
 
     if (first != last) {
         if (T_IDENTIFIER == token_id(*first) &&
@@ -2452,7 +2455,6 @@ pp_iterator_functor<ContextT>::on_pragma(
 #endif
         }
     }
-    expanded.push_back(result_type(T_NEWLINE, "\n", act_token.get_position()));
 
     // the queues should be empty at this point
     BOOST_ASSERT(unput_queue.empty());

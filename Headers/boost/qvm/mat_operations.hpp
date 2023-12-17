@@ -16,7 +16,7 @@
 #include <boost/qvm/detail/cofactor_impl.hpp>
 #include <boost/qvm/detail/transp_impl.hpp>
 #include <boost/qvm/scalar_traits.hpp>
-#include <string>
+#include <boost/qvm/to_string.hpp>
 
 namespace boost { namespace qvm {
 
@@ -34,12 +34,6 @@ qvm_detail
 
 ////////////////////////////////////////////////
 
-namespace
-qvm_to_string_detail
-    {
-    template <class T>
-    std::string to_string( T const & x );
-    }
 
 namespace
 qvm_detail
@@ -185,7 +179,11 @@ qvm_detail
 
         public:
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -275,7 +273,11 @@ qvm_detail
             {
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -381,7 +383,11 @@ qvm_detail
             return *this;
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -468,7 +474,7 @@ operator/=( A & a, B b )
     {
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<A>::write_element_idx(i,j,a)/=b;
+            write_mat_element_idx(i,j,a,mat_traits<A>::read_element_idx(i,j,a)/b);
     return a;
     }
 
@@ -497,7 +503,7 @@ operator/( A const & a, B b )
     R r;
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=mat_traits<A>::read_element_idx(i,j,a)/b;
+            write_mat_element_idx(i,j,r,mat_traits<A>::read_element_idx(i,j,a)/b);
     return r;
     }
 
@@ -556,7 +562,7 @@ operator-=( A & a, B const & b )
     {
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<A>::write_element_idx(i,j,a)-=mat_traits<B>::read_element_idx(i,j,b);
+            write_mat_element_idx(i,j,a,mat_traits<A>::read_element_idx(i,j,a)-mat_traits<B>::read_element_idx(i,j,b));
     return a;
     }
 
@@ -585,7 +591,7 @@ operator-( A const & a )
     R r;
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=-mat_traits<A>::read_element_idx(i,j,a);
+            write_mat_element_idx(i,j,r,-mat_traits<A>::read_element_idx(i,j,a));
     return r;
     }
 
@@ -616,7 +622,7 @@ operator-( A const & a, B const & b )
     R r;
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=mat_traits<A>::read_element_idx(i,j,a)-mat_traits<B>::read_element_idx(i,j,b);
+            write_mat_element_idx(i,j,r,mat_traits<A>::read_element_idx(i,j,a)-mat_traits<B>::read_element_idx(i,j,b));
     return r;
     }
 
@@ -656,7 +662,7 @@ operator*=( A & r, B const & b )
             Ta x(scalar_traits<Ta>::value(0));
             for( int k=0; k<mat_traits<A>::cols; ++k )
                 x += a[i][k]*mat_traits<B>::read_element_idx(k,j,b);
-            mat_traits<A>::write_element_idx(i,j,r) = x;
+            write_mat_element_idx(i,j,r,x);
             }
     return r;
     }
@@ -684,7 +690,7 @@ operator*=( A & a, B b )
     {
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<A>::write_element_idx(i,j,a)*=b;
+            write_mat_element_idx(i,j,a,mat_traits<A>::read_element_idx(i,j,a)*b);
     return a;
     }
 
@@ -719,7 +725,7 @@ operator*( A const & a, B const & b )
             Ta x(scalar_traits<Ta>::value(0));
             for( int k=0; k<mat_traits<A>::cols; ++k )
                 x += mat_traits<A>::read_element_idx(i,k,a)*mat_traits<B>::read_element_idx(k,j,b);
-            mat_traits<R>::write_element_idx(i,j,r) = x;
+            write_mat_element_idx(i,j,r,x);
             }
     return r;
     }
@@ -749,7 +755,7 @@ operator*( A const & a, B b )
     R r;
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=mat_traits<A>::read_element_idx(i,j,a)*b;
+            write_mat_element_idx(i,j,r,mat_traits<A>::read_element_idx(i,j,a)*b);
     return r;
     }
 
@@ -778,7 +784,7 @@ operator*( A a, B const & b )
     R r;
     for( int i=0; i!=mat_traits<B>::rows; ++i )
         for( int j=0; j!=mat_traits<B>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=a*mat_traits<B>::read_element_idx(i,j,b);
+            write_mat_element_idx(i,j,r,a*mat_traits<B>::read_element_idx(i,j,b));
     return r;
     }
 
@@ -837,7 +843,7 @@ operator+=( A & a, B const & b )
     {
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<A>::write_element_idx(i,j,a)+=mat_traits<B>::read_element_idx(i,j,b);
+            write_mat_element_idx(i,j,a,mat_traits<A>::read_element_idx(i,j,a)+mat_traits<B>::read_element_idx(i,j,b));
     return a;
     }
 
@@ -868,7 +874,7 @@ operator+( A const & a, B const & b )
     R r;
     for( int i=0; i!=mat_traits<A>::rows; ++i )
         for( int j=0; j!=mat_traits<A>::cols; ++j )
-            mat_traits<R>::write_element_idx(i,j,r)=mat_traits<A>::read_element_idx(i,j,a)+mat_traits<B>::read_element_idx(i,j,b);
+            write_mat_element_idx(i,j,r,mat_traits<A>::read_element_idx(i,j,a)+mat_traits<B>::read_element_idx(i,j,b));
     return r;
     }
 
@@ -896,7 +902,11 @@ qvm_detail
             return *this;
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -905,11 +915,85 @@ qvm_detail
             return r;
             }
         };
+
+    template <class M,bool WriteElementRef=mat_write_element_ref<M>::value>
+    struct mref_write_traits;
+
+    template <class M>
+    struct
+    mref_write_traits<M,true>
+        {
+        typedef typename mat_traits<M>::scalar_type scalar_type;
+        typedef qvm_detail::mref_<M> this_matrix;
+        static int const rows=mat_traits<M>::rows;
+        static int const cols=mat_traits<M>::cols;
+
+        template <int Row,int Col>
+        static
+        BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
+        scalar_type &
+        write_element( this_matrix & x )
+            {
+            BOOST_QVM_STATIC_ASSERT(Row>=0);
+            BOOST_QVM_STATIC_ASSERT(Row<rows);
+            BOOST_QVM_STATIC_ASSERT(Col>=0);
+            BOOST_QVM_STATIC_ASSERT(Col<cols);
+            return mat_traits<M>::template write_element<Row,Col>(reinterpret_cast<M &>(x));
+            }
+
+        static
+        BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
+        scalar_type &
+        write_element_idx( int row, int col, this_matrix & x )
+            {
+            BOOST_QVM_ASSERT(row>=0);
+            BOOST_QVM_ASSERT(row<rows);
+            BOOST_QVM_ASSERT(col>=0);
+            BOOST_QVM_ASSERT(col<cols);
+            return mat_traits<M>::write_element_idx(row,col,reinterpret_cast<M &>(x));
+            }
+        };
+
+    template <class M>
+    struct
+    mref_write_traits<M,false>
+        {
+        typedef typename mat_traits<M>::scalar_type scalar_type;
+        typedef qvm_detail::mref_<M> this_matrix;
+        static int const rows=mat_traits<M>::rows;
+        static int const cols=mat_traits<M>::cols;
+
+        template <int Row,int Col>
+        static
+        BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
+        void
+        write_element( this_matrix & x, scalar_type s )
+            {
+            BOOST_QVM_STATIC_ASSERT(Row>=0);
+            BOOST_QVM_STATIC_ASSERT(Row<rows);
+            BOOST_QVM_STATIC_ASSERT(Col>=0);
+            BOOST_QVM_STATIC_ASSERT(Col<cols);
+            mat_traits<M>::template write_element<Row,Col>(reinterpret_cast<M &>(x), s);
+            }
+
+        static
+        BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
+        void
+        write_element_idx( int row, int col, this_matrix & x, scalar_type s )
+            {
+            BOOST_QVM_ASSERT(row>=0);
+            BOOST_QVM_ASSERT(row<rows);
+            BOOST_QVM_ASSERT(col>=0);
+            BOOST_QVM_ASSERT(col<cols);
+            mat_traits<M>::write_element_idx(row,col,reinterpret_cast<M &>(x), s);
+            }
+        };
     }
 
 template <class M>
 struct
-mat_traits< qvm_detail::mref_<M> >
+mat_traits< qvm_detail::mref_<M> >:
+    qvm_detail::mref_write_traits<M>
     {
     typedef typename mat_traits<M>::scalar_type scalar_type;
     typedef qvm_detail::mref_<M> this_matrix;
@@ -929,19 +1013,6 @@ mat_traits< qvm_detail::mref_<M> >
         return mat_traits<M>::template read_element<Row,Col>(reinterpret_cast<M const &>(x));
         }
 
-    template <int Row,int Col>
-    static
-    BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
-    scalar_type &
-    write_element( this_matrix & x )
-        {
-        BOOST_QVM_STATIC_ASSERT(Row>=0);
-        BOOST_QVM_STATIC_ASSERT(Row<rows);
-        BOOST_QVM_STATIC_ASSERT(Col>=0);
-        BOOST_QVM_STATIC_ASSERT(Col<cols);
-        return mat_traits<M>::template write_element<Row,Col>(reinterpret_cast<M &>(x));
-        }
-
     static
     BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
     scalar_type
@@ -952,18 +1023,6 @@ mat_traits< qvm_detail::mref_<M> >
         BOOST_QVM_ASSERT(col>=0);
         BOOST_QVM_ASSERT(col<cols);
         return mat_traits<M>::read_element_idx(row,col,reinterpret_cast<M const &>(x));
-        }
-
-    static
-    BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_CRITICAL
-    scalar_type &
-    write_element_idx( int row, int col, this_matrix & x )
-        {
-        BOOST_QVM_ASSERT(row>=0);
-        BOOST_QVM_ASSERT(row<rows);
-        BOOST_QVM_ASSERT(col>=0);
-        BOOST_QVM_ASSERT(col<cols);
-        return mat_traits<M>::write_element_idx(row,col,reinterpret_cast<M &>(x));
         }
     };
 
@@ -1009,7 +1068,11 @@ qvm_detail
 
         public:
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -1036,9 +1099,9 @@ mat_traits< qvm_detail::zero_mat_<T,Rows,Cols> >
     read_element( this_matrix const & )
         {
         BOOST_QVM_STATIC_ASSERT(Row>=0);
-        BOOST_QVM_STATIC_ASSERT(Row<Rows);
+        BOOST_QVM_STATIC_ASSERT(Row<rows);
         BOOST_QVM_STATIC_ASSERT(Col>=0);
-        BOOST_QVM_STATIC_ASSERT(Col<Cols);
+        BOOST_QVM_STATIC_ASSERT(Col<cols);
         return scalar_traits<scalar_type>::value(0);
         }
 
@@ -1117,7 +1180,11 @@ qvm_detail
             a[2][2] = a22;
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -1793,7 +1860,11 @@ qvm_detail
             {
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -1991,7 +2062,11 @@ qvm_detail
             {
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
@@ -2189,7 +2264,11 @@ qvm_detail
             {
             }
 
-        template <class R>
+        template <class R
+#if __cplusplus >= 201103L
+            , class = typename enable_if<is_mat<R> >::type
+#endif
+        >
         BOOST_QVM_CONSTEXPR BOOST_QVM_INLINE_TRIVIAL
         operator R() const
             {
