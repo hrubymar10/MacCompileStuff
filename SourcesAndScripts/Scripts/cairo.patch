@@ -1,0 +1,42 @@
+--- meson.build	2023-11-02 23:46:31
++++ meson.build	2023-11-02 23:46:38
+@@ -195,10 +195,7 @@
+   endif
+ endif
+ 
+-lzo_dep = dependency('lzo2', required: false)
+-if lzo_dep.found()
+-  conf.set('HAVE_LZO', 1)
+-endif
++conf.set('HAVE_LZO', 0)
+ 
+ dl_dep = cc.find_library('dl', required: false)
+ if dl_dep.found() and cc.has_function('dlsym', dependencies: [dl_dep])
+--- util/cairo-script/meson.build	2023-11-02 23:52:23
++++ util/cairo-script/meson.build	2023-11-02 23:48:25
+@@ -27,7 +27,7 @@
+ libcairoscript = library('cairo-script-interpreter',
+   cairoscript_interpreter_sources,
+   include_directories: [incbase],
+-  dependencies: deps + [libcairo_dep, lzo_dep],
++  dependencies: deps + [libcairo_dep],
+   soversion: cairo_version_sonum,
+   version: cairo_libversion,
+   c_args: ['-DCAIRO_COMPILATION'],
+--- src/cairo-ps-surface.c	2023-11-03 20:13:24
++++ src/cairo-ps-surface.c	2023-11-03 20:13:42
+@@ -100,14 +100,6 @@
+     fprintf (stderr, "%s::%d -- %s\n", __FUNCTION__, __LINE__, (s))
+ #else
+ #define DEBUG_FALLBACK(s)
+-#endif
+-
+-#ifndef HAVE_CTIME_R
+-static char *ctime_r(const time_t *timep, char *buf)
+-{
+-    (void)buf;
+-    return ctime(timep);
+-}
+ #endif
+ 
+ /**

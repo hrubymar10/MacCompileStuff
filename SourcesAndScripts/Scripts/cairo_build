@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # cairo_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-CAIRO_VERSION="1.16.0"
-SHA256="5e7b29b3f113ef870d1e3ecf8adf21f923396401604bda16d44be45e66052331"
+CAIRO_VERSION="1.18.0"
+SHA256="243a0736b978a33dee29f9cca7521733b78a65b5418206fef7bd1c3d4cf10b64"
 
 starttimestamp=$(date +%s)
 
@@ -31,41 +31,50 @@ check_libffi
 check_glib
 
 cd "${SOURCES_PATH}"
-rm -rf "cairo-"*
+rm -rf "cairo"*
 get_src_and_verify_checksum "cairo-${CAIRO_VERSION}.tar.xz" "${SHA256}" "https://cairographics.org/releases/cairo-${CAIRO_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/cairo-${CAIRO_VERSION}.tar.xz" -C .
 cp -R "cairo-${CAIRO_VERSION}" "cairo-${CAIRO_VERSION}-arm64"
-ln -s "cairo-${CAIRO_VERSION}" "cairo"
-cd "cairo"
+mv "cairo-${CAIRO_VERSION}" "cairo-${CAIRO_VERSION}-x86_64"
+ln -s "cairo-${CAIRO_VERSION}-x86_64" "cairo"
+
 # Build x86_64
+cd "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-x86_64"
 source "${MY_PATH}/env"
-export LDFLAGS="${LDFLAGS_X86_64} -lglib-2.0"
-export CFLAGS="${CFLAGS_X86_64} -I${HEADERS_PATH}/glib-2.0"
-export CXXFLAGS="${CXXFLAGS_X86_64} -I${HEADERS_PATH}/glib-2.0"
-./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no --host=x86_64-apple-darwin
-make
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+patch -b -p0 < "${SCRIPTS_PATH}/cairo.patch"
+mkdir -p "build/cairo"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson setup --wrap-mode=nofallback --default-library=shared --buildtype=release -Ddwrite=disabled -Dfontconfig=enabled -Dfreetype=enabled -Dpng=enabled -Dquartz=enabled -Dtee=enabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dzlib=enabled -Dtests=disabled -Dglib=enabled -Dgtk_doc=false . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson compile -C build --verbose
+
 # Build arm64
 cd "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64"
 source "${MY_PATH}/env"
-export LDFLAGS="${LDFLAGS_ARM64} -lglib-2.0"
-export CFLAGS="${CFLAGS_ARM64} -I${HEADERS_PATH}/glib-2.0"
-export CXXFLAGS="${CXXFLAGS_ARM64} -I${HEADERS_PATH}/glib-2.0"
-./configure --disable-dependency-tracking --enable-gobject=yes --enable-svg=yes --enable-tee=yes --enable-quartz-image --enable-xcb=no --enable-xlib=no --enable-xlib-xrender=no --host=aarch64-apple-darwin
-make
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+patch -b -p0 < "${SCRIPTS_PATH}/cairo.patch"
+mkdir -p "build/cairo"
+arch -arm64 /opt/homebrew/bin/meson setup --wrap-mode=nofallback --default-library=shared --buildtype=release -Ddwrite=disabled -Dfontconfig=enabled -Dfreetype=enabled -Dpng=enabled -Dquartz=enabled -Dtee=enabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dzlib=enabled -Dtests=disabled -Dglib=enabled -Dgtk_doc=false . "build"
+arch -arm64 /opt/homebrew/bin/meson compile -C build --verbose
+
 mkdir "cairo-${CAIRO_VERSION}-RELEASE"
 cd "cairo-${CAIRO_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64/src/.libs/libcairo.2.dylib" "${SOURCES_PATH}/cairo-${CAIRO_VERSION}/src/.libs/libcairo.2.dylib" -output "libcairo.2.dylib"
+lipo -create "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64/build/src/libcairo.2.dylib" "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-x86_64/build/src/libcairo.2.dylib" -output "libcairo.2.dylib"
 install_name_tool -id "@rpath/libcairo.2.dylib" "libcairo.2.dylib"
+remove_rpath_if_exists "libcairo.2.dylib" "${LIBS_PATH}"
 rm -rf "${LIBS_PATH}/libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
 cp -rf "libcairo.2.dylib" "${LIBS_PATH}/libcairo.2.dylib"
 ln -s "libcairo.2.dylib" "${LIBS_PATH}/libcairo.dylib"
 rm -rf "${HEADERS_PATH}/cairo"
 mkdir "${HEADERS_PATH}/cairo"
-cp "${SOURCES_PATH}/cairo/cairo-version.h" "${HEADERS_PATH}/cairo/"
 cp "${SOURCES_PATH}/cairo/util/cairo-gobject/cairo-gobject.h" "${HEADERS_PATH}/cairo/"
 cp "${SOURCES_PATH}/cairo/util/cairo-script/cairo-script-interpreter.h" "${HEADERS_PATH}/cairo/"
+cp "${SOURCES_PATH}/cairo/build/src/cairo-features.h" "${HEADERS_PATH}/cairo/"
 cd "${SOURCES_PATH}/cairo/src"
-cp "cairo-deprecated.h" "cairo-features.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-quartz.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo-xml.h" "cairo.h" "${HEADERS_PATH}/cairo/"
+cp "cairo-deprecated.h" "cairo-ft.h" "cairo-pdf.h" "cairo-ps.h" "cairo-quartz-image.h" "cairo-quartz.h" "cairo-script.h" "cairo-svg.h" "cairo-tee.h" "cairo-version.h" "cairo-xcb.h" "cairo-xlib-xrender.h" "cairo-xlib.h" "cairo.h" "${HEADERS_PATH}/cairo/"
 generate_pkgconfig_file "cairo" "${CAIRO_VERSION}"
 echo "==> DONE ..."
 echo ""

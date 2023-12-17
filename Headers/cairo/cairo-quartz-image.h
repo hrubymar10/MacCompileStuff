@@ -1,6 +1,6 @@
 /* cairo - a vector graphics library with display and print output
  *
- * Copyright © 2009 Chris Wilson
+ * Copyright © 2008 Mozilla Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it either under the terms of the GNU Lesser General Public
@@ -27,41 +27,33 @@
  *
  * The Original Code is the cairo graphics library.
  *
- * The Initial Developer of the Original Code is Chris Wilson
+ * The Initial Developer of the Original Code is Mozilla Foundation.
  *
  * Contributor(s):
- *	Chris Wilson <chris@chris-wilson.co.uk>
+ *      Vladimir Vukicevic <vladimir@mozilla.com>
  */
 
-#ifndef CAIRO_XML_H
-#define CAIRO_XML_H
+#ifndef CAIRO_QUARTZ_IMAGE_H
+#define CAIRO_QUARTZ_IMAGE_H
 
 #include "cairo.h"
 
-#if CAIRO_HAS_XML_SURFACE
+#if CAIRO_HAS_QUARTZ_IMAGE_SURFACE
+
+#include <Carbon/Carbon.h>
 
 CAIRO_BEGIN_DECLS
 
-cairo_public cairo_device_t *
-cairo_xml_create (const char *filename);
-
-cairo_public cairo_device_t *
-cairo_xml_create_for_stream (cairo_write_func_t	 write_func,
-			     void		*closure);
+cairo_public cairo_surface_t *
+cairo_quartz_image_surface_create (cairo_surface_t *image_surface);
 
 cairo_public cairo_surface_t *
-cairo_xml_surface_create (cairo_device_t *xml,
-			  cairo_content_t content,
-			  double width, double height);
-
-cairo_public cairo_status_t
-cairo_xml_for_recording_surface (cairo_device_t *xml,
-				 cairo_surface_t *surface);
+cairo_quartz_image_surface_get_image (cairo_surface_t *surface);
 
 CAIRO_END_DECLS
 
-#else  /*CAIRO_HAS_XML_SURFACE*/
-# error Cairo was not compiled with support for the XML backend
-#endif /*CAIRO_HAS_XML_SURFACE*/
+#else  /* CAIRO_HAS_QUARTZ_IMAGE_SURFACE */
+# error Cairo was not compiled with support for the quartz-image backend
+#endif /* CAIRO_HAS_QUARTZ_IMAGE_SURFACE */
 
-#endif /*CAIRO_XML_H*/
+#endif /* CAIRO_QUARTZ_IMAGE_H */
