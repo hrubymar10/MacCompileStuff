@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#
+# pcre2_build
+# Martin Hrubý (hrubymar10), 2023
+#
+
+set -e
+
+PCRE2_VERSION="10.42"
+SHA256="8d36cd8cb6ea2a4c2bb358ff6411b0c788633a2a45dabbf1aeb4b701d1b5e840"
+
+starttimestamp=$(date +%s)
+
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
+fi
+
+source "${MY_PATH}/env"
+source "${MY_PATH}/functions"
+
+check_wget
+
+cd "${SOURCES_PATH}"
+rm -rf "pcre2"*
+get_src_and_verify_checksum "pcre2-${PCRE2_VERSION}.tar.bz2" "${SHA256}" "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.bz2"
+tar xf "${SOURCES_PATH}/archives/pcre2-${PCRE2_VERSION}.tar.bz2" -C .
+cp -R "pcre2-${PCRE2_VERSION}" "pcre2-${PCRE2_VERSION}-arm64"
+mv "pcre2-${PCRE2_VERSION}" "pcre2-${PCRE2_VERSION}-x86_64"
+ln -s "pcre2-${PCRE2_VERSION}-x86_64" "pcre2"
+
+# Build x86_64
+cd "${SOURCES_PATH}/pcre2-${PCRE2_VERSION}-x86_64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_X86_64}"
+export CFLAGS="${CFLAGS_X86_64}"
+export CXXFLAGS="${CXXFLAGS_X86_64}"
+arch -x86_64 ./configure --disable-dependency-tracking --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --host=x86_64-apple-darwin # TODO: --enable-pcre2-16 --enable-pcre2-32 
+arch -x86_64 make
+
+# Build arm64
+cd "${SOURCES_PATH}/pcre2-${PCRE2_VERSION}-arm64"
+source "${MY_PATH}/env"
+export LDFLAGS="${LDFLAGS_ARM64}"
+export CFLAGS="${CFLAGS_ARM64}"
+export CXXFLAGS="${CXXFLAGS_ARM64}"
+arch -arm64 ./configure --disable-dependency-tracking --enable-pcre2grep-libz --enable-pcre2grep-libbz2 --host=x86_64-apple-darwin # TODO: --enable-pcre2-16 --enable-pcre2-32 
+arch -arm64 make
+
+mkdir "pcre2-${PCRE2_VERSION}-RELEASE"
+cd "pcre2-${PCRE2_VERSION}-RELEASE"
+lipo -create "${SOURCES_PATH}/pcre2-${PCRE2_VERSION}-arm64/.libs/libpcre2-8.0.dylib" "${SOURCES_PATH}/pcre2-${PCRE2_VERSION}-x86_64/.libs/libpcre2-8.0.dylib" -output "libpcre2-8.0.dylib"
+install_name_tool -id "@rpath/libpcre2-8.0.dylib" "libpcre2-8.0.dylib"
+rm -rf "${LIBS_PATH}/libpcre2-8.0.dylib" "${LIBS_PATH}/libpcre2-8.dylib"
+cp -rf "libpcre2-8.0.dylib" "${LIBS_PATH}/libpcre2-8.0.dylib"
+ln -s "libpcre2-8.0.dylib" "${LIBS_PATH}/libpcre2-8.dylib"
+generate_pkgconfig_file "libpcre2-8" "${PCRE2_VERSION}"
+echo "==> DONE ..."
+echo ""
+time_interval_to_string "${starttimestamp}" "$(date +%s)"
+echo ""

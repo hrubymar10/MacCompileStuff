@@ -28,6 +28,7 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 * **OpenSSL** 1.1.1q
 * **Pango** 1.50.8
 * **pcre** 8.45
+* **pcre2** 10.42
 * **Pixman** 0.42.2
 * **SDL2** 2.28.5
 * **SDL2_image** 2.8.1

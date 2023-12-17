@@ -34,6 +34,7 @@ SCRIPTS=(
   "graphite2"
   "readline"
   "pcre"
+  "pcre2"
   "openssl"
   "boost"
   "glib"
