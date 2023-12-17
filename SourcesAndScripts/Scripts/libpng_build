@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # libpng_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-LIBPNG_VERSION="1.6.37"
-SHA256="505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
+LIBPNG_VERSION="1.6.40"
+SHA256="535b479b2467ff231a3ec6d92a525906fb8ef27978be4f66dbe05d3f3a01b3a1"
 
 starttimestamp=$(date +%s)
 
@@ -29,15 +29,18 @@ rm -rf "libpng"*
 get_src_and_verify_checksum "libpng-${LIBPNG_VERSION}.tar.xz" "${SHA256}" "http://prdownloads.sourceforge.net/libpng/libpng-${LIBPNG_VERSION}.tar.xz?download" -O "libpng-${LIBPNG_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/libpng-${LIBPNG_VERSION}.tar.xz" -C .
 cp -R "libpng-${LIBPNG_VERSION}" "libpng-${LIBPNG_VERSION}-arm64"
-ln -s "libpng-${LIBPNG_VERSION}" "libpng"
-cd "libpng"
+mv "libpng-${LIBPNG_VERSION}" "libpng-${LIBPNG_VERSION}-x86_64"
+ln -s "libpng-${LIBPNG_VERSION}-x86_64" "libpng"
+
 # Build x86_64
+cd "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -46,13 +49,17 @@ export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
+
 mkdir "libpng-${LIBPNG_VERSION}-RELEASE"
 cd "libpng-${LIBPNG_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-arm64/.libs/libpng16.16.dylib" "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}/.libs/libpng16.16.dylib" -output "libpng16.16.dylib"
+lipo -create "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-arm64/.libs/libpng16.16.dylib" "${SOURCES_PATH}/libpng-${LIBPNG_VERSION}-x86_64/.libs/libpng16.16.dylib" -output "libpng16.16.dylib"
 install_name_tool -id "@rpath/libpng16.16.dylib" "libpng16.16.dylib"
-rm -rf "${LIBS_PATH}/libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
+rm -rf "${LIBS_PATH}/libpng16.16.dylib" "${LIBS_PATH}/libpng16.dylib" "${LIBS_PATH}/libpng.dylib"
 cp "libpng16.16.dylib" "${LIBS_PATH}/libpng16.16.dylib"
+ln -s "libpng16.16.dylib" "${LIBS_PATH}/libpng16.dylib"
 ln -s "libpng16.16.dylib" "${LIBS_PATH}/libpng.dylib"
+generate_pkgconfig_file "libpng" "${LIBPNG_VERSION}"
+generate_pkgconfig_file "libpng16" "${LIBPNG_VERSION}"
 echo "==> DONE ..."
 echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
