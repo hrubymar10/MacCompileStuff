@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # libffi_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-LIBFFI_VERSION="3.4.2"
-SHA256="540fb721619a6aba3bdeef7d940d8e9e0e6d2c193595bc243241b77ff9e93620"
+LIBFFI_VERSION="3.4.4"
+SHA256="d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676"
 
 starttimestamp=$(date +%s)
 
@@ -29,16 +29,20 @@ rm -rf "libffi"*
 get_src_and_verify_checksum "libffi-${LIBFFI_VERSION}.tar.gz" "${SHA256}" "https://github.com/libffi/libffi/releases/download/v${LIBFFI_VERSION}/libffi-${LIBFFI_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/libffi-${LIBFFI_VERSION}.tar.gz" -C .
 cp -R "libffi-${LIBFFI_VERSION}" "libffi-${LIBFFI_VERSION}-arm64"
-ln -s "libffi-${LIBFFI_VERSION}" "libffi"
+mv "libffi-${LIBFFI_VERSION}" "libffi-${LIBFFI_VERSION}-x86_64"
+ln -s "libffi-${LIBFFI_VERSION}-x86_64" "libffi"
+ln -s "libffi-${LIBFFI_VERSION}-x86_64" "libffi-x86_64"
 ln -s "libffi-${LIBFFI_VERSION}-arm64" "libffi-arm64"
-cd "libffi"
+
 # Build x86_64
+cd "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -47,11 +51,12 @@ export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
+
 mkdir "libffi-${LIBFFI_VERSION}-RELEASE"
 cd "libffi-${LIBFFI_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/.libs/libffi.8.dylib" "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}/x86_64-apple-darwin/.libs/libffi.8.dylib" -output "libffi.8.dylib"
+lipo -create "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/.libs/libffi.8.dylib" "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-x86_64/x86_64-apple-darwin/.libs/libffi.8.dylib" -output "libffi.8.dylib"
 install_name_tool -id "@rpath/libffi.8.dylib" "libffi.8.dylib"
-rm -rf "${LIBS_PATH}/libffi.8.dylib" "${LIBS_PATH}/libffi.dylib"
+rm -rf "${LIBS_PATH}/libffi.8.dylib" "${LIBS_PATH}/libffi.7.dylib" "${LIBS_PATH}/libffi.dylib"
 cp -rf "libffi.8.dylib" "${LIBS_PATH}/libffi.8.dylib"
 ln -s "libffi.8.dylib" "${LIBS_PATH}/libffi.7.dylib"
 ln -s "libffi.8.dylib" "${LIBS_PATH}/libffi.dylib"
@@ -59,8 +64,8 @@ rm -rf "${HEADERS_PATH}/libffi"
 mkdir -p "${HEADERS_PATH}/libffi"
 cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/include/ffi.h" "${HEADERS_PATH}/libffi/ffi_arm64.h"
 cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-arm64/aarch64-apple-darwin/include/ffitarget.h" "${HEADERS_PATH}/libffi/ffitarget_arm64.h"
-cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}/x86_64-apple-darwin/include/ffi.h" "${HEADERS_PATH}/libffi/ffi_x86_64.h"
-cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}/x86_64-apple-darwin/include/ffitarget.h" "${HEADERS_PATH}/libffi/ffitarget_x86_64.h"
+cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-x86_64/x86_64-apple-darwin/include/ffi.h" "${HEADERS_PATH}/libffi/ffi_x86_64.h"
+cp "${SOURCES_PATH}/libffi-${LIBFFI_VERSION}-x86_64/x86_64-apple-darwin/include/ffitarget.h" "${HEADERS_PATH}/libffi/ffitarget_x86_64.h"
 printf "#ifdef __x86_64__\n#include \"ffi_x86_64.h\"\n#else\n#include \"ffi_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/libffi/ffi.h"
 printf "#ifdef __x86_64__\n#include \"ffitarget_x86_64.h\"\n#else\n#include \"ffitarget_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/libffi/ffitarget.h"
 generate_pkgconfig_file "libffi" "${LIBFFI_VERSION}"
