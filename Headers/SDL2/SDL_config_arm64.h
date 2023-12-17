@@ -1,7 +1,7 @@
 /* include/SDL_config.h.  Generated from SDL_config.h.in by configure.  */
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2022 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -76,6 +76,7 @@
 #define HAVE_STRING_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_WCHAR_H 1
+/* #undef HAVE_LINUX_INPUT_H */
 /* #undef HAVE_PTHREAD_NP_H */
 #define HAVE_LIBUNWIND_H 1
 
@@ -93,6 +94,7 @@
 #define HAVE_UNSETENV 1
 #endif
 #define HAVE_QSORT 1
+#define HAVE_BSEARCH 1
 #define HAVE_ABS 1
 #define HAVE_BCOPY 1
 #define HAVE_MEMSET 1
@@ -142,6 +144,7 @@
 #define HAVE_STRCASECMP 1
 /* #undef HAVE__STRNICMP */
 #define HAVE_STRNCASECMP 1
+#define HAVE_STRCASESTR 1
 /* #undef HAVE_SSCANF */
 #define HAVE_VSSCANF 1
 /* #undef HAVE_SNPRINTF */
@@ -227,8 +230,11 @@
 /* #undef HAVE_IBUS_IBUS_H */
 /* #undef HAVE_IMMINTRIN_H */
 /* #undef HAVE_LIBUDEV_H */
+/* #undef HAVE_LIBUSB */
 /* #undef HAVE_LIBSAMPLERATE_H */
 /* #undef HAVE_LIBDECOR_H */
+/* #undef HAVE_LSXINTRIN_H */
+/* #undef HAVE_LASXINTRIN_H */
 
 /* #undef HAVE_DDRAW_H */
 /* #undef HAVE_DINPUT_H */
@@ -244,6 +250,7 @@
 /* #undef HAVE_TPCSHRD_H */
 /* #undef HAVE_SENSORSAPI_H */
 /* #undef HAVE_ROAPI_H */
+/* #undef HAVE_SHELLSCALINGAPI_H */
 
 /* SDL internal assertion support */
 /* #undef SDL_DEFAULT_ASSERT_LEVEL */
@@ -293,7 +300,6 @@
 /* #undef SDL_AUDIO_DRIVER_NETBSD */
 /* #undef SDL_AUDIO_DRIVER_OPENSLES */
 /* #undef SDL_AUDIO_DRIVER_OSS */
-/* #undef SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H */
 /* #undef SDL_AUDIO_DRIVER_PAUDIO */
 /* #undef SDL_AUDIO_DRIVER_PIPEWIRE */
 /* #undef SDL_AUDIO_DRIVER_PIPEWIRE_DYNAMIC */
@@ -377,34 +383,30 @@
 /* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_CURSOR */
 /* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_XKBCOMMON */
 /* #undef SDL_VIDEO_DRIVER_WAYLAND_DYNAMIC_LIBDECOR */
-#define SDL_VIDEO_DRIVER_X11 1
+/* #undef SDL_VIDEO_DRIVER_X11 */
 /* #undef SDL_VIDEO_DRIVER_RPI */
 /* #undef SDL_VIDEO_DRIVER_KMSDRM */
 /* #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC */
 /* #undef SDL_VIDEO_DRIVER_KMSDRM_DYNAMIC_GBM */
 /* #undef SDL_VIDEO_DRIVER_ANDROID */
 /* #undef SDL_VIDEO_DRIVER_EMSCRIPTEN */
-/* #undef SDL_VIDEO_DRIVER_OFFSCREEN */
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC "/opt/X11/lib/libX11.6.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/opt/X11/lib/libXext.6.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR "/opt/X11/lib/libXcursor.1.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA "/opt/X11/lib/libXinerama.1.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 "/opt/X11/lib/libXi.6.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XFIXES "/opt/X11/lib/libXfixes.3.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "/opt/X11/lib/libXrandr.2.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS "/opt/X11/lib/libXss.1.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE "/opt/X11/lib/libXxf86vm.1.dylib"
-#define SDL_VIDEO_DRIVER_X11_XCURSOR 1
-#define SDL_VIDEO_DRIVER_X11_XDBE 1
-#define SDL_VIDEO_DRIVER_X11_XINERAMA 1
-#define SDL_VIDEO_DRIVER_X11_XINPUT2 1
-#define SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH 1
-#define SDL_VIDEO_DRIVER_X11_XFIXES 1
-#define SDL_VIDEO_DRIVER_X11_XRANDR 1
-#define SDL_VIDEO_DRIVER_X11_XSCRNSAVER 1
-#define SDL_VIDEO_DRIVER_X11_XSHAPE 1
-#define SDL_VIDEO_DRIVER_X11_XVIDMODE 1
-#define SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1
+#define SDL_VIDEO_DRIVER_OFFSCREEN 1
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XFIXES */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS */
+/* #undef SDL_VIDEO_DRIVER_X11_XCURSOR */
+/* #undef SDL_VIDEO_DRIVER_X11_XDBE */
+/* #undef SDL_VIDEO_DRIVER_X11_XINPUT2 */
+/* #undef SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH */
+/* #undef SDL_VIDEO_DRIVER_X11_XFIXES */
+/* #undef SDL_VIDEO_DRIVER_X11_XRANDR */
+/* #undef SDL_VIDEO_DRIVER_X11_XSCRNSAVER */
+/* #undef SDL_VIDEO_DRIVER_X11_XSHAPE */
+/* #undef SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
 /* #undef SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM */
 /* #undef SDL_VIDEO_DRIVER_NACL */
 /* #undef SDL_VIDEO_DRIVER_VIVANTE */
@@ -415,6 +417,7 @@
 
 /* #undef SDL_VIDEO_RENDER_D3D */
 /* #undef SDL_VIDEO_RENDER_D3D11 */
+/* #undef SDL_VIDEO_RENDER_D3D12 */
 #define SDL_VIDEO_RENDER_OGL 1
 /* #undef SDL_VIDEO_RENDER_OGL_ES */
 #define SDL_VIDEO_RENDER_OGL_ES2 1
@@ -428,7 +431,7 @@
 /* #undef SDL_VIDEO_OPENGL_BGL */
 #define SDL_VIDEO_OPENGL_CGL 1
 #define SDL_VIDEO_OPENGL_EGL 1
-#define SDL_VIDEO_OPENGL_GLX 1
+/* #undef SDL_VIDEO_OPENGL_GLX */
 /* #undef SDL_VIDEO_OPENGL_WGL */
 /* #undef SDL_VIDEO_OPENGL_OSMESA */
 /* #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC */
@@ -461,6 +464,7 @@
 /* #undef SDL_FILESYSTEM_OS2 */
 /* #undef SDL_FILESYSTEM_VITA */
 /* #undef SDL_FILESYSTEM_PSP */
+/* #undef SDL_FILESYSTEM_PS2 */
 
 /* Enable misc subsystem */
 /* #undef SDL_MISC_DUMMY */
@@ -469,7 +473,6 @@
 /* #undef SDL_LOCALE_DUMMY */
 
 /* Enable assembly routines */
-#define SDL_ASSEMBLY_ROUTINES 1
 /* #undef SDL_ALTIVEC_BLITTERS */
 /* #undef SDL_ARM_SIMD_BLITTERS */
 /* #undef SDL_ARM_NEON_BLITTERS */
@@ -488,5 +491,8 @@
 
 /* Enable dynamic libsamplerate support */
 /* #undef SDL_LIBSAMPLERATE_DYNAMIC */
+
+/* Libdecor get min/max content size functions */
+/* #undef SDL_HAVE_LIBDECOR_GET_MIN_MAX */
 
 #endif /* SDL_config_h_ */

@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 #
 # SDL2_build
-# Martin Hrubý (hrubymar10), 2019-2022
+# Martin Hrubý (hrubymar10), 2019-2023
 #
 
 set -e
 
-SDL2_VERSION="2.0.22"
-SDL2_SHA256="fe7cbf3127882e3fc7259a75a0cb585620272c51745d3852ab9dd87960697f2e"
-SDL2_IMAGE_VERSION="2.6.0"
-SDL2_IMAGE_SHA256="611c862f40de3b883393aabaa8d6df350aa3ae4814d65030972e402edae85aaa"
-SDL2_MIXER_VERSION="2.6.1"
-SDL2_MIXER_SHA256="bc5c7b85f297e5f3cb34c99c366a4746922fc41365b15fd78a164dda71a861a3"
-SDL2_NET_VERSION="2.0.1"
-SDL2_NET_SHA256="15ce8a7e5a23dafe8177c8df6e6c79b6749a03fff1e8196742d3571657609d21"
-SDL2_TTF_VERSION="2.20.0"
-SDL2_TTF_SHA256="874680232b72839555a558b48d71666b562e280f379e673b6f0c7445ea3b9b8a"
+SDL2_VERSION="2.28.5"
+SDL2_SHA256="332cb37d0be20cb9541739c61f79bae5a477427d79ae85e352089afdaf6666e4"
+SDL2_IMAGE_VERSION="2.8.1"
+SDL2_IMAGE_SHA256="e4cab9a58c347a490c46723c17553b4e12233cd821d3b993a8475a50497f5a3e"
+SDL2_MIXER_VERSION="2.6.3"
+SDL2_MIXER_SHA256="7a6ba86a478648ce617e3a5e9277181bc67f7ce9876605eea6affd4a0d6eea8f"
+SDL2_NET_VERSION="2.2.0"
+SDL2_NET_SHA256="4e4a891988316271974ff4e9585ed1ef729a123d22c08bd473129179dc857feb"
+SDL2_TTF_VERSION="2.20.2"
+SDL2_TTF_SHA256="9dc71ed93487521b107a2c4a9ca6bf43fb62f6bddd5c26b055e6b91418a22053"
 
 starttimestamp=$(date +%s)
 
@@ -42,9 +42,11 @@ cd "SDL2"
 get_src_and_verify_checksum "SDL2-${SDL2_VERSION}.tar.gz" "${SDL2_SHA256}" "https://libsdl.org/release/SDL2-${SDL2_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2-${SDL2_VERSION}.tar.gz" -C .
 cp -R "SDL2-${SDL2_VERSION}" "SDL2-${SDL2_VERSION}-arm64"
-ln -s "SDL2-${SDL2_VERSION}" "SDL"
+mv "SDL2-${SDL2_VERSION}" "SDL2-${SDL2_VERSION}-x86_64"
+ln -s "SDL2-${SDL2_VERSION}-x86_64" "SDL"
+ln -s "SDL2-${SDL2_VERSION}-x86_64" "SDL-x86_64"
 ln -s "SDL2-${SDL2_VERSION}-arm64" "SDL-arm64"
-cd "SDL"
+cd "SDL-x86_64"
 # Build x86_64
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
@@ -67,7 +69,7 @@ make
 ./configure --prefix="${SOURCES_PATH}/SDL2/SDL-arm64/dist"
 make install-hdrs
 rm -rf "${LIBS_PATH}/libSDL2-2.0.0.dylib" "${LIBS_PATH}/libSDL2.dylib"
-lipo -create "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}-arm64/build/.libs/libSDL2-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}/build/.libs/libSDL2-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}-arm64/build/.libs/libSDL2-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}-x86_64/build/.libs/libSDL2-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2-2.0.0.dylib"
 install_name_tool -id "@rpath/libSDL2-2.0.0.dylib" "${LIBS_PATH}/libSDL2-2.0.0.dylib"
 ln -s "libSDL2-2.0.0.dylib" "${LIBS_PATH}/libSDL2.dylib"
 rm -rf "${HEADERS_PATH}/SDL2"
@@ -81,7 +83,8 @@ cd "${SOURCES_PATH}/SDL2"
 get_src_and_verify_checksum "SDL2_image-${SDL2_IMAGE_VERSION}.tar.gz" "${SDL2_IMAGE_SHA256}" "https://github.com/libsdl-org/SDL_image/releases/download/release-${SDL2_IMAGE_VERSION}/SDL2_image-${SDL2_IMAGE_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2_image-${SDL2_IMAGE_VERSION}.tar.gz" -C .
 cp -R "SDL2_image-${SDL2_IMAGE_VERSION}" "SDL2_image-${SDL2_IMAGE_VERSION}-arm64"
-ln -s "SDL2_image-${SDL2_IMAGE_VERSION}" "SDL2_image"
+mv "SDL2_image-${SDL2_IMAGE_VERSION}" "SDL2_image-${SDL2_IMAGE_VERSION}-x86_64"
+ln -s "SDL2_image-${SDL2_IMAGE_VERSION}-x86_64" "SDL2_image"
 cd "SDL2_image"
 # Build x86_64
 source "${MY_PATH}/env"
@@ -99,17 +102,18 @@ export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --enable-webp-shared=no --enable-jxl=no --enable-jxl-shared=no --enable-avif=no --enable-avif-shared=no --enable-imageio --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_image.dylib" "${LIBS_PATH}/libSDL2_image.dylib"
-lipo -create "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_IMAGE_VERSION}-arm64/.libs/libSDL2_image-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_IMAGE_VERSION}/.libs/libSDL2_image-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_image-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_IMAGE_VERSION}-arm64/.libs/libSDL2_image-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_image-${SDL2_IMAGE_VERSION}-x86_64/.libs/libSDL2_image-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_image-2.0.0.dylib"
 install_name_tool -id "@rpath/libSDL2_image-2.0.0.dylib" "${LIBS_PATH}/libSDL2_image-2.0.0.dylib"
 ln -s "libSDL2_image-2.0.0.dylib" "${LIBS_PATH}/libSDL2_image.dylib"
-cp -rf "${SOURCES_PATH}/SDL2/SDL2_image/SDL_image.h" "${MY_PATH}/../../Headers/SDL2/SDL_image.h"
+cp -rf "${SOURCES_PATH}/SDL2/SDL2_image/include/SDL_image.h" "${MY_PATH}/../../Headers/SDL2/SDL_image.h"
 
 cd "${SOURCES_PATH}/SDL2"
 
 get_src_and_verify_checksum "SDL2_mixer-${SDL2_MIXER_VERSION}.tar.gz" "${SDL2_MIXER_SHA256}" "https://github.com/libsdl-org/SDL_mixer/releases/download/release-${SDL2_MIXER_VERSION}/SDL2_mixer-${SDL2_MIXER_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2_mixer-${SDL2_MIXER_VERSION}.tar.gz" -C .
 cp -R "SDL2_mixer-${SDL2_MIXER_VERSION}" "SDL2_mixer-${SDL2_MIXER_VERSION}-arm64"
-ln -s "SDL2_mixer-${SDL2_MIXER_VERSION}" "SDL2_mixer"
+mv "SDL2_mixer-${SDL2_MIXER_VERSION}" "SDL2_mixer-${SDL2_MIXER_VERSION}-x86_64"
+ln -s "SDL2_mixer-${SDL2_MIXER_VERSION}-x86_64" "SDL2_mixer"
 cd "SDL2_mixer"
 # Build x86_64
 source "${MY_PATH}/env"
@@ -127,7 +131,7 @@ export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --disable-music-flac --disable-music-flac-shared --disable-music-midi-fluidsynth --disable-music-midi-fluidsynth-shared --disable-music-mod-mikmod-shared --disable-music-mod-modplug-shared --disable-music-mp3-mpg123 --disable-music-mp3-mpg123-shared --disable-music-mod-mikmod --disable-music-mod-modplug --enable-music-ogg --enable-music-ogg-shared --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib" "${LIBS_PATH}/libSDL2_mixer.dylib"
-lipo -create "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-arm64/build/.libs/libSDL2_mixer-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}/build/.libs/libSDL2_mixer-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-arm64/build/.libs/libSDL2_mixer-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-x86_64/build/.libs/libSDL2_mixer-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib"
 install_name_tool -id "@rpath/libSDL2_mixer-2.0.0.dylib" "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib"
 ln -s "libSDL2_mixer-2.0.0.dylib" "${LIBS_PATH}/libSDL2_mixer.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_mixer/include/SDL_mixer.h" "${HEADERS_PATH}/SDL2/SDL_mixer.h"
@@ -137,25 +141,30 @@ cd "${SOURCES_PATH}/SDL2"
 get_src_and_verify_checksum "SDL2_net-${SDL2_NET_VERSION}.tar.gz" "${SDL2_NET_SHA256}" "https://www.libsdl.org/projects/SDL_net/release/SDL2_net-${SDL2_NET_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2_net-${SDL2_NET_VERSION}.tar.gz" -C .
 cp -R "SDL2_net-${SDL2_NET_VERSION}" "SDL2_net-${SDL2_NET_VERSION}-arm64"
-ln -s "SDL2_net-${SDL2_NET_VERSION}" "SDL2_net"
+mv "SDL2_net-${SDL2_NET_VERSION}" "SDL2_net-${SDL2_NET_VERSION}-x86_64"
+ln -s "SDL2_net-${SDL2_NET_VERSION}-x86_64" "SDL2_net"
 cd "SDL2_net"
 # Build x86_64
+mkdir "tmp"
+cp "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}-x86_64/build/.libs/libSDL2_test.a" "tmp/"
 source "${MY_PATH}/env"
-export LDFLAGS="${LDFLAGS_X86_64}"
+export LDFLAGS="${LDFLAGS_X86_64} -L${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-x86_64/tmp"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 ./configure --disable-dependency-tracking --enable-shared --host=x86_64-apple-darwin
 make
 # Build arm64
 cd "${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-arm64"
+mkdir "tmp"
+cp "${SOURCES_PATH}/SDL2/SDL2-${SDL2_VERSION}-arm64/build/.libs/libSDL2_test.a" "tmp/"
 source "${MY_PATH}/env"
-export LDFLAGS="${LDFLAGS_ARM64}"
+export LDFLAGS="${LDFLAGS_ARM64} -L${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-arm64/tmp"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_net-2.0.0.dylib" "${LIBS_PATH}/libSDL2_net.dylib"
-lipo -create "${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-arm64/.libs/libSDL2_net-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}/.libs/libSDL2_net-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_net-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-arm64/.libs/libSDL2_net-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_net-${SDL2_NET_VERSION}-x86_64/.libs/libSDL2_net-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_net-2.0.0.dylib"
 install_name_tool -id "@rpath/libSDL2_net-2.0.0.dylib" "${LIBS_PATH}/libSDL2_net-2.0.0.dylib"
 ln -s "libSDL2_net-2.0.0.dylib" "${LIBS_PATH}/libSDL2_net.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_net/SDL_net.h" "${HEADERS_PATH}/SDL2/SDL_net.h"
@@ -165,7 +174,8 @@ cd "${SOURCES_PATH}/SDL2"
 get_src_and_verify_checksum "SDL2_ttf-${SDL2_TTF_VERSION}.tar.gz" "${SDL2_TTF_SHA256}" "https://github.com/libsdl-org/SDL_ttf/releases/download/release-${SDL2_TTF_VERSION}/SDL2_ttf-${SDL2_TTF_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2_ttf-${SDL2_TTF_VERSION}.tar.gz" -C .
 cp -R "SDL2_ttf-${SDL2_TTF_VERSION}" "SDL2_ttf-${SDL2_TTF_VERSION}-arm64"
-ln -s "SDL2_ttf-${SDL2_TTF_VERSION}" "SDL2_ttf"
+mv "SDL2_ttf-${SDL2_TTF_VERSION}" "SDL2_ttf-${SDL2_TTF_VERSION}-x86_64"
+ln -s "SDL2_ttf-${SDL2_TTF_VERSION}-x86_64" "SDL2_ttf"
 cd "SDL2_ttf"
 # Build x86_64
 source "${MY_PATH}/env"
@@ -183,7 +193,7 @@ export CXXFLAGS="${CXXFLAGS_ARM64}"
 ./configure --disable-dependency-tracking --enable-shared --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
-lipo -create "${SOURCES_PATH}/SDL2/SDL2_ttf-${SDL2_TTF_VERSION}-arm64/.libs/libSDL2_ttf-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_ttf-${SDL2_TTF_VERSION}/.libs/libSDL2_ttf-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_ttf-2.0.0.dylib"
+lipo -create "${SOURCES_PATH}/SDL2/SDL2_ttf-${SDL2_TTF_VERSION}-arm64/.libs/libSDL2_ttf-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_ttf-${SDL2_TTF_VERSION}-x86_64/.libs/libSDL2_ttf-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_ttf-2.0.0.dylib"
 install_name_tool -id "@rpath/libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf-2.0.0.dylib"
 ln -s "libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h"
