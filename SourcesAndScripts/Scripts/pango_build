@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # pango_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-PANGO_VERSION="1.49.3"
-PANGO_VERSION_SHORT="1.49"
-SHA256="45c403b89910a121ad8eb6d57b5be1d8f19499d39b686435dc6f29b106d2be93"
+PANGO_VERSION="1.51.0"
+PANGO_VERSION_SHORT="1.51"
+SHA256="74efc109ae6f903bbe6af77eaa2ac6094b8ee245a2e23f132a7a8f0862d1a9f5"
 
 starttimestamp=$(date +%s)
 
@@ -46,9 +46,11 @@ rm -rf "pango"*
 get_src_and_verify_checksum "pango-${PANGO_VERSION}.tar.xz" "${SHA256}" "http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_VERSION_SHORT}/pango-${PANGO_VERSION}.tar.xz"
 tar xf "${SOURCES_PATH}/archives/pango-${PANGO_VERSION}.tar.xz" -C .
 cp -R "pango-${PANGO_VERSION}" "pango-${PANGO_VERSION}-arm64"
-ln -s "pango-${PANGO_VERSION}" "pango"
-cd "pango"
+mv "pango-${PANGO_VERSION}" "pango-${PANGO_VERSION}-x86_64"
+ln -s "pango-${PANGO_VERSION}-x86_64" "pango"
+
 # Build x86_64
+cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-x86_64"
 source "${MY_PATH}/env"
 unset MACOSX_DEPLOYMENT_TARGET
 export LDFLAGS="${LDFLAGS_X86_64}"
@@ -59,6 +61,7 @@ sed -i -e "/-Werror=unused-but-set-variable/d" "meson.build"
 arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release . "build"
 cd "build"
 arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+
 # Build arm64
 cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64"
 source "${MY_PATH}/env"
@@ -71,11 +74,12 @@ sed -i -e "/-Werror=unused-but-set-variable/d" "meson.build"
 arch -arm64 /opt/homebrew/bin/meson -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release . "build"
 cd "build"
 arch -arm64 /opt/homebrew/bin/ninja
+
 mkdir "pango-${PANGO_VERSION}-RELEASE"
 cd "pango-${PANGO_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpango-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpango-1.0.0.dylib" -output "libpango-1.0.0.dylib"
-lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangocairo-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpangocairo-1.0.0.dylib" -output "libpangocairo-1.0.0.dylib"
-lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangoft2-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}/build/pango/libpangoft2-1.0.0.dylib" -output "libpangoft2-1.0.0.dylib"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpango-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}-x86_64/build/pango/libpango-1.0.0.dylib" -output "libpango-1.0.0.dylib"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangocairo-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}-x86_64/build/pango/libpangocairo-1.0.0.dylib" -output "libpangocairo-1.0.0.dylib"
+lipo -create "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64/build/pango/libpangoft2-1.0.0.dylib" "${SOURCES_PATH}/pango-${PANGO_VERSION}-x86_64/build/pango/libpangoft2-1.0.0.dylib" -output "libpangoft2-1.0.0.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
     remove_rpath_if_exists "${filename}" "@loader_path/"
@@ -88,7 +92,7 @@ mkdir "${HEADERS_PATH}/pango"
 cp "${SOURCES_PATH}/pango/build/pango/pango-enum-types.h" "${HEADERS_PATH}/pango/"
 cp "${SOURCES_PATH}/pango/build/pango/pango-features.h" "${HEADERS_PATH}/pango/"
 cd "${SOURCES_PATH}/pango/pango"
-cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-color.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-markup.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${HEADERS_PATH}/pango/"
+cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-color.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-fontset-simple.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-markup.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${HEADERS_PATH}/pango/"
 echo "==> DONE ..."
 echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

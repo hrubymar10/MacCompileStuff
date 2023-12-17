@@ -253,7 +253,7 @@ typedef enum {
  * @PANGO_FONT_SCALE_NONE: Leave the font size unchanged
  * @PANGO_FONT_SCALE_SUPERSCRIPT: Change the font to a size suitable for superscripts
  * @PANGO_FONT_SCALE_SUBSCRIPT: Change the font to a size suitable for subscripts
- * @PANGO_FONT_SCALE_SMALL_CAPS: Change the font to a size suitable for Small Caps. Since: 1.50
+ * @PANGO_FONT_SCALE_SMALL_CAPS: Change the font to a size suitable for Small Caps
  *
  * An enumeration that affects font sizes for superscript
  * and subscript positioning and for (emulated) Small Caps.
@@ -484,7 +484,7 @@ struct _PangoAttrFontDesc
 /**
  * PangoAttrFontFeatures:
  * @attr: the common portion of the attribute
- * @features: the featues, as a string in CSS syntax
+ * @features: the features, as a string in CSS syntax
  *
  * The `PangoAttrFontFeatures` structure is used to represent OpenType
  * font features as an attribute.
@@ -707,6 +707,11 @@ PANGO_AVAILABLE_IN_1_46
 gboolean                pango_attr_list_equal           (PangoAttrList         *list,
                                                          PangoAttrList         *other_list);
 
+PANGO_AVAILABLE_IN_1_50
+char *                  pango_attr_list_to_string       (PangoAttrList         *list);
+PANGO_AVAILABLE_IN_1_50
+PangoAttrList *         pango_attr_list_from_string     (const char            *text);
+
 PANGO_AVAILABLE_IN_1_44
 GType                   pango_attr_iterator_get_type    (void) G_GNUC_CONST;
 
@@ -733,6 +738,10 @@ void                    pango_attr_iterator_get_font    (PangoAttrIterator     *
                                                          GSList               **extra_attrs);
 PANGO_AVAILABLE_IN_1_2
 GSList *                pango_attr_iterator_get_attrs   (PangoAttrIterator     *iterator);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoAttribute, pango_attribute_destroy)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoAttrList, pango_attr_list_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoAttrIterator, pango_attr_iterator_destroy)
 
 G_END_DECLS
 
