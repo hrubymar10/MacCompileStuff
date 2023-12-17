@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # openssl_build
-# Martin Hrubý (hrubymar10), 2018-2022
+# Martin Hrubý (hrubymar10), 2018-2023
 #
 
 set -e
 
-OPENSSL_VERSION="1.1.1q"
-SHA256="d7939ce614029cdff0b6c20f0e2e5703158a489a72b2507b8bd51bf8c8fd10ca"
+OPENSSL_VERSION="1.1.1w"
+SHA256="cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8"
 
 starttimestamp=$(date +%s)
 
@@ -29,29 +29,31 @@ rm -rf openssl*
 get_src_and_verify_checksum "openssl-${OPENSSL_VERSION}.tar.gz" "${SHA256}" "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/openssl-${OPENSSL_VERSION}.tar.gz" -C .
 cp -R "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}-arm64"
-ln -s "openssl-${OPENSSL_VERSION}" "openssl"
-cd "openssl"
+mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}-x86_64"
+ln -s "openssl-${OPENSSL_VERSION}-x86_64" "openssl"
+
 # Build x86_64
+cd "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-x86_64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-patch -b -p0 < "${SCRIPTS_PATH}/openssl.patch"
 perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-x86_64-cc enable-ec_nistp_64_gcc_128
 make
+
 # Build arm64
 cd "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64"
 source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-patch -b -p0 < "${SCRIPTS_PATH}/openssl.patch"
 perl ./Configure no-ssl3 no-ssl3-method no-zlib darwin64-arm64-cc enable-ec_nistp_64_gcc_128
 make
+
 mkdir "openssl-${OPENSSL_VERSION}-RELEASE"
 cd "openssl-${OPENSSL_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libcrypto.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}/libcrypto.1.1.dylib" -output "libcrypto.1.1.dylib"
-lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libssl.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}/libssl.1.1.dylib" -output "libssl.1.1.dylib"
+lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libcrypto.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-x86_64/libcrypto.1.1.dylib" -output "libcrypto.1.1.dylib"
+lipo -create "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/libssl.1.1.dylib" "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-x86_64/libssl.1.1.dylib" -output "libssl.1.1.dylib"
 for filename in * ; do
   install_name_tool -id "@rpath/${filename}" "${filename}"
   install_name_tool -change "/usr/local/lib/libcrypto.1.1.dylib" "@loader_path/libcrypto.1.1.dylib" "${filename}"
