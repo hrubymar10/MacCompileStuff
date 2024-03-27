@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # pango_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
@@ -52,28 +52,27 @@ ln -s "pango-${PANGO_VERSION}-x86_64" "pango"
 # Build x86_64
 cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-x86_64"
 source "${MY_PATH}/env"
+patch -b -p0 < "${SCRIPTS_PATH}/pango.patch"
 unset MACOSX_DEPLOYMENT_TARGET
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir "build"
 sed -i -e "/-Werror=unused-but-set-variable/d" "meson.build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release . "build"
-cd "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+arch -x86_64 /opt/homebrew_x86_64/bin/meson setup -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release --wrap-mode=nofallback . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson compile -C build --verbose
 
 # Build arm64
 cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64"
 source "${MY_PATH}/env"
+patch -b -p0 < "${SCRIPTS_PATH}/pango.patch"
 unset MACOSX_DEPLOYMENT_TARGET
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 mkdir "build"
-sed -i -e "/-Werror=unused-but-set-variable/d" "meson.build"
-arch -arm64 /opt/homebrew/bin/meson -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release . "build"
-cd "build"
-arch -arm64 /opt/homebrew/bin/ninja
+arch -arm64 /opt/homebrew/bin/meson setup -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release --wrap-mode=nofallback . "build"
+arch -arm64 /opt/homebrew/bin/meson compile -C build --verbose
 
 mkdir "pango-${PANGO_VERSION}-RELEASE"
 cd "pango-${PANGO_VERSION}-RELEASE"
