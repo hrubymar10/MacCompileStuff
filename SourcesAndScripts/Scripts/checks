@@ -79,7 +79,22 @@ check_for_rpaths() {
   echo ""
 }
 
+check_for_forbidden_private_functions() {
+  echo "==> Checking for forbidden private functions:"
+  for DYLIB in *".dylib"; do
+    if [[ -L "${DYLIB}" ]]; then continue; fi
+    PRIVATE_FUNCTIONS="$(otool -vt ${DYLIB} | grep "_CTFontCopyDefaultCascadeList\$" || true)"
+    if [[ -n "${PRIVATE_FUNCTIONS}" ]]; then
+      echo "${DYLIB}"
+      echo "    ${PRIVATE_FUNCTIONS}"
+    fi
+  done
+  echo "==> Done"
+  echo ""
+}
+
 check_min_macos_version
 check_architectures
 check_for_bad_references
 check_for_rpaths
+check_for_forbidden_private_functions
