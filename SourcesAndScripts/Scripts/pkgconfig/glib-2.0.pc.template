@@ -3,6 +3,8 @@ exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/Headers
 
+glib_mkenums=/opt/homebrew/opt/glib/bin/glib-mkenums
+
 Name: GLib
 Description: C Utility Library
 Version: VERSION
