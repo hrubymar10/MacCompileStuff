@@ -53,8 +53,7 @@ export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir "build"
-#meson -Dgraphite=enabled -Dcoretext=enabled --buildtype=release --default-library=shared --cross-file="${SCRIPTS_PATH}/cross_file_x86_64.txt" . "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared --wrap-mode=nofallback . "build"
 cd "build"
 arch -x86_64 /opt/homebrew_x86_64/bin/ninja
 
@@ -66,8 +65,7 @@ export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
 mkdir "build"
-#meson -Dgraphite=enabled -Dcoretext=enabled --buildtype=release --default-library=shared --cross-file="${SCRIPTS_PATH}/cross_file_arm64.txt" . "build"
-arch -arm64 /opt/homebrew/bin/meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared . "build"
+arch -arm64 /opt/homebrew/bin/meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared --wrap-mode=nofallback . "build"
 cd "build"
 arch -arm64 /opt/homebrew/bin/ninja
 
