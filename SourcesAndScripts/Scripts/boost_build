@@ -25,7 +25,7 @@ source "${MY_PATH}/functions"
 
 check_wget
 
-if ! [ is_apple_silicon_mac ]; then
+if ! is_apple_silicon_mac; then
   echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
