@@ -32,8 +32,8 @@ check_gettext
 check_freetype
 check_graphite2
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Harfbuzz requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
@@ -53,9 +53,9 @@ export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared --wrap-mode=nofallback . "build"
+arch -x86_64 zsh -c 'meson -Dgraphite=enabled -Dcoretext=enabled -Dintrospection=disabled --buildtype=release --default-library=shared --wrap-mode=nofallback . build'
 cd "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+arch -x86_64 zsh -c ninja
 
 # Build arm64
 cd "${SOURCES_PATH}/harfbuzz-${HARFBUZZ_VERSION}-arm64"

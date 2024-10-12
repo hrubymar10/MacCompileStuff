@@ -46,8 +46,8 @@ export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 patch -b -p0 < "${SCRIPTS_PATH}/cairo.patch"
 mkdir -p "build/cairo"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson setup --wrap-mode=nofallback --default-library=shared --buildtype=release -Ddwrite=disabled -Dfontconfig=enabled -Dfreetype=enabled -Dpng=enabled -Dquartz=enabled -Dtee=enabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dzlib=enabled -Dtests=disabled -Dglib=enabled -Dgtk_doc=false . "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson compile -C build --verbose
+arch -x86_64 zsh -c 'meson setup --wrap-mode=nofallback --default-library=shared --buildtype=release -Ddwrite=disabled -Dfontconfig=enabled -Dfreetype=enabled -Dpng=enabled -Dquartz=enabled -Dtee=enabled -Dxcb=disabled -Dxlib=disabled -Dxlib-xcb=disabled -Dzlib=enabled -Dtests=disabled -Dglib=enabled -Dgtk_doc=false . build'
+arch -x86_64 zsh -c 'meson compile -C build --verbose'
 
 # Build arm64
 cd "${SOURCES_PATH}/cairo-${CAIRO_VERSION}-arm64"
