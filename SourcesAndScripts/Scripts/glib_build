@@ -30,8 +30,8 @@ check_pcre2
 check_libffi
 check_gettext
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Glib requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
@@ -52,12 +52,12 @@ export CFLAGS="${CFLAGS_X86_64} -Wno-implicit-function-declaration"
 export CXXFLAGS="${CXXFLAGS_X86_64} -Wno-implicit-function-declaration"
 patch -b -p0 < "${SCRIPTS_PATH}/glib.patch"
 mkdir -p "build/glib"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false --default-library=shared --buildtype=release . "build"
+arch -x86_64 zsh -c 'meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false --default-library=shared --buildtype=release . build'
 cd "build/glib"
 ln -s "${LIBS_PATH}/libpcre2-8.0.dylib" "libpcre2-8.dylib"
 ln -s "${LIBS_PATH}/libintl.8.dylib"
 cd ..
-arch -x86_64 /opt/homebrew_x86_64/bin/ninja
+arch -x86_64 zsh -c ninja
 
 # Build arm64
 cd "${SOURCES_PATH}/glib-${GLIB_VERSION}-arm64"

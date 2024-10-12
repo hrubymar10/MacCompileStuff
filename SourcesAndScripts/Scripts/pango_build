@@ -36,8 +36,8 @@ check_fribidi
 check_meson
 check_ninja
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Pango requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
@@ -58,9 +58,9 @@ export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
 mkdir "build"
-sed -i -e "/-Werror=unused-but-set-variable/d" "meson.build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson setup -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release --wrap-mode=nofallback . "build"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson compile -C build --verbose
+sed -i '' "/-Werror=unused-but-set-variable/d" "meson.build"
+arch -x86_64 zsh -c 'meson setup -Dintrospection=disabled -Djson-glib:introspection=disabled -Djson-glib:tests=false -Dfontconfig=enabled -Dcairo=enabled -Dfreetype=enabled --default-library=shared --buildtype=release --wrap-mode=nofallback . build'
+arch -x86_64 zsh -c 'meson compile -C build --verbose'
 
 # Build arm64
 cd "${SOURCES_PATH}/pango-${PANGO_VERSION}-arm64"
