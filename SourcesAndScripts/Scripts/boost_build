@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # boost_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-BOOST_VERSION_1="1.84.0"
-BOOST_VERSION_2="1_84_0"
-SHA256="cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454"
+BOOST_VERSION_1="1.86.0"
+BOOST_VERSION_2="1_86_0"
+SHA256="1bed88e40401b2cb7a1f76d4bab499e352fa4d0c5f31c0dbae64e24d34d7513b"
 
 starttimestamp=$(date +%s)
 
@@ -44,7 +44,7 @@ ln -s "boost_${BOOST_VERSION_2}-x86_64" "boost"
 cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-x86_64"
 rm -rf "stage"
 source "${MY_PATH}/env"
-arch -x86_64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
+arch -x86_64 ./bootstrap.sh --with-libraries=charconv,chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=sysv address-model=64 architecture=x86 binary-format=mach-o threading=multi toolset=clang
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64} -stdlib=libc++"
 export CXXFLAGS="${CXXFLAGS_X86_64} -stdlib=libc++"
@@ -54,7 +54,7 @@ arch -x86_64 ./b2 -q cxxflags="${CXXFLAGS}" linkflags="${LDFLAGS}" --layout=tagg
 cd "${SOURCES_PATH}/boost_${BOOST_VERSION_2}-arm64"
 rm -rf "stage"
 source "${MY_PATH}/env"
-arch -arm64 ./bootstrap.sh --with-libraries=chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
+arch -arm64 ./bootstrap.sh --with-libraries=charconv,chrono,context,coroutine,filesystem,iostreams,locale,program_options,random,regex,system,timer,test,thread abi=aapcs address-model=64 architecture=arm binary-format=mach-o threading=multi toolset=clang
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64} -stdlib=libc++"
 export CXXFLAGS="${CXXFLAGS_ARM64} -stdlib=libc++"
