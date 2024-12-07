@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # pixman_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-PIXMAN_VERSION="0.42.2"
-SHA256="ea1480efada2fd948bc75366f7c349e1c96d3297d09a3fe62626e38e234a625e"
+PIXMAN_VERSION="0.44.2"
+SHA256="6349061ce1a338ab6952b92194d1b0377472244208d47ff25bef86fc71973466"
 
 starttimestamp=$(date +%s)
 
@@ -23,6 +23,14 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
+check_meson
+check_ninja
+check_pkg_config
+
+if ! is_apple_silicon_mac; then
+  echo "Error: Pixman requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
 
 cd "${SOURCES_PATH}"
 rm -rf "pixman"*
@@ -38,9 +46,10 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-patch -b -p0 < "${SCRIPTS_PATH}/pixman.patch"
-./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=x86_64-apple-darwin
-make
+mkdir -p "build/pixman"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson setup -Ddemos=disabled -Dtests=disabled -Dgtk=disabled -Dgnuplot=false --wrap-mode=nofallback --default-library=shared --buildtype=release . "build"
+cd "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/ninja
 
 # Build arm64
 cd "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64"
@@ -48,21 +57,19 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-patch -b -p0 < "${SCRIPTS_PATH}/pixman.patch"
-./configure --disable-dependency-tracking --disable-gtk --disable-silent-rules --host=aarch64-apple-darwin
-make
+mkdir -p "build/pixman"
+arch -arm64 /opt/homebrew/bin/meson setup -Ddemos=disabled -Dtests=disabled -Dgtk=disabled -Dgnuplot=false --wrap-mode=nofallback --default-library=shared --buildtype=release . "build"
+cd "build"
+arch -arm64 /opt/homebrew/bin/ninja
 
-mkdir "pixman-${PIXMAN_VERSION}-RELEASE"
-cd "pixman-${PIXMAN_VERSION}-RELEASE"
-lipo -create "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64/pixman/.libs/libpixman-1.0.42.2.dylib" "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-x86_64/pixman/.libs/libpixman-1.0.42.2.dylib" -output "libpixman-1.0.dylib"
-install_name_tool -id "@rpath/libpixman-1.0.dylib" "libpixman-1.0.dylib"
 rm -rf "${LIBS_PATH}/libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.dylib" "${LIBS_PATH}/libpixman.dylib"
-cp -rf "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.0.dylib"
+lipo -create "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-arm64/build/pixman/libpixman-1.0.dylib" "${SOURCES_PATH}/pixman-${PIXMAN_VERSION}-x86_64/build/pixman/libpixman-1.0.dylib" -output "${LIBS_PATH}/libpixman-1.0.dylib"
+install_name_tool -id "@rpath/libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.0.dylib"
 ln -s "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman-1.dylib"
 ln -s "libpixman-1.0.dylib" "${LIBS_PATH}/libpixman.dylib"
 rm -rf "${HEADERS_PATH}/pixman"
 mkdir -p "${HEADERS_PATH}/pixman"
-cp "${SOURCES_PATH}/pixman/pixman/pixman.h" "${SOURCES_PATH}/pixman/pixman/pixman-version.h" "${HEADERS_PATH}/pixman/"
+cp "${SOURCES_PATH}/pixman/pixman/pixman.h" "${SOURCES_PATH}/pixman/build/pixman/pixman-version.h" "${HEADERS_PATH}/pixman/"
 generate_pkgconfig_file "pixman-1" "${PIXMAN_VERSION}"
 echo "==> DONE ..."
 echo ""
