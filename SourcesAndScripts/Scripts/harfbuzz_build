@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # harfbuzz_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-HARFBUZZ_VERSION="8.3.0"
-SHA256="109501eaeb8bde3eadb25fab4164e993fbace29c3d775bcaa1c1e58e2f15f847"
+HARFBUZZ_VERSION="10.1.0"
+SHA256="6ce3520f2d089a33cef0fc48321334b8e0b72141f6a763719aaaecd2779ecb82"
 
 starttimestamp=$(date +%s)
 
@@ -31,9 +31,10 @@ check_glib
 check_gettext
 check_freetype
 check_graphite2
+check_pkg_config
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Harfbuzz requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
