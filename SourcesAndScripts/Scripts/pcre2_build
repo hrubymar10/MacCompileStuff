@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # pcre2_build
-# Martin Hrubý (hrubymar10), 2023
+# Martin Hrubý (hrubymar10), 2023-2024
 #
 
 set -e
 
-PCRE2_VERSION="10.42"
-SHA256="8d36cd8cb6ea2a4c2bb358ff6411b0c788633a2a45dabbf1aeb4b701d1b5e840"
+PCRE2_VERSION="10.44"
+SHA256="d34f02e113cf7193a1ebf2770d3ac527088d485d4e047ed10e5d217c6ef5de96"
 
 starttimestamp=$(date +%s)
 
@@ -23,6 +23,12 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
+check_pkg_config
+
+if ! is_apple_silicon_mac; then
+  echo "Error: PCRE2 requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
 
 cd "${SOURCES_PATH}"
 rm -rf "pcre2"*
