@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # cairo_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-CAIRO_VERSION="1.18.0"
-SHA256="243a0736b978a33dee29f9cca7521733b78a65b5418206fef7bd1c3d4cf10b64"
+CAIRO_VERSION="1.18.2"
+SHA256="a62b9bb42425e844cc3d6ddde043ff39dbabedd1542eba57a2eb79f85889d45a"
 
 starttimestamp=$(date +%s)
 
@@ -29,6 +29,12 @@ check_freetype
 check_libpng
 check_libffi
 check_glib
+check_pkg_config
+
+if ! is_apple_silicon_mac; then
+  echo "Error: Cairo requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
 
 cd "${SOURCES_PATH}"
 rm -rf "cairo"*
