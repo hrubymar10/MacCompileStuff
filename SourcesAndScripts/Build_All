@@ -28,6 +28,7 @@ SCRIPTS=(
   "freetype"
   "libwebp"
   "SDL2"
+  "libwebp" # Build again with SDL2 support
   "gettext"
   "pixman"
   "fontconfig"
