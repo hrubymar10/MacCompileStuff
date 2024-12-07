@@ -194,10 +194,14 @@ T float_next_imp(const T& val, const std::true_type&, const Policy& pol)
 
    int fpclass = (boost::math::fpclassify)(val);
 
-   if((fpclass == (int)FP_NAN) || (fpclass == (int)FP_INFINITE))
+   if (fpclass == (int)FP_INFINITE)
    {
-      if(val < 0)
+      if (val < 0)
          return -tools::max_value<T>();
+      return val;  // +INF
+   }
+   else if (fpclass == (int)FP_NAN)
+   {
       return policies::raise_domain_error<T>(
          function,
          "Argument must be finite, but got %1%", val, pol);
@@ -243,10 +247,14 @@ T float_next_imp(const T& val, const std::false_type&, const Policy& pol)
 
    int fpclass = (boost::math::fpclassify)(val);
 
-   if((fpclass == (int)FP_NAN) || (fpclass == (int)FP_INFINITE))
+   if (fpclass == (int)FP_INFINITE)
    {
-      if(val < 0)
+      if (val < 0)
          return -tools::max_value<T>();
+      return val;  // +INF
+   }
+   else if (fpclass == (int)FP_NAN)
+   {
       return policies::raise_domain_error<T>(
          function,
          "Argument must be finite, but got %1%", val, pol);
@@ -328,10 +336,14 @@ T float_prior_imp(const T& val, const std::true_type&, const Policy& pol)
 
    int fpclass = (boost::math::fpclassify)(val);
 
-   if((fpclass == (int)FP_NAN) || (fpclass == (int)FP_INFINITE))
+   if (fpclass == (int)FP_INFINITE)
    {
-      if(val > 0)
+      if (val > 0)
          return tools::max_value<T>();
+      return val; // -INF
+   }
+   else if (fpclass == (int)FP_NAN)
+   {
       return policies::raise_domain_error<T>(
          function,
          "Argument must be finite, but got %1%", val, pol);
@@ -378,10 +390,14 @@ T float_prior_imp(const T& val, const std::false_type&, const Policy& pol)
 
    int fpclass = (boost::math::fpclassify)(val);
 
-   if((fpclass == (int)FP_NAN) || (fpclass == (int)FP_INFINITE))
+   if (fpclass == (int)FP_INFINITE)
    {
-      if(val > 0)
+      if (val > 0)
          return tools::max_value<T>();
+      return val; // -INF
+   }
+   else if (fpclass == (int)FP_NAN)
+   {
       return policies::raise_domain_error<T>(
          function,
          "Argument must be finite, but got %1%", val, pol);
@@ -694,9 +710,9 @@ inline typename tools::promote_args<T, U>::type float_distance(const T& a, const
          && !std::numeric_limits<T>::is_integer && !std::numeric_limits<U>::is_integer)),
       "Float distance between two different floating point types is undefined.");
 
-   BOOST_IF_CONSTEXPR (!std::is_same<T, U>::value)
+   BOOST_MATH_IF_CONSTEXPR (!std::is_same<T, U>::value)
    {
-      BOOST_IF_CONSTEXPR(std::is_integral<T>::value)
+      BOOST_MATH_IF_CONSTEXPR(std::is_integral<T>::value)
       {
          return float_distance(static_cast<U>(a), b, pol);
       }

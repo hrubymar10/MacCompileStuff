@@ -13,10 +13,13 @@
 #include <boost/process/v2/detail/config.hpp>
 #include <boost/process/v2/cstring_ref.hpp>
 #include <boost/process/v2/detail/utf8.hpp>
+
 #include <boost/type_traits.hpp>
+
 #include <functional>
 #include <memory>
 #include <numeric>
+#include <vector>
 
 #if !defined(GENERATING_DOCUMENTATION)
 #if defined(BOOST_PROCESS_V2_WINDOWS)
@@ -1884,13 +1887,5 @@ struct hash<BOOST_PROCESS_V2_NAMESPACE::environment::key_value_pair>
 
 }
 
-
-
-#if defined(BOOST_PROCESS_V2_HEADER_ONLY)
-
-#include <boost/process/v2/impl/environment.ipp>
-#include <boost/process/v2/detail/impl/environment.ipp>
-
-#endif
 
 #endif //BOOST_PROCESS_V2_ENVIRONMENT_HPP

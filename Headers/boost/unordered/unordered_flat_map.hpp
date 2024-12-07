@@ -14,12 +14,12 @@
 #include <boost/unordered/detail/foa/flat_map_types.hpp>
 #include <boost/unordered/detail/foa/table.hpp>
 #include <boost/unordered/detail/serialize_container.hpp>
+#include <boost/unordered/detail/throw_exception.hpp>
 #include <boost/unordered/detail/type_traits.hpp>
 #include <boost/unordered/unordered_flat_map_fwd.hpp>
 
 #include <boost/core/allocator_access.hpp>
 #include <boost/container_hash/hash.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <initializer_list>
 #include <iterator>
@@ -75,6 +75,10 @@ namespace boost {
         typename boost::allocator_const_pointer<allocator_type>::type;
       using iterator = typename table_type::iterator;
       using const_iterator = typename table_type::const_iterator;
+
+#if defined(BOOST_UNORDERED_ENABLE_STATS)
+      using stats = typename table_type::stats;
+#endif
 
       unordered_flat_map() : unordered_flat_map(0) {}
 
@@ -459,8 +463,8 @@ namespace boost {
         // TODO: someday refactor this to conditionally serialize the key and
         // include it in the error message
         //
-        boost::throw_exception(
-          std::out_of_range("key was not found in unordered_flat_map"));
+        boost::unordered::detail::throw_out_of_range(
+          "key was not found in unordered_flat_map");
       }
 
       mapped_type const& at(key_type const& key) const
@@ -469,8 +473,8 @@ namespace boost {
         if (pos != table_.end()) {
           return pos->second;
         }
-        boost::throw_exception(
-          std::out_of_range("key was not found in unordered_flat_map"));
+        boost::unordered::detail::throw_out_of_range(
+          "key was not found in unordered_flat_map");
       }
 
       template <class K>
@@ -483,8 +487,8 @@ namespace boost {
         if (pos != table_.end()) {
           return pos->second;
         }
-        boost::throw_exception(
-          std::out_of_range("key was not found in unordered_flat_map"));
+        boost::unordered::detail::throw_out_of_range(
+          "key was not found in unordered_flat_map");
       }
 
       template <class K>
@@ -497,8 +501,8 @@ namespace boost {
         if (pos != table_.end()) {
           return pos->second;
         }
-        boost::throw_exception(
-          std::out_of_range("key was not found in unordered_flat_map"));
+        boost::unordered::detail::throw_out_of_range(
+          "key was not found in unordered_flat_map");
       }
 
       BOOST_FORCEINLINE mapped_type& operator[](key_type const& key)
@@ -653,6 +657,14 @@ namespace boost {
       void rehash(size_type n) { table_.rehash(n); }
 
       void reserve(size_type n) { table_.reserve(n); }
+
+#if defined(BOOST_UNORDERED_ENABLE_STATS)
+      /// Stats
+      ///
+      stats get_stats() const { return table_.get_stats(); }
+
+      void reset_stats() noexcept { table_.reset_stats(); }
+#endif
 
       /// Observers
       ///

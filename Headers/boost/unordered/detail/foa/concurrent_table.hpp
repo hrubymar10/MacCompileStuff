@@ -1,6 +1,7 @@
 /* Fast open-addressing concurrent hash table.
  *
- * Copyright 2023 Joaquin M Lopez Munoz.
+ * Copyright 2023-2024 Joaquin M Lopez Munoz.
+ * Copyright 2024 Braden Ganetsky.
  * Distributed under the Boost Software License, Version 1.0.
  * (See accompanying file LICENSE_1_0.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt)
@@ -28,6 +29,7 @@
 #include <boost/unordered/detail/foa/tuple_rotate_right.hpp>
 #include <boost/unordered/detail/serialization_version.hpp>
 #include <boost/unordered/detail/static_assert.hpp>
+#include <boost/unordered/detail/type_traits.hpp>
 #include <cstddef>
 #include <functional>
 #include <initializer_list>
@@ -257,6 +259,7 @@ struct concurrent_table_arrays:table_arrays<Value,Group,SizePolicy,Allocator>
     typename boost::allocator_pointer<group_access_allocator_type>::type;
 
   using super=table_arrays<Value,Group,SizePolicy,Allocator>;
+  using allocator_type=typename super::allocator_type;
 
   concurrent_table_arrays(const super& arrays,group_access_pointer pga):
     super{arrays},group_accesses_{pga}{}
@@ -265,12 +268,11 @@ struct concurrent_table_arrays:table_arrays<Value,Group,SizePolicy,Allocator>
     return boost::to_address(group_accesses_);
   }
 
-  static concurrent_table_arrays new_(
-    group_access_allocator_type al,std::size_t n)
+  static concurrent_table_arrays new_(allocator_type al,std::size_t n)
   {
     super x{super::new_(al,n)};
     BOOST_TRY{
-      return new_group_access(al,x);
+      return new_group_access(group_access_allocator_type(al),x);
     }
     BOOST_CATCH(...){
       super::delete_(al,x);
@@ -320,10 +322,9 @@ struct concurrent_table_arrays:table_arrays<Value,Group,SizePolicy,Allocator>
     return arrays;
   }
 
-  static void delete_(
-    group_access_allocator_type al,concurrent_table_arrays& arrays)noexcept
+  static void delete_(allocator_type al,concurrent_table_arrays& arrays)noexcept
   {
-    delete_group_access(al,arrays);
+    delete_group_access(group_access_allocator_type(al),arrays);
     super::delete_(al,arrays);
   }
 
@@ -468,6 +469,10 @@ public:
   using size_type=typename super::size_type;
   static constexpr std::size_t bulk_visit_size=16;
 
+#if defined(BOOST_UNORDERED_ENABLE_STATS)
+  using stats=typename super::stats;
+#endif
+
 private:
   template<typename Value,typename T>
   using enable_if_is_value_type=typename std::enable_if<
@@ -509,6 +514,7 @@ public:
     x.arrays=ah.release();
     x.size_ctrl.ml=x.initial_max_load();
     x.size_ctrl.size=0;
+    BOOST_UNORDERED_SWAP_STATS(this->cstats,x.cstats);
   }
 
   concurrent_table(compatible_nonconcurrent_table&& x):
@@ -680,6 +686,26 @@ public:
   BOOST_FORCEINLINE bool emplace(Args&&... args)
   {
     return construct_and_emplace(std::forward<Args>(args)...);
+  }
+
+  /* Optimization for value_type and init_type, to avoid constructing twice */
+  template<typename Value>
+  BOOST_FORCEINLINE auto emplace(Value&& x)->typename std::enable_if<
+    detail::is_similar_to_any<Value,value_type,init_type>::value,bool>::type
+  {
+    return emplace_impl(std::forward<Value>(x));
+  }
+
+  /* Optimizations for maps for (k,v) to avoid eagerly constructing value */
+  template <typename K, typename V>
+  BOOST_FORCEINLINE auto emplace(K&& k, V&& v) ->
+    typename std::enable_if<is_emplace_kv_able<concurrent_table, K>::value,
+      bool>::type
+  {
+    alloc_cted_or_fwded_key_type<type_policy, Allocator, K&&> x(
+      this->al(), std::forward<K>(k));
+    return emplace_impl(
+      try_emplace_args_t{}, x.move_or_fwd(), std::forward<V>(v));
   }
 
   BOOST_FORCEINLINE bool
@@ -944,6 +970,13 @@ public:
     super::reserve(n);
   }
 
+#if defined(BOOST_UNORDERED_ENABLE_STATS)
+  /* already thread safe */
+
+  using super::get_stats;
+  using super::reset_stats;
+#endif
+
   template<typename Predicate>
   friend std::size_t erase_if(concurrent_table& x,Predicate&& pr)
   {
@@ -1165,6 +1198,7 @@ private:
     GroupAccessMode access_mode,
     const Key& x,std::size_t pos0,std::size_t hash,F&& f)const
   {    
+    BOOST_UNORDERED_STATS_COUNTER(num_cmps);
     prober pb(pos0);
     do{
       auto pos=pb.get();
@@ -1176,19 +1210,27 @@ private:
         auto lck=access(access_mode,pos);
         do{
           auto n=unchecked_countr_zero(mask);
-          if(BOOST_LIKELY(
-            pg->is_occupied(n)&&bool(this->pred()(x,this->key_from(p[n]))))){
-            f(pg,n,p+n);
-            return 1;
+          if(BOOST_LIKELY(pg->is_occupied(n))){
+            BOOST_UNORDERED_INCREMENT_STATS_COUNTER(num_cmps);
+            if(BOOST_LIKELY(bool(this->pred()(x,this->key_from(p[n]))))){
+              f(pg,n,p+n);
+              BOOST_UNORDERED_ADD_STATS(
+                this->cstats.successful_lookup,(pb.length(),num_cmps));
+              return 1;
+            }
           }
           mask&=mask-1;
         }while(mask);
       }
       if(BOOST_LIKELY(pg->is_not_overflowed(hash))){
+        BOOST_UNORDERED_ADD_STATS(
+          this->cstats.unsuccessful_lookup,(pb.length(),num_cmps));
         return 0;
       }
     }
     while(BOOST_LIKELY(pb.next(this->arrays.groups_size_mask)));
+    BOOST_UNORDERED_ADD_STATS(
+      this->cstats.unsuccessful_lookup,(pb.length(),num_cmps));
     return 0;
   }
 
@@ -1223,6 +1265,7 @@ private:
 
     it=first;
     for(auto i=m;i--;++it){
+      BOOST_UNORDERED_STATS_COUNTER(num_cmps);
       auto          pos=positions[i];
       prober        pb(pos);
       auto          pg=this->arrays.groups()+pos;
@@ -1235,12 +1278,15 @@ private:
           auto lck=access(access_mode,pos);
           do{
             auto n=unchecked_countr_zero(mask);
-            if(BOOST_LIKELY(
-              pg->is_occupied(n)&&
-              bool(this->pred()(*it,this->key_from(p[n]))))){
-              f(cast_for(access_mode,type_policy::value_from(p[n])));
-              ++res;
-              goto next_key;
+            if(BOOST_LIKELY(pg->is_occupied(n))){
+              BOOST_UNORDERED_INCREMENT_STATS_COUNTER(num_cmps);
+              if(bool(this->pred()(*it,this->key_from(p[n])))){
+                f(cast_for(access_mode,type_policy::value_from(p[n])));
+                ++res;
+                BOOST_UNORDERED_ADD_STATS(
+                  this->cstats.successful_lookup,(pb.length(),num_cmps));
+                goto next_key;
+              }
             }
             mask&=mask-1;
           }while(mask);
@@ -1249,6 +1295,8 @@ private:
         do{
           if(BOOST_LIKELY(pg->is_not_overflowed(hashes[i]))||
              BOOST_UNLIKELY(!pb.next(this->arrays.groups_size_mask))){
+            BOOST_UNORDERED_ADD_STATS(
+              this->cstats.unsuccessful_lookup,(pb.length(),num_cmps));
             goto next_key;
           }
           pos=pb.get();
@@ -1311,7 +1359,7 @@ private:
   {
     auto lck=shared_access();
 
-    auto x=alloc_make_insert_type<type_policy>(
+    alloc_cted_insert_type<type_policy,Allocator,Args...> x(
       this->al(),std::forward<Args>(args)...);
     int res=unprotected_norehash_emplace_or_visit(
       access_mode,std::forward<F>(f),type_policy::move(x.value()));
@@ -1469,6 +1517,7 @@ private:
             this->construct_element(p,std::forward<Args>(args)...);
             rslot.commit();
             rsize.commit();
+            BOOST_UNORDERED_ADD_STATS(this->cstats.insertion,(pb.length()));
             return 1;
           }
           pg->mark_overflow(hash);

@@ -398,6 +398,11 @@ public:
 
         @throws invalid_argument if `deflateSupported == false`, and either
         `client_enable` or `server_enable` is `true`.
+
+        @note
+
+        These settings should be configured before performing the WebSocket
+        handshake.
     */
     void
     set_option(permessage_deflate const& o);
@@ -1376,7 +1381,13 @@ public:
     async_accept(
         AcceptHandler&& handler =
             net::default_completion_token_t<
-                executor_type>{});
+                executor_type>{}
+#ifndef BOOST_BEAST_DOXYGEN
+        , typename std::enable_if<
+            ! net::is_const_buffer_sequence<
+            AcceptHandler>::value>::type* = nullptr
+#endif
+    );
 
     /** Perform the WebSocket handshake asynchronously in the server role.
 
@@ -1449,6 +1460,9 @@ public:
             net::default_completion_token_t<
                 executor_type>{}
 #ifndef BOOST_BEAST_DOXYGEN
+        , typename std::enable_if<
+            net::is_const_buffer_sequence<
+            ConstBufferSequence>::value>::type* = 0
         , typename std::enable_if<
             ! http::detail::is_header<
             ConstBufferSequence>::value>::type* = 0
@@ -1639,7 +1653,8 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
-         @par Per-Operation Cancellation
+
+        @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
         net::cancellation_type values:
@@ -1649,6 +1664,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         @note `terminal` cancellation will may close the underlying socket.
@@ -1760,6 +1776,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -1770,6 +1787,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -1885,6 +1903,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -1895,6 +1914,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2063,6 +2083,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -2073,6 +2094,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2259,6 +2281,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -2269,6 +2292,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2388,6 +2412,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2477,6 +2502,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2607,6 +2633,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -2617,6 +2644,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
@@ -2756,6 +2784,7 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
+
         @par Per-Operation Cancellation
 
         This asynchronous operation supports cancellation for the following
@@ -2766,6 +2795,7 @@ public:
 
         `total` cancellation succeeds if the operation is suspended due to ongoing
         control operations such as a ping/pong.
+
         `terminal` cancellation succeeds when supported by the underlying stream.
 
         `terminal` cancellation leaves the stream in an undefined state,
