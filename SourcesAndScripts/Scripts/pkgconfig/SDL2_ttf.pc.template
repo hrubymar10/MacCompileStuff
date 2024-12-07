@@ -1,0 +1,13 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: SDL2_ttf
+Description: ttf library for Simple DirectMedia Layer with FreeType 2 support
+Version: VERSION
+Requires: sdl2 >= 2.0.10
+Libs: -L${libdir} -lSDL2_ttf
+Cflags: -I${includedir}/SDL2
+Requires.private: harfbuzz freetype2
+Libs.private:

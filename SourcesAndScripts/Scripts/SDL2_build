@@ -14,8 +14,8 @@ SDL2_MIXER_VERSION="2.8.0"
 SDL2_MIXER_SHA256="1cfb34c87b26dbdbc7afd68c4f545c0116ab5f90bbfecc5aebe2a9cb4bb31549"
 SDL2_NET_VERSION="2.2.0"
 SDL2_NET_SHA256="4e4a891988316271974ff4e9585ed1ef729a123d22c08bd473129179dc857feb"
-SDL2_TTF_VERSION="2.20.2"
-SDL2_TTF_SHA256="9dc71ed93487521b107a2c4a9ca6bf43fb62f6bddd5c26b055e6b91418a22053"
+SDL2_TTF_VERSION="2.22.0"
+SDL2_TTF_SHA256="d48cbd1ce475b9e178206bf3b72d56b66d84d44f64ac05803328396234d67723"
 
 starttimestamp=$(date +%s)
 
@@ -269,6 +269,7 @@ generate_pkgconfig_file "sdl2" "${SDL2_VERSION}"
 generate_pkgconfig_file "SDL2_image" "${SDL2_IMAGE_VERSION}"
 generate_pkgconfig_file "SDL2_mixer" "${SDL2_MIXER_VERSION}"
 generate_pkgconfig_file "SDL2_net" "${SDL2_NET_VERSION}"
+generate_pkgconfig_file "SDL2_ttf" "${SDL2_TTF_VERSION}"
 
 echo "==> DONE ..."
 echo ""
