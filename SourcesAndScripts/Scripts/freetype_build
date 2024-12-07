@@ -6,8 +6,8 @@
 
 set -e
 
-FREETYPE_VERSION="2.13.2"
-SHA256="12991c4e55c506dd7f9b765933e62fd2be2e06d421505d7950a132e4f1bb484d"
+FREETYPE_VERSION="2.13.3"
+SHA256="0550350666d427c74daeb85d5ac7bb353acba5f76956395995311a9c6f063289"
 
 starttimestamp=$(date +%s)
 
@@ -24,6 +24,7 @@ source "${MY_PATH}/functions"
 
 check_wget
 check_libpng
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf "freetype"*
