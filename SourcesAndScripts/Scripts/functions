@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # functions
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
@@ -119,15 +119,23 @@ check_pcre2() {
 }
 
 check_meson() {
-  if ! [ -x "$(command -v meson)" ]; then
-    echo 'Error: meson is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "/opt/homebrew/bin/meson" ]; then
+    echo 'Error: meson for arm64 is not installed in expected path /opt/homebrew/bin/meson. Use for example Homebrew and install it. See https://brew.sh/' >&2
+    exit 1
+  fi
+  if ! [ -f "/opt/homebrew_x86_64/bin/meson" ]; then
+    echo 'Error: meson for x86_64 is not installed in expected path /opt/homebrew_x86_64/bin/meson. Use for example Homebrew and install it. See https://brew.sh/' >&2
     exit 1
   fi
 }
 
 check_ninja() {
-  if ! [ -x "$(command -v ninja)" ]; then
-    echo 'Error: ninja is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+  if ! [ -f "/opt/homebrew/bin/ninja" ]; then
+    echo 'Error: ninja for arm64 is not installed in expected path /opt/homebrew/bin/ninja. Use for example Homebrew and install it. See https://brew.sh/' >&2
+    exit 1
+  fi
+  if ! [ -f "/opt/homebrew_x86_64/bin/ninja" ]; then
+    echo 'Error: ninja for x86_64 is not installed in expected path /opt/homebrew_x86_64/bin/ninja. Use for example Homebrew and install it. See https://brew.sh/' >&2
     exit 1
   fi
 }
@@ -142,6 +150,20 @@ check_cmake() {
 check_gsed() {
   if ! [ -x "$(command -v gsed)" ]; then
     echo 'Error: gnu-sed (gsed) is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+    exit 1
+  fi
+}
+
+check_pkg_config() {
+  if ! [ -x "$(command -v pkg-config)" ]; then
+    echo 'Error: pkg-config is not installed. Use for example Homebrew and install it. See https://brew.sh/' >&2
+    exit 1
+  fi
+}
+
+check_sdl2_sources() {
+  if ! [ -d "${SOURCES_PATH}/SDL2/SDL" ]; then
+    echo 'Error: SDL2 sources are not prepared. You must build SDL2 first.' >&2
     exit 1
   fi
 }

@@ -1,0 +1,11 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: VERSION
+Libs: -L${libdir} -lcrypto
+Libs.private:
+Cflags: -I${includedir}

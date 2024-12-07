@@ -1,0 +1,12 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: ogg
+Description: ogg is a library for manipulating ogg bitstreams
+Version: VERSION
+Requires:
+Conflicts:
+Libs: -L${libdir} -logg
+Cflags: -I${includedir}

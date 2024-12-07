@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # graphite2_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
@@ -24,6 +24,7 @@ source "${MY_PATH}/functions"
 
 check_wget
 check_cmake
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf "graphite2"*

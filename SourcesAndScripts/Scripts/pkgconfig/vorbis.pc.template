@@ -1,0 +1,13 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: vorbis
+Description: vorbis is the primary Ogg Vorbis library
+Version: VERSION
+Requires.private: ogg
+Conflicts:
+Libs: -L${libdir} -lvorbis
+Libs.private: -lm
+Cflags: -I${includedir}

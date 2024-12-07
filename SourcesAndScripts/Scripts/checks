@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # checks
-# Martin Hrubý (hrubymar10), 2020-2023
+# Martin Hrubý (hrubymar10), 2020-2024
 #
 
 set -e

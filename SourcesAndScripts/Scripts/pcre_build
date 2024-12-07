@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # pcre_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
@@ -26,6 +26,12 @@ check_wget
 check_gettext
 check_fontconfig
 check_freetype
+check_pkg_config
+
+if ! is_apple_silicon_mac; then
+  echo "Error: PCRE requires Apple Silicon mac to build universal libs" >&2
+  exit 1
+fi
 
 cd "${SOURCES_PATH}"
 rm -rf "pcre"*

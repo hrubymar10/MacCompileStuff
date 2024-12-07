@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # openssl_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
@@ -23,6 +23,7 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf openssl*
@@ -70,6 +71,9 @@ cp -rf "${SOURCES_PATH}/openssl/include/openssl/"*".h" "${HEADERS_PATH}/openssl/
 mv "${HEADERS_PATH}/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_x86_64.h"
 cp "${SOURCES_PATH}/openssl-${OPENSSL_VERSION}-arm64/include/openssl/opensslconf.h" "${HEADERS_PATH}/openssl/opensslconf_arm64.h"
 printf "#ifdef __x86_64__\n#include \"opensslconf_x86_64.h\"\n#else\n#include \"opensslconf_arm64.h\"\n#endif\n" > "${HEADERS_PATH}/openssl/opensslconf.h"
+generate_pkgconfig_file "openssl" "${OPENSSL_VERSION}"
+generate_pkgconfig_file "libcrypto" "${OPENSSL_VERSION}"
+generate_pkgconfig_file "libssl" "${OPENSSL_VERSION}"
 echo "==> DONE ..."
 echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"

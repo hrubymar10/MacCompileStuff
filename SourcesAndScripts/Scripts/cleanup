@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# cleanup
+# Martin Hrubý (hrubymar10), 2024
+#
+
+set -e
+
+MY_PATH=$(cd `dirname ${0}` && pwd)
+if [ -z "${MY_PATH}" ] ; then
+  # error; for some reason, the path is not accessible
+  # to the script (e.g. permissions re-evaled after suid)
+  echo 'Error: Script path is for some reason not accessible' >&2
+  exit 1  # fail
+fi
+
+source "${MY_PATH}/env"
+
+cleanup_headers() {
+  echo "==> Cleaning headers"
+  rm -rf "${HEADERS_PATH}/"*
+  echo "==> Done"
+  echo ""
+}
+
+cleanup_libs() {
+  echo "==> Cleaning libs"
+  rm -rf "${LIBS_PATH}/"*
+  echo "==> Done"
+  echo ""
+}
+
+cleanup_pkgconfig() {
+  echo "==> Cleaning pkgconfig"
+  rm -rf "${PKG_CONFIG_PATH}/"*.pc
+  echo "==> Done"
+  echo ""
+}
+
+cleanup_sources() {
+  echo "==> Cleaning sources"
+  find "${SOURCES_PATH}" -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -not -name "archives" -not -name ".gitkeep" -exec rm -rf {} \;
+  echo "==> Done"
+  echo ""
+}
+
+cleanup_headers
+cleanup_libs
+cleanup_pkgconfig
+cleanup_sources

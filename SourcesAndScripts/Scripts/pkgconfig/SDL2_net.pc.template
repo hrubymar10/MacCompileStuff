@@ -1,0 +1,13 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: SDL2_net
+Description: net library for Simple DirectMedia Layer
+Version: VERSION
+Requires: sdl2 >= 2.0.4
+Libs: -L${libdir} -lSDL2_net
+Libs.private:
+#Libs: -L${libdir} -lSDL2_net
+Cflags: -I${includedir}/SDL2

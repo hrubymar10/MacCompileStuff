@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # SDL2_build
-# Martin Hrubý (hrubymar10), 2019-2023
+# Martin Hrubý (hrubymar10), 2019-2024
 #
 
 set -e
@@ -33,6 +33,7 @@ source "${MY_PATH}/functions"
 check_wget
 check_freetype
 check_libwebp
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf "SDL2"
@@ -197,6 +198,8 @@ lipo -create "${SOURCES_PATH}/SDL2/SDL2_ttf-${SDL2_TTF_VERSION}-arm64/.libs/libS
 install_name_tool -id "@rpath/libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf-2.0.0.dylib"
 ln -s "libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h"
+
+generate_pkgconfig_file "SDL2_net" "${SDL2_NET_VERSION}"
 
 echo "==> DONE ..."
 echo ""

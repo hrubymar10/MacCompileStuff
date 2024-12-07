@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # libogg_build
-# Martin Hrubý (hrubymar10), 2019-2023
+# Martin Hrubý (hrubymar10), 2019-2024
 #
 
 set -e
@@ -23,6 +23,7 @@ source "${MY_PATH}/env"
 source "${MY_PATH}/functions"
 
 check_wget
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf "libogg"*
@@ -60,6 +61,6 @@ ln -s "libogg.0.dylib" "${LIBS_PATH}/libogg.dylib"
 rm -rf "${HEADERS_PATH}/ogg"
 mkdir "${HEADERS_PATH}/ogg"
 cp -rf "${SOURCES_PATH}/libogg/include/ogg/"*.h "${HEADERS_PATH}/ogg/"
-cd "${SOURCES_PATH}/libogg"
+generate_pkgconfig_file "ogg" "${LIBOGG_VERSION}"
 echo "==> DONE ..."
 echo ""
