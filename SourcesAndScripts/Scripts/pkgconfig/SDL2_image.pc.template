@@ -1,0 +1,13 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: SDL2_image
+Description: image loading library for Simple DirectMedia Layer
+Version: VERSION
+Requires: sdl2 >= 2.0.9
+Libs: -L${libdir} -lSDL2_image
+Requires.private: libpng libjxl libjpeg libtiff-4 libavif libwebpdemux libwebp 
+Libs.private:
+Cflags: -I${includedir}/SDL2

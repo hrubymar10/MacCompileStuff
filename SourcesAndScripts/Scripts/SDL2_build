@@ -8,8 +8,8 @@ set -e
 
 SDL2_VERSION="2.30.10"
 SDL2_SHA256="f59adf36a0fcf4c94198e7d3d776c1b3824211ab7aeebeb31fe19836661196aa"
-SDL2_IMAGE_VERSION="2.8.1"
-SDL2_IMAGE_SHA256="e4cab9a58c347a490c46723c17553b4e12233cd821d3b993a8475a50497f5a3e"
+SDL2_IMAGE_VERSION="2.8.2"
+SDL2_IMAGE_SHA256="8f486bbfbcf8464dd58c9e5d93394ab0255ce68b51c5a966a918244820a76ddc"
 SDL2_MIXER_VERSION="2.6.3"
 SDL2_MIXER_SHA256="7a6ba86a478648ce617e3a5e9277181bc67f7ce9876605eea6affd4a0d6eea8f"
 SDL2_NET_VERSION="2.2.0"
@@ -200,6 +200,7 @@ ln -s "libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h"
 
 generate_pkgconfig_file "sdl2" "${SDL2_VERSION}"
+generate_pkgconfig_file "SDL2_image" "${SDL2_IMAGE_VERSION}"
 generate_pkgconfig_file "SDL2_net" "${SDL2_NET_VERSION}"
 
 echo "==> DONE ..."
