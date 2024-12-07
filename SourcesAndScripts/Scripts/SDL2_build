@@ -6,8 +6,8 @@
 
 set -e
 
-SDL2_VERSION="2.28.5"
-SDL2_SHA256="332cb37d0be20cb9541739c61f79bae5a477427d79ae85e352089afdaf6666e4"
+SDL2_VERSION="2.30.10"
+SDL2_SHA256="f59adf36a0fcf4c94198e7d3d776c1b3824211ab7aeebeb31fe19836661196aa"
 SDL2_IMAGE_VERSION="2.8.1"
 SDL2_IMAGE_SHA256="e4cab9a58c347a490c46723c17553b4e12233cd821d3b993a8475a50497f5a3e"
 SDL2_MIXER_VERSION="2.6.3"
@@ -40,7 +40,7 @@ rm -rf "SDL2"
 mkdir "SDL2"
 cd "SDL2"
 
-get_src_and_verify_checksum "SDL2-${SDL2_VERSION}.tar.gz" "${SDL2_SHA256}" "https://libsdl.org/release/SDL2-${SDL2_VERSION}.tar.gz"
+get_src_and_verify_checksum "SDL2-${SDL2_VERSION}.tar.gz" "${SDL2_SHA256}" "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VERSION}/SDL2-${SDL2_VERSION}.tar.gz"
 tar xf "${SOURCES_PATH}/archives/SDL2-${SDL2_VERSION}.tar.gz" -C .
 cp -R "SDL2-${SDL2_VERSION}" "SDL2-${SDL2_VERSION}-arm64"
 mv "SDL2-${SDL2_VERSION}" "SDL2-${SDL2_VERSION}-x86_64"
@@ -199,6 +199,7 @@ install_name_tool -id "@rpath/libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf
 ln -s "libSDL2_ttf-2.0.0.dylib" "${LIBS_PATH}/libSDL2_ttf.dylib"
 cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h"
 
+generate_pkgconfig_file "sdl2" "${SDL2_VERSION}"
 generate_pkgconfig_file "SDL2_net" "${SDL2_NET_VERSION}"
 
 echo "==> DONE ..."
