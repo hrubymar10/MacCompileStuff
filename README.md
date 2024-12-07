@@ -32,6 +32,6 @@ MacCompileStuff is bundle of precompiled universal libraries for The Battle for 
 * **Pixman** 0.44.2
 * **SDL2** 2.30.10
 * **SDL2_image** 2.8.2
-* **SDL2_mixer** 2.6.3
+* **SDL2_mixer** 2.8.0
 * **SDL2_net** 2.2.0
 * **SDL2_ttf** 2.20.2

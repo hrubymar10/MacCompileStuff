@@ -1,0 +1,13 @@
+prefix=PATH
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/Headers
+
+Name: SDL2_mixer
+Description: mixer library for Simple DirectMedia Layer
+Version: VERSION
+Requires: sdl2 >= 2.0.9
+Libs: -L${libdir} -lSDL2_mixer
+Cflags: -I${includedir}/SDL2
+Requires.private:  libxmp fluidsynth libgme vorbisfile flac libmpg123 opusfile wavpack
+Libs.private:

@@ -10,8 +10,8 @@ SDL2_VERSION="2.30.10"
 SDL2_SHA256="f59adf36a0fcf4c94198e7d3d776c1b3824211ab7aeebeb31fe19836661196aa"
 SDL2_IMAGE_VERSION="2.8.2"
 SDL2_IMAGE_SHA256="8f486bbfbcf8464dd58c9e5d93394ab0255ce68b51c5a966a918244820a76ddc"
-SDL2_MIXER_VERSION="2.6.3"
-SDL2_MIXER_SHA256="7a6ba86a478648ce617e3a5e9277181bc67f7ce9876605eea6affd4a0d6eea8f"
+SDL2_MIXER_VERSION="2.8.0"
+SDL2_MIXER_SHA256="1cfb34c87b26dbdbc7afd68c4f545c0116ab5f90bbfecc5aebe2a9cb4bb31549"
 SDL2_NET_VERSION="2.2.0"
 SDL2_NET_SHA256="4e4a891988316271974ff4e9585ed1ef729a123d22c08bd473129179dc857feb"
 SDL2_TTF_VERSION="2.20.2"
@@ -121,7 +121,40 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64}"
 export CXXFLAGS="${CXXFLAGS_X86_64}"
-./configure --disable-dependency-tracking --enable-shared --disable-music-flac --disable-music-flac-shared --disable-music-midi-fluidsynth --disable-music-midi-fluidsynth-shared --disable-music-mod-mikmod-shared --disable-music-mod-modplug-shared --disable-music-mp3-mpg123 --disable-music-mp3-mpg123-shared --disable-music-mod-mikmod --disable-music-mod-modplug --enable-music-ogg --enable-music-ogg-shared --host=x86_64-apple-darwin
+./configure \
+  --disable-dependency-tracking \
+  --enable-shared \
+  --disable-music-flac \
+  --disable-music-flac-drflac \
+  --disable-music-flac-libflac \
+  --disable-music-flac-libflac-shared \
+  --disable-music-gme \
+  --disable-music-gme-shared \
+  --disable-music-midi \
+  --disable-music-midi-fluidsynth \
+  --disable-music-midi-fluidsynth-shared \
+  --disable-music-midi-native \
+  --disable-music-midi-timidity \
+  --disable-music-mod \
+  --disable-music-mod-modplug \
+  --disable-music-mod-xmp \
+  --disable-music-mod-xmp-shared \
+  --disable-music-mp3 \
+  --disable-music-mp3-minimp3 \
+  --disable-music-mp3-mpg123 \
+  --disable-music-mp3-mpg123-shared \
+  --disable-music-ogg-stb \
+  --disable-music-ogg-tremor \
+  --disable-music-opus \
+  --disable-music-opus-shared \
+  --disable-music-wave \
+  --disable-music-wavpack \
+  --disable-music-wavpack-dsd \
+  --disable-music-wavpack-shared \
+  --enable-music-ogg \
+  --enable-music-ogg-vorbis \
+  --enable-music-ogg-vorbis-shared \
+  --host=x86_64-apple-darwin
 make
 # Build arm64
 cd "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-arm64"
@@ -129,7 +162,40 @@ source "${MY_PATH}/env"
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64}"
 export CXXFLAGS="${CXXFLAGS_ARM64}"
-./configure --disable-dependency-tracking --enable-shared --disable-music-flac --disable-music-flac-shared --disable-music-midi-fluidsynth --disable-music-midi-fluidsynth-shared --disable-music-mod-mikmod-shared --disable-music-mod-modplug-shared --disable-music-mp3-mpg123 --disable-music-mp3-mpg123-shared --disable-music-mod-mikmod --disable-music-mod-modplug --enable-music-ogg --enable-music-ogg-shared --host=aarch64-apple-darwin
+./configure \
+  --disable-dependency-tracking \
+  --enable-shared \
+  --disable-music-flac \
+  --disable-music-flac-drflac \
+  --disable-music-flac-libflac \
+  --disable-music-flac-libflac-shared \
+  --disable-music-gme \
+  --disable-music-gme-shared \
+  --disable-music-midi \
+  --disable-music-midi-fluidsynth \
+  --disable-music-midi-fluidsynth-shared \
+  --disable-music-midi-native \
+  --disable-music-midi-timidity \
+  --disable-music-mod \
+  --disable-music-mod-modplug \
+  --disable-music-mod-xmp \
+  --disable-music-mod-xmp-shared \
+  --disable-music-mp3 \
+  --disable-music-mp3-minimp3 \
+  --disable-music-mp3-mpg123 \
+  --disable-music-mp3-mpg123-shared \
+  --disable-music-ogg-stb \
+  --disable-music-ogg-tremor \
+  --disable-music-opus \
+  --disable-music-opus-shared \
+  --disable-music-wave \
+  --disable-music-wavpack \
+  --disable-music-wavpack-dsd \
+  --disable-music-wavpack-shared \
+  --enable-music-ogg \
+  --enable-music-ogg-vorbis \
+  --enable-music-ogg-vorbis-shared \
+  --host=aarch64-apple-darwin
 make
 rm -rf "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib" "${LIBS_PATH}/libSDL2_mixer.dylib"
 lipo -create "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-arm64/build/.libs/libSDL2_mixer-2.0.0.dylib" "${SOURCES_PATH}/SDL2/SDL2_mixer-${SDL2_MIXER_VERSION}-x86_64/build/.libs/libSDL2_mixer-2.0.0.dylib" -output "${LIBS_PATH}/libSDL2_mixer-2.0.0.dylib"
@@ -201,6 +267,7 @@ cp -rf "${SOURCES_PATH}/SDL2/SDL2_ttf/SDL_ttf.h" "${HEADERS_PATH}/SDL2/SDL_ttf.h
 
 generate_pkgconfig_file "sdl2" "${SDL2_VERSION}"
 generate_pkgconfig_file "SDL2_image" "${SDL2_IMAGE_VERSION}"
+generate_pkgconfig_file "SDL2_mixer" "${SDL2_MIXER_VERSION}"
 generate_pkgconfig_file "SDL2_net" "${SDL2_NET_VERSION}"
 
 echo "==> DONE ..."
