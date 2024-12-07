@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # glib_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-GLIB_VERSION="2.78.3"
-GLIB_VERSION_SHORT="2.78"
-SHA256="609801dd373796e515972bf95fc0b2daa44545481ee2f465c4f204d224b2bc21"
+GLIB_VERSION="2.83.0"
+GLIB_VERSION_SHORT="2.83"
+SHA256="a07d9e1a57a4279c5ece71c26dc44eea12bd518ea9ff695d53e722997032b614"
 
 starttimestamp=$(date +%s)
 
@@ -29,9 +29,10 @@ check_ninja
 check_pcre2
 check_libffi
 check_gettext
+check_pkg_config
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Glib requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
@@ -50,9 +51,8 @@ unset MACOSX_DEPLOYMENT_TARGET
 export LDFLAGS="${LDFLAGS_X86_64}"
 export CFLAGS="${CFLAGS_X86_64} -Wno-implicit-function-declaration"
 export CXXFLAGS="${CXXFLAGS_X86_64} -Wno-implicit-function-declaration"
-patch -b -p0 < "${SCRIPTS_PATH}/glib.patch"
 mkdir -p "build/glib"
-arch -x86_64 /opt/homebrew_x86_64/bin/meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false --default-library=shared --buildtype=release . "build"
+arch -x86_64 /opt/homebrew_x86_64/bin/meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false -Dtests=false -Dinstalled_tests=false --default-library=shared --buildtype=release . "build"
 cd "build/glib"
 ln -s "${LIBS_PATH}/libpcre2-8.0.dylib" "libpcre2-8.dylib"
 ln -s "${LIBS_PATH}/libintl.8.dylib"
@@ -66,9 +66,8 @@ unset MACOSX_DEPLOYMENT_TARGET
 export LDFLAGS="${LDFLAGS_ARM64}"
 export CFLAGS="${CFLAGS_ARM64} -Wno-implicit-function-declaration"
 export CXXFLAGS="${CXXFLAGS_ARM64} -Wno-implicit-function-declaration"
-patch -b -p0 < "${SCRIPTS_PATH}/glib.patch"
 mkdir -p "build/glib"
-arch -arm64 /opt/homebrew/bin/meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false --default-library=shared --buildtype=release . "build"
+arch -arm64 /opt/homebrew/bin/meson setup --wrap-mode=nofallback -Dbsymbolic_functions=false -Ddtrace=false -Dtests=false -Dinstalled_tests=false --default-library=shared --buildtype=release . "build"
 cd "build/glib"
 ln -s "${LIBS_PATH}/libpcre2-8.0.dylib" "libpcre2-8.dylib"
 ln -s "${LIBS_PATH}/libintl.8.dylib"
