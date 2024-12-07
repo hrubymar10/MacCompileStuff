@@ -1,6 +1,6 @@
---- pango/pangocoretext-fontmap.c	2024-03-23 19:38:01
-+++ pango/pangocoretext-fontmap.c	2024-03-23 19:39:06
-@@ -1585,13 +1585,6 @@
+--- pango/pangocoretext-fontmap.c	2024-09-22 16:26:09
++++ pango/pangocoretext-fontmap.c	2024-09-22 16:28:29
+@@ -1641,13 +1641,6 @@
  G_DEFINE_TYPE (PangoCoreTextFontset,
                 pango_core_text_fontset,
                 PANGO_TYPE_FONTSET);
@@ -14,7 +14,7 @@
  
  static PangoCoreTextFontset *
  pango_core_text_fontset_new (PangoCoreTextFontsetKey    *key,
-@@ -1654,7 +1647,6 @@
+@@ -1710,7 +1703,6 @@
    fontset->real_font_count = fontset->fonts->len;
  
    /* Add the cascade list for this language */
@@ -22,7 +22,7 @@
      {
        CFArrayRef language_pref_list = NULL;
        CFStringRef languages[1];
-@@ -1678,12 +1670,6 @@
+@@ -1734,12 +1726,6 @@
            CFRelease (language_pref_list);
          }
      }

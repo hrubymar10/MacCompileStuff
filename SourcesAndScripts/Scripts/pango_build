@@ -6,9 +6,9 @@
 
 set -e
 
-PANGO_VERSION="1.51.0"
-PANGO_VERSION_SHORT="1.51"
-SHA256="74efc109ae6f903bbe6af77eaa2ac6094b8ee245a2e23f132a7a8f0862d1a9f5"
+PANGO_VERSION="1.55.0"
+PANGO_VERSION_SHORT="1.55"
+SHA256="a2c17a8dc459a7267b8b167bb149d23ff473b6ff9d5972bee047807ee2220ccf"
 
 starttimestamp=$(date +%s)
 
@@ -35,9 +35,10 @@ check_freetype
 check_fribidi
 check_meson
 check_ninja
+check_pkg_config
 
-if ! [ is_apple_silicon_mac ]; then
-  echo "Error: Boost requires Apple Silicon mac to build universal libs" >&2
+if ! is_apple_silicon_mac; then
+  echo "Error: Pango requires Apple Silicon mac to build universal libs" >&2
   exit 1
 fi
 
@@ -92,6 +93,11 @@ cp "${SOURCES_PATH}/pango/build/pango/pango-enum-types.h" "${HEADERS_PATH}/pango
 cp "${SOURCES_PATH}/pango/build/pango/pango-features.h" "${HEADERS_PATH}/pango/"
 cd "${SOURCES_PATH}/pango/pango"
 cp "pango-attributes.h" "pango-bidi-type.h" "pango-break.h" "pango-color.h" "pango-context.h" "pango-coverage.h" "pango-engine.h" "pango-font.h" "pango-fontmap.h" "pango-fontset.h" "pango-fontset-simple.h" "pango-glyph-item.h" "pango-glyph.h" "pango-gravity.h" "pango-item.h" "pango-language.h" "pango-layout.h" "pango-markup.h" "pango-matrix.h" "pango-modules.h" "pango-ot.h" "pango-renderer.h" "pango-script.h" "pango-tabs.h" "pango-types.h" "pango-utils.h" "pango.h" "pangocairo.h" "pangofc-decoder.h" "pangofc-font.h" "pangofc-fontmap.h" "pangoft2.h" "pangoxft-render.h" "pangoxft.h" "pango-version-macros.h" "pango-direction.h" "${HEADERS_PATH}/pango/"
+generate_pkgconfig_file "pango" "${PANGO_VERSION}"
+generate_pkgconfig_file "pangocairo" "${PANGO_VERSION}"
+generate_pkgconfig_file "pangofc" "${PANGO_VERSION}"
+generate_pkgconfig_file "pangoft2" "${PANGO_VERSION}"
+generate_pkgconfig_file "pangoot" "${PANGO_VERSION}"
 echo "==> DONE ..."
 echo ""
 time_interval_to_string "${starttimestamp}" "$(date +%s)"
