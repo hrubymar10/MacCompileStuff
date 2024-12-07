@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
 # fontconfig_build
-# Martin Hrubý (hrubymar10), 2018-2023
+# Martin Hrubý (hrubymar10), 2018-2024
 #
 
 set -e
 
-FONTCONFIG_VERSION="2.14.2"
-SHA256="dba695b57bce15023d2ceedef82062c2b925e51f5d4cc4aef736cf13f60a468b"
+FONTCONFIG_VERSION="2.15.0"
+SHA256="63a0658d0e06e0fa886106452b58ef04f21f58202ea02a94c39de0d3335d7c0e"
 
 starttimestamp=$(date +%s)
 
@@ -24,6 +24,7 @@ source "${MY_PATH}/functions"
 
 check_wget
 check_freetype
+check_pkg_config
 
 cd "${SOURCES_PATH}"
 rm -rf "fontconfig"*
